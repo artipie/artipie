@@ -5,15 +5,15 @@
 package com.artipie.docker.http;
 
 import com.artipie.docker.Digest;
-import com.artipie.docker.RepoName;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import java.util.Optional;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 /**
  * Tests for {@link UploadEntity.Request}.
@@ -28,7 +28,7 @@ class UploadEntityRequestTest {
         final UploadEntity.Request request = new UploadEntity.Request(
             new RequestLine(RqMethod.POST, "/v2/my-repo/blobs/uploads/")
         );
-        MatcherAssert.assertThat(request.name().value(), new IsEqual<>("my-repo"));
+        MatcherAssert.assertThat(request.name(), new IsEqual<>("my-repo"));
     }
 
     @Test
@@ -39,7 +39,7 @@ class UploadEntityRequestTest {
                 new RequestLine(
                     RqMethod.POST, String.format("/v2/%s/blobs/uploads/", name)
                 )
-            ).name().value(),
+            ).name(),
             new IsEqual<>(name)
         );
     }
@@ -143,7 +143,7 @@ class UploadEntityRequestTest {
             )
         );
         MatcherAssert.assertThat(
-            request.from().map(RepoName::value),
+            request.from(),
             new IsEqual<>(Optional.of("foo"))
         );
     }

@@ -7,7 +7,6 @@ package com.artipie.docker.composite;
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Catalog;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
 import com.artipie.docker.misc.Pagination;
@@ -15,7 +14,6 @@ import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +31,7 @@ final class ReadWriteDockerTest {
             new AstoDocker(new InMemoryStorage())
         );
         MatcherAssert.assertThat(
-            docker.repo(new RepoName.Simple("test")),
+            docker.repo("test"),
             new IsInstanceOf(ReadWriteRepo.class)
         );
     }
@@ -49,19 +47,13 @@ final class ReadWriteDockerTest {
         );
         final Catalog result = docker.catalog(Pagination.from("foo", limit)).join();
         MatcherAssert.assertThat(
-            "Forwards from",
-            fake.from().value(),
-            Matchers.is("foo")
+            "Forwards from", fake.from(), Matchers.is("foo")
         );
         MatcherAssert.assertThat(
-            "Forwards limit",
-            fake.limit(),
-            new IsEqual<>(limit)
+            "Forwards limit", fake.limit(), Matchers.is(limit)
         );
         MatcherAssert.assertThat(
-            "Returns catalog",
-            result,
-            new IsEqual<>(catalog)
+            "Returns catalog", result, Matchers.is(catalog)
         );
     }
 

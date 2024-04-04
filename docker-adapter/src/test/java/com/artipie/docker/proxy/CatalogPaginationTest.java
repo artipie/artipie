@@ -4,9 +4,7 @@
  */
 package com.artipie.docker.proxy;
 
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.Pagination;
-import com.google.common.base.Strings;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,10 +26,7 @@ class CatalogPaginationTest {
         "my-alpine,20,/v2/_catalog?n=20&last=my-alpine"
     })
     void shouldBuildPathString(String repo, int limit, String uri) {
-        Pagination p = new Pagination(
-            Strings.isNullOrEmpty(repo) ? null : new RepoName.Simple(repo),
-            limit
-        );
+        Pagination p = new Pagination(repo, limit);
         MatcherAssert.assertThat(
             URLDecoder.decode(p.uriWithPagination("/v2/_catalog"), StandardCharsets.UTF_8),
             Matchers.is(uri)

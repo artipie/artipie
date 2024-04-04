@@ -9,7 +9,6 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 
 /**
  * Asto implementation of {@link Repo}.
@@ -26,13 +25,13 @@ public final class AstoRepo implements Repo {
     /**
      * Repository name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
      * @param asto Asto storage
      * @param name Repository name
      */
-    public AstoRepo(final Storage asto, final RepoName name) {
+    public AstoRepo(Storage asto, String name) {
         this.asto = asto;
         this.name = name;
     }

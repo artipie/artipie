@@ -7,11 +7,11 @@ package com.artipie.docker.http;
 import com.artipie.asto.Content;
 import com.artipie.docker.Docker;
 import com.artipie.docker.ManifestReference;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.error.ManifestError;
-import com.artipie.docker.manifest.ManifestLayer;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.manifest.ManifestLayer;
+import com.artipie.docker.misc.ImageRepositoryName;
+import com.artipie.docker.misc.ImageTag;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
@@ -127,7 +127,7 @@ final class ManifestEntity {
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
-            final RepoName name = request.name();
+            final String name = request.name();
             final ManifestReference ref = request.reference();
             return this.docker.repo(name).manifests().get(ref)
                 .thenApply(
@@ -186,24 +186,25 @@ final class ManifestEntity {
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
-            final RepoName name = request.name();
+            final String name = request.name();
             final ManifestReference ref = request.reference();
             return this.docker.repo(name).manifests()
                 .put(ref, new Content.From(body))
                 .thenApply(
                     manifest -> {
-                        if (this.events.isPresent() && new Tag.Valid(ref.reference()).valid()) {
+                        if (this.events.isPresent() && ImageTag.valid(ref.reference())) {
                             this.events.get().add(
                                 new ArtifactEvent(
-                                    ManifestEntity.REPO_TYPE, this.rname,
+                                    ManifestEntity.REPO_TYPE,
+                                    this.rname,
                                     new Login(headers).getValue(),
-                                    name.value(), ref.reference(),
+                                    name, ref.reference(),
                                     manifest.layers().stream().mapToLong(ManifestLayer::size).sum()
                                 )
                             );
                         }
                         return ResponseBuilder.created()
-                            .header(new Location(String.format("/v2/%s/manifests/%s", name.value(), ref.reference())))
+                            .header(new Location(String.format("/v2/%s/manifests/%s", name, ref.reference())))
                             .header(new ContentLength("0"))
                             .header(new DigestHeader(manifest.digest()))
                             .build();
@@ -257,7 +258,7 @@ final class ManifestEntity {
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
-            final RepoName name = request.name();
+            final String name = request.name();
             final ManifestReference ref = request.reference();
             return this.docker.repo(name).manifests().get(ref).thenApply(
                     manifest -> {
@@ -267,7 +268,7 @@ final class ManifestEntity {
                                 this.policy, this.permission(line, this.repoName)
                             );
                         } else {
-                            final String img = new Request(line).name().value();
+                            final String img = new Request(line).name();
                             control = new OperationControl(
                                 this.policy,
                                 new DockerRepositoryPermission(
@@ -322,8 +323,8 @@ final class ManifestEntity {
          *
          * @return Repository name.
          */
-        RepoName name() {
-            return new RepoName.Valid(this.rqregex.path().group("name"));
+        String name() {
+            return ImageRepositoryName.validate(this.rqregex.path().group("name"));
         }
 
         /**

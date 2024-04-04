@@ -7,7 +7,6 @@ package com.artipie.docker.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.Upload;
 import com.artipie.http.Headers;
@@ -40,7 +39,7 @@ public final class UploadEntityGetTest {
     @Test
     void shouldReturnZeroOffsetAfterUploadStarted() {
         final String name = "test";
-        final Upload upload = this.docker.repo(new RepoName.Valid(name))
+        final Upload upload = this.docker.repo(name)
             .uploads()
             .start()
             .toCompletableFuture().join();
@@ -61,7 +60,7 @@ public final class UploadEntityGetTest {
     @Test
     void shouldReturnZeroOffsetAfterOneByteUploaded() {
         final String name = "test";
-        final Upload upload = this.docker.repo(new RepoName.Valid(name))
+        final Upload upload = this.docker.repo(name)
             .uploads()
             .start()
             .toCompletableFuture().join();
@@ -82,7 +81,7 @@ public final class UploadEntityGetTest {
     @Test
     void shouldReturnOffsetDuringUpload() {
         final String name = "test";
-        final Upload upload = this.docker.repo(new RepoName.Valid(name))
+        final Upload upload = this.docker.repo(name)
             .uploads()
             .start()
             .toCompletableFuture().join();

@@ -4,7 +4,6 @@
  */
 package com.artipie.docker.http;
 
-import com.artipie.docker.RepoName;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.RegistryCategory;
 import com.artipie.security.perms.Action;
@@ -94,7 +93,7 @@ public interface Scope {
         /**
          * Resource name.
          */
-        private final RepoName name;
+        private final String name;
 
         /**
          * Resource action.
@@ -102,12 +101,10 @@ public interface Scope {
         private final DockerActions action;
 
         /**
-         * Ctor.
-         *
          * @param name Resource name.
          * @param action Resource action.
          */
-        public Repository(final RepoName name, final DockerActions action) {
+        public Repository(String name, DockerActions action) {
             this.name = name;
             this.action = action;
         }
@@ -119,7 +116,7 @@ public interface Scope {
 
         @Override
         public String name() {
-            return this.name.value();
+            return this.name;
         }
 
         @Override
@@ -129,17 +126,13 @@ public interface Scope {
 
         /**
          * Scope for pull action on repository resource.
-         *
-         * @since 0.10
          */
         static final class Pull extends Wrap {
 
             /**
-             * Ctor.
-             *
              * @param name Resource name.
              */
-            Pull(final RepoName name) {
+            Pull(String name) {
                 super(new Repository(name, DockerActions.PULL));
             }
         }
@@ -152,28 +145,22 @@ public interface Scope {
         static final class Push extends Wrap {
 
             /**
-             * Ctor.
-             *
              * @param name Resource name.
              */
-            Push(final RepoName name) {
+            Push(String name) {
                 super(new Repository(name, DockerActions.PUSH));
             }
         }
 
         /**
          * Scope for push action on repository resource.
-         *
-         * @since 0.12
          */
         static final class OverwriteTags extends Wrap {
 
             /**
-             * Ctor.
-             *
              * @param name Resource name.
              */
-            OverwriteTags(final RepoName name) {
+            OverwriteTags(String name) {
                 super(new Repository(name, DockerActions.OVERWRITE));
             }
         }
@@ -181,8 +168,6 @@ public interface Scope {
 
     /**
      * Scope for action on registry type resource, such as reading repositories catalog.
-     *
-     * @since 0.11
      */
     final class Registry implements Scope {
 

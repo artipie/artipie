@@ -7,11 +7,12 @@ package com.artipie.docker.composite;
 import com.artipie.asto.Content;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.fake.FullTagsManifests;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 
@@ -58,28 +59,22 @@ final class ReadWriteManifestsTest {
 
     @Test
     void shouldDelegateTags() {
-        final Optional<Tag> from = Optional.of(new Tag.Valid("foo"));
+        final Optional<String> from = Optional.of("foo");
         final int limit = 123;
         final Tags tags = () -> new Content.From("{...}".getBytes());
         final FullTagsManifests fake = new FullTagsManifests(tags);
         final Tags result = new ReadWriteManifests(
             fake,
             new CapturePutManifests()
-        ).tags(from, limit).toCompletableFuture().join();
+        ).tags(Pagination.from("foo", limit)).toCompletableFuture().join();
         MatcherAssert.assertThat(
-            "Forwards from",
-            fake.capturedFrom(),
-            new IsEqual<>(from)
+            "Forwards from", fake.capturedFrom(), Matchers.is(from)
         );
         MatcherAssert.assertThat(
-            "Forwards limit",
-            fake.capturedLimit(),
-            new IsEqual<>(limit)
+            "Forwards limit", fake.capturedLimit(), Matchers.is(limit)
         );
         MatcherAssert.assertThat(
-            "Returns tags",
-            result,
-            new IsEqual<>(tags)
+            "Returns tags", result, Matchers.is(tags)
         );
     }
 
@@ -107,7 +102,7 @@ final class ReadWriteManifestsTest {
         }
 
         @Override
-        public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
+        public CompletableFuture<Tags> tags(Pagination pagination) {
             throw new UnsupportedOperationException();
         }
 
@@ -146,7 +141,7 @@ final class ReadWriteManifestsTest {
         }
 
         @Override
-        public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
+        public CompletableFuture<Tags> tags(Pagination pagination) {
             throw new UnsupportedOperationException();
         }
 

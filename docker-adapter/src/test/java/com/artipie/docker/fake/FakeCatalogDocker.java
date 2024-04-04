@@ -7,7 +7,6 @@ package com.artipie.docker.fake;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.Pagination;
 
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +40,7 @@ public final class FakeCatalogDocker implements Docker {
      *
      * @return Captured from parameter.
      */
-    public RepoName from() {
+    public String from() {
         return this.paginationRef.get().last();
     }
 
@@ -55,7 +54,7 @@ public final class FakeCatalogDocker implements Docker {
     }
 
     @Override
-    public Repo repo(final RepoName name) {
+    public Repo repo(String name) {
         throw new UnsupportedOperationException();
     }
 

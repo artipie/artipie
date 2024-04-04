@@ -30,9 +30,10 @@ public final class Login extends Header {
      * @param headers Header.
      */
     public Login(final Headers headers) {
-        this(
-            new RqHeaders(headers, AuthzSlice.LOGIN_HDR)
-                .stream().findFirst().orElse(ArtifactEvent.DEF_OWNER)
+        this(headers.find(AuthzSlice.LOGIN_HDR).stream()
+            .findFirst()
+            .map(Header::getValue)
+            .orElse(ArtifactEvent.DEF_OWNER)
         );
     }
 

@@ -7,13 +7,13 @@ package com.artipie.docker.fake;
 import com.artipie.asto.Content;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.ImageTag;
+import com.artipie.docker.misc.Pagination;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -25,27 +25,16 @@ public final class FullTagsManifests implements Manifests {
     /**
      * Tags.
      */
-    private final Tags tgs;
+    private final Tags tags;
 
     /**
      * From parameter captured.
      */
-    private final AtomicReference<Optional<Tag>> from;
+    private final AtomicReference<Pagination> from;
 
-    /**
-     * Limit parameter captured.
-     */
-    private final AtomicInteger limit;
-
-    /**
-     * Ctor.
-     *
-     * @param tgs Tags.
-     */
-    public FullTagsManifests(final Tags tgs) {
-        this.tgs = tgs;
+    public FullTagsManifests(final Tags tags) {
+        this.tags = tags;
         this.from = new AtomicReference<>();
-        this.limit = new AtomicInteger();
     }
 
     @Override
@@ -59,10 +48,9 @@ public final class FullTagsManifests implements Manifests {
     }
 
     @Override
-    public CompletableFuture<Tags> tags(final Optional<Tag> pfrom, final int plimit) {
-        this.from.set(pfrom);
-        this.limit.set(plimit);
-        return CompletableFuture.completedFuture(this.tgs);
+    public CompletableFuture<Tags> tags(Pagination pagination) {
+        this.from.set(pagination);
+        return CompletableFuture.completedFuture(this.tags);
     }
 
     /**
@@ -70,8 +58,8 @@ public final class FullTagsManifests implements Manifests {
      *
      * @return Captured `from` argument.
      */
-    public Optional<Tag> capturedFrom() {
-        return this.from.get();
+    public Optional<String> capturedFrom() {
+        return Optional.of(ImageTag.validate(this.from.get().last()));
     }
 
     /**
@@ -80,6 +68,6 @@ public final class FullTagsManifests implements Manifests {
      * @return Captured `limit` argument.
      */
     public int capturedLimit() {
-        return this.limit.get();
+        return from.get().limit();
     }
 }

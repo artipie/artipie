@@ -5,7 +5,7 @@
 package com.artipie.docker;
 
 import com.artipie.docker.error.InvalidTagNameException;
-import com.artipie.docker.misc.Validator;
+import com.artipie.docker.misc.ImageTag;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.StringContains;
@@ -16,9 +16,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.Arrays;
 
 /**
- * Tests for {@link Tag.Valid}.
+ * Tests for {@link ImageTag}.
  */
-class TagValidatorTest {
+class ImageTagTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
@@ -31,8 +31,7 @@ class TagValidatorTest {
         "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567"
     })
     void shouldGetValueWhenValid(final String tag) {
-        Assertions.assertTrue(Validator.isValidTag(tag));
-        Assertions.assertEquals(tag, Validator.validateTag(tag));
+        Assertions.assertEquals(tag, ImageTag.validate(tag));
     }
 
     @ParameterizedTest
@@ -45,9 +44,8 @@ class TagValidatorTest {
         "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678"
     })
     void shouldFailToGetValueWhenInvalid(final String tag) {
-        Assertions.assertFalse(Validator.isValidTag(tag));
         final Throwable throwable = Assertions.assertThrows(
-            InvalidTagNameException.class, () -> Validator.validateTag(tag)
+            InvalidTagNameException.class, () -> ImageTag.validate(tag)
         );
         MatcherAssert.assertThat(
             throwable.getMessage(),

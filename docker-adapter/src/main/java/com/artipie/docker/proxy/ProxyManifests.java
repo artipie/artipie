@@ -9,11 +9,10 @@ import com.artipie.docker.Digest;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.http.DigestHeader;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.Headers;
 import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
@@ -58,15 +57,13 @@ public final class ProxyManifests implements Manifests {
     /**
      * Repository name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
-     * Ctor.
-     *
      * @param remote Remote repository.
      * @param name Repository name.
      */
-    public ProxyManifests(final Slice remote, final RepoName name) {
+    public ProxyManifests(Slice remote, String name) {
         this.remote = remote;
         this.name = name;
     }
@@ -80,7 +77,7 @@ public final class ProxyManifests implements Manifests {
     public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return new ResponseSink<>(
             this.remote.response(
-                new RequestLine(RqMethod.GET, new ManifestPath(this.name, ref).string()),
+                new RequestLine(RqMethod.GET, String.format("/v2/%s/manifests/%s", name, ref.reference())),
                 MANIFEST_ACCEPT_HEADERS,
                 Content.EMPTY
             ),
@@ -102,12 +99,11 @@ public final class ProxyManifests implements Manifests {
     }
 
     @Override
-    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
-        String fromStr = from.map(Tag::value).orElse(null);
+    public CompletableFuture<Tags> tags(Pagination pagination) {
         return new ResponseSink<>(
             this.remote.response(
                 new RequestLine(
-                    RqMethod.GET, uri(name.value(), limit, fromStr)
+                    RqMethod.GET, pagination.uriWithPagination(String.format("/v2/%s/tags/list", name))
                 ),
                 Headers.EMPTY,
                 Content.EMPTY

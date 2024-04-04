@@ -7,7 +7,6 @@ package com.artipie.docker.asto;
 import com.artipie.asto.Key;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ManifestReference;
-import com.artipie.docker.RepoName;
 
 /**
  * Original storage layout that is compatible with reference Docker Registry implementation.
@@ -24,16 +23,16 @@ public final class Layout {
         );
     }
 
-    public static Key manifest(RepoName repo, final ManifestReference ref) {
+    public static Key manifest(String repo, final ManifestReference ref) {
         return new Key.From(manifests(repo), ref.link().string());
     }
 
-    public static Key tags(RepoName repo) {
+    public static Key tags(String repo) {
         return new Key.From(manifests(repo), "tags");
     }
 
-    public static Key upload(RepoName name, final String uuid) {
-        return new Key.From(repositories(), name.value(), "_uploads", uuid);
+    public static Key upload(String name, final String uuid) {
+        return new Key.From(repositories(), name, "_uploads", uuid);
     }
 
     /**
@@ -42,7 +41,7 @@ public final class Layout {
      * @param repo Repository name.
      * @return Manifests key.
      */
-    private static Key manifests(final RepoName repo) {
-        return new Key.From(repositories(), repo.value(), "_manifests");
+    private static Key manifests(String repo) {
+        return new Key.From(repositories(), repo, "_manifests");
     }
 }

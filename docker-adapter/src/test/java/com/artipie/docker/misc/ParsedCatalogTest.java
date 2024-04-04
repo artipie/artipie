@@ -5,8 +5,6 @@
 package com.artipie.docker.misc;
 
 import com.artipie.asto.Content;
-import com.artipie.docker.RepoName;
-import java.util.stream.Collectors;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
@@ -27,10 +25,7 @@ class ParsedCatalogTest {
         MatcherAssert.assertThat(
             new ParsedCatalog(
                 () -> new Content.From("{\"repositories\":[\"one\",\"two\"]}".getBytes())
-            ).repos().toCompletableFuture().join()
-                .stream()
-                .map(RepoName::value)
-                .collect(Collectors.toList()),
+            ).repos().toCompletableFuture().join(),
             Matchers.contains("one", "two")
         );
     }
@@ -40,10 +35,7 @@ class ParsedCatalogTest {
         MatcherAssert.assertThat(
             new ParsedCatalog(
                 () -> new Content.From("{\"repositories\":[]}".getBytes())
-            ).repos().toCompletableFuture().join()
-                .stream()
-                .map(RepoName::value)
-                .collect(Collectors.toList()),
+            ).repos().toCompletableFuture().join(),
             new IsEmptyCollection<>()
         );
     }

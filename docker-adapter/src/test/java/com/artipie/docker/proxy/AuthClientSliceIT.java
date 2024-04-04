@@ -5,7 +5,6 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.docker.ManifestReference;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.GenericAuthenticator;
@@ -50,8 +49,7 @@ class AuthClientSliceIT {
 
     @Test
     void getManifestByTag() {
-        final RepoName name = new RepoName.Valid("library/busybox");
-        final ProxyManifests manifests = new ProxyManifests(this.slice, name);
+        final ProxyManifests manifests = new ProxyManifests(this.slice, "library/busybox");
         final ManifestReference ref = ManifestReference.fromTag("latest");
         final Optional<Manifest> manifest = manifests.get(ref).toCompletableFuture().join();
         MatcherAssert.assertThat(

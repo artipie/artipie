@@ -7,11 +7,10 @@ package com.artipie.docker.composite;
 import com.artipie.asto.Content;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.JoinedTagsSource;
+import com.artipie.docker.misc.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +28,7 @@ public final class MultiReadManifests implements Manifests {
     /**
      * Repository name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
      * Manifests for reading.
@@ -42,7 +41,7 @@ public final class MultiReadManifests implements Manifests {
      * @param name Repository name.
      * @param manifests Manifests for reading.
      */
-    public MultiReadManifests(final RepoName name, final List<Manifests> manifests) {
+    public MultiReadManifests(String name, List<Manifests> manifests) {
         this.name = name;
         this.manifests = manifests;
     }
@@ -77,7 +76,7 @@ public final class MultiReadManifests implements Manifests {
     }
 
     @Override
-    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
-        return new JoinedTagsSource(this.name, this.manifests, from, limit).tags();
+    public CompletableFuture<Tags> tags(Pagination pagination) {
+        return new JoinedTagsSource(this.name, this.manifests, pagination).tags();
     }
 }

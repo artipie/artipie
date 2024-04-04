@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ManifestReference;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.http.DigestHeader;
 import com.artipie.docker.manifest.Manifest;
 import com.artipie.docker.misc.Pagination;
@@ -43,8 +42,7 @@ class ProxyManifestsTest {
                     .header(new DigestHeader(new Digest.FromString(digest)))
                     .body(data)
                     .completedFuture();
-            },
-            new RepoName.Valid("test")
+            }, "test"
         ).get(ManifestReference.from("abc")).toCompletableFuture().join();
         Assertions.assertTrue(found.isPresent());
         final Manifest manifest = found.orElseThrow();
@@ -63,8 +61,7 @@ class ProxyManifestsTest {
                     throw new IllegalArgumentException();
                 }
                 return ResponseBuilder.notFound().completedFuture();
-            },
-            new RepoName.Valid("my-test")
+            }, "my-test"
         ).get(ManifestReference.from("latest")).toCompletableFuture().join();
         Assertions.assertFalse(found.isPresent());
     }

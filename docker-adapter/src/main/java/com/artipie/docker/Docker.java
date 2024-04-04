@@ -20,7 +20,7 @@ public interface Docker {
      * @param name Repository name
      * @return Repository object
      */
-    Repo repo(RepoName name);
+    Repo repo(String name);
 
     /**
      * Docker repositories catalog.

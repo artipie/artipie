@@ -8,8 +8,8 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.error.UploadUnknownError;
+import com.artipie.docker.misc.ImageRepositoryName;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
@@ -76,9 +76,9 @@ public final class UploadEntity {
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
-            final RepoName target = request.name();
+            final String target = request.name();
             final Optional<Digest> mount = request.mount();
-            final Optional<RepoName> from = request.from();
+            final Optional<String> from = request.from();
             if (mount.isPresent() && from.isPresent()) {
                 return this.mount(mount.get(), from.get(), target);
             }
@@ -94,7 +94,7 @@ public final class UploadEntity {
          * @return HTTP response.
          */
         private CompletableFuture<Response> mount(
-            Digest digest, RepoName source, RepoName target
+            Digest digest, String source, String target
         ) {
             return this.docker.repo(source).layers().get(digest)
                 .toCompletableFuture()
@@ -116,7 +116,7 @@ public final class UploadEntity {
          * @param name Repository name.
          * @return HTTP response.
          */
-        private CompletableFuture<Response> startUpload(final RepoName name) {
+        private CompletableFuture<Response> startUpload(String name) {
             return this.docker.repo(name).uploads().start()
                 .thenCompose(upload -> acceptedResponse(name, upload.uuid(), 0))
                 .toCompletableFuture();
@@ -152,7 +152,7 @@ public final class UploadEntity {
             RequestLine line, Headers headers, Content body
         ) {
             final Request request = new Request(line);
-            final RepoName name = request.name();
+            final String name = request.name();
             final String uuid = request.uuid();
             return this.docker.repo(name).uploads().get(uuid)
                 .toCompletableFuture()
@@ -204,7 +204,7 @@ public final class UploadEntity {
             final Content body
         ) {
             final Request request = new Request(line);
-            final RepoName name = request.name();
+            final String name = request.name();
             final String uuid = request.uuid();
             final Repo repo = this.docker.repo(name);
             return repo.uploads().get(uuid)
@@ -253,9 +253,8 @@ public final class UploadEntity {
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
-            final RepoName name = request.name();
             final String uuid = request.uuid();
-            return this.docker.repo(name).uploads().get(uuid)
+            return this.docker.repo(request.name()).uploads().get(uuid)
                 .thenApply(
                     found -> found.map(
                         upload -> upload.offset().thenApply(
@@ -297,10 +296,8 @@ public final class UploadEntity {
          *
          * @return Repository name.
          */
-        RepoName name() {
-            return new RepoName.Valid(
-                new RqByRegex(this.line, UploadEntity.PATH).path().group("name")
-            );
+        String name() {
+            return ImageRepositoryName.validate(new RqByRegex(this.line, UploadEntity.PATH).path().group("name"));
         }
 
         /**
@@ -337,8 +334,9 @@ public final class UploadEntity {
          *
          * @return Repository name, empty if parameter does not present in the query.
          */
-        Optional<RepoName> from() {
-            return this.params().value("from").map(RepoName.Valid::new);
+        Optional<String> from() {
+            return this.params().value("from")
+                .map(ImageRepositoryName::validate);
         }
 
         /**
@@ -351,18 +349,18 @@ public final class UploadEntity {
         }
     }
 
-    private static CompletableFuture<Response> acceptedResponse(RepoName name, String uuid, long offset) {
+    private static CompletableFuture<Response> acceptedResponse(String name, String uuid, long offset) {
         return ResponseBuilder.accepted()
-            .header(new Location(String.format("/v2/%s/blobs/uploads/%s", name.value(), uuid)))
+            .header(new Location(String.format("/v2/%s/blobs/uploads/%s", name, uuid)))
             .header(new Header("Range", String.format("0-%d", offset)))
             .header(new ContentLength("0"))
             .header(new Header(UploadEntity.UPLOAD_UUID, uuid))
             .completedFuture();
     }
 
-    private static CompletableFuture<Response> createdResponse(RepoName name, Digest digest) {
+    private static CompletableFuture<Response> createdResponse(String name, Digest digest) {
         return ResponseBuilder.created()
-            .header(new Location(String.format("/v2/%s/blobs/%s", name.value(), digest.string())))
+            .header(new Location(String.format("/v2/%s/blobs/%s", name, digest.string())))
             .header(new ContentLength("0"))
             .header(new DigestHeader(digest))
             .completedFuture();
@@ -395,12 +393,12 @@ public final class UploadEntity {
         @Override
         public CompletableFuture<Response> response(RequestLine line, Headers headers, Content body) {
             final Request request = new Request(line);
-            final RepoName name = request.name();
+            final String name = request.name();
             final String uuid = request.uuid();
-            return (CompletableFuture<Response>) this.docker.repo(name).uploads().get(uuid)
+            return this.docker.repo(name).uploads().get(uuid)
                 .thenCompose(
                     x -> x.map(
-                        upload -> upload.cancel().toCompletableFuture()
+                        upload -> upload.cancel()
                             .thenApply(
                                 offset -> ResponseBuilder.ok()
                                     .header(UploadEntity.UPLOAD_UUID, uuid)

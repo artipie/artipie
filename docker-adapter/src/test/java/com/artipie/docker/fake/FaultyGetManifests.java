@@ -7,9 +7,9 @@ package com.artipie.docker.fake;
 import com.artipie.asto.Content;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +30,7 @@ public final class FaultyGetManifests implements Manifests {
     }
 
     @Override
-    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(Pagination pagination) {
         throw new UnsupportedOperationException();
     }
 }

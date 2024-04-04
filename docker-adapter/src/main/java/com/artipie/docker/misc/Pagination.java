@@ -5,7 +5,6 @@
 package com.artipie.docker.misc;
 
 import com.artipie.ArtipieException;
-import com.artipie.docker.RepoName;
 import com.artipie.http.rq.RqParams;
 import org.apache.hc.core5.net.URIBuilder;
 
@@ -18,7 +17,7 @@ import java.net.URISyntaxException;
  * @param last  last
  * @param limit
  */
-public record Pagination(RepoName last, int limit) {
+public record Pagination(String last, int limit) {
 
     public static Pagination empty() {
         return from(null, null);
@@ -27,15 +26,14 @@ public record Pagination(RepoName last, int limit) {
     public static Pagination from(URI uri) {
         final RqParams params = new RqParams(uri);
         return new Pagination(
-            params.value("last").map(RepoName.Simple::new).orElse(null),
+            params.value("last").orElse(null),
             params.value("n").map(Integer::parseInt).orElse(Integer.MAX_VALUE)
         );
     }
 
     public static Pagination from(String repoName, Integer limit) {
         return new Pagination(
-            repoName != null ? new RepoName.Simple(repoName) : null,
-            limit != null ? limit : Integer.MAX_VALUE
+            repoName, limit != null ? limit : Integer.MAX_VALUE
         );
     }
 
@@ -52,7 +50,7 @@ public record Pagination(RepoName last, int limit) {
                 builder.addParameter("n", String.valueOf(limit));
             }
             if (last != null) {
-                builder.addParameter("last", last.value());
+                builder.addParameter("last", last);
             }
             return builder.toString();
         } catch (URISyntaxException e) {
@@ -69,7 +67,7 @@ public record Pagination(RepoName last, int limit) {
      * @param name Image repository name.
      * @return True if given {@code name} more than {@code Pagination.last}.
      */
-    public boolean lessThan(RepoName name) {
-        return last == null || name.value().compareTo(last.value()) > 0;
+    public boolean lessThan(String name) {
+        return last == null || name.compareTo(last) > 0;
     }
 }

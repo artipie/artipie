@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.Pagination;
 import com.artipie.http.Headers;
 import com.artipie.http.RsStatus;
@@ -29,8 +28,6 @@ public final class ProxyDocker implements Docker {
     private final Slice remote;
 
     /**
-     * Ctor.
-     *
      * @param remote Remote repository.
      */
     public ProxyDocker(final Slice remote) {
@@ -38,7 +35,7 @@ public final class ProxyDocker implements Docker {
     }
 
     @Override
-    public Repo repo(final RepoName name) {
+    public Repo repo(String name) {
         return new ProxyRepo(this.remote, name);
     }
 

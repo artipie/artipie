@@ -7,6 +7,7 @@ package com.artipie.docker;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -36,9 +37,8 @@ public interface Manifests {
     /**
      * List manifest tags.
      *
-     * @param from  From which tag to start, exclusive.
-     * @param limit Maximum number of tags returned.
+     * @param pagination  Pagination parameters.
      * @return Tags.
      */
-    CompletableFuture<Tags> tags(Optional<Tag> from, int limit);
+    CompletableFuture<Tags> tags(Pagination pagination);
 }

@@ -4,8 +4,8 @@
  */
 package com.artipie.docker.proxy;
 
-import com.artipie.docker.RepoName;
 import com.artipie.docker.Tags;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import org.hamcrest.MatcherAssert;
@@ -17,8 +17,6 @@ import org.junit.jupiter.api.Test;
 import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
-
-import java.util.Optional;
 
 /**
  * Integration tests for {@link ProxyManifests}.
@@ -49,8 +47,8 @@ final class ProxyManifestsIT {
         MatcherAssert.assertThat(
             new ProxyManifests(
                 this.client.https("mcr.microsoft.com"),
-                new RepoName.Simple(repo)
-            ).tags(Optional.empty(), Integer.MAX_VALUE)
+                repo
+            ).tags(Pagination.empty())
                 .thenApply(Tags::json)
                 .toCompletableFuture().join().asString(),
             new StringIsJson.Object(

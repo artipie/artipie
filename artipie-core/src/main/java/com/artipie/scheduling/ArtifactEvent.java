@@ -8,9 +8,7 @@ import java.util.Objects;
 
 /**
  * Artifact data record.
- * @since 1.3
  */
-@SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class ArtifactEvent {
 
     /**
@@ -21,12 +19,12 @@ public final class ArtifactEvent {
     /**
      * Repository type.
      */
-    private final String rtype;
+    private final String repoType;
 
     /**
      * Repository name.
      */
-    private final String rname;
+    private final String repoName;
 
     /**
      * Owner username.
@@ -36,12 +34,12 @@ public final class ArtifactEvent {
     /**
      * Event type.
      */
-    private final Type etype;
+    private final Type eventType;
 
     /**
      * Artifact name.
      */
-    private final String aname;
+    private final String artifactName;
 
     /**
      * Artifact version.
@@ -60,78 +58,76 @@ public final class ArtifactEvent {
 
     /**
      * Ctor for the event to remove all artifact versions.
-     * @param rtype Repository type
-     * @param rname Repository name
-     * @param aname Artifact name
+     * @param repoType Repository type
+     * @param repoName Repository name
+     * @param artifactName Artifact name
      */
-    public ArtifactEvent(final String rtype, final String rname, final String aname) {
-        this(rtype, rname, ArtifactEvent.DEF_OWNER, aname, "", 0L, 0L, Type.DELETE_ALL);
+    public ArtifactEvent(String repoType, String repoName, String artifactName) {
+        this(repoType, repoName, ArtifactEvent.DEF_OWNER, artifactName, "", 0L, 0L, Type.DELETE_ALL);
     }
 
     /**
      * Ctor for the event to remove artifact with specified version.
-     * @param rtype Repository type
-     * @param rname Repository name
-     * @param aname Artifact name
+     * @param repoType Repository type
+     * @param repoName Repository name
+     * @param artifactName Artifact name
      * @param version Artifact version
      */
-    public ArtifactEvent(final String rtype, final String rname,
-        final String aname, final String version) {
-        this(rtype, rname, ArtifactEvent.DEF_OWNER, aname, version, 0L, 0L, Type.DELETE_VERSION);
+    public ArtifactEvent(String repoType, String repoName,
+                         String artifactName, String version) {
+        this(repoType, repoName, ArtifactEvent.DEF_OWNER, artifactName, version, 0L, 0L, Type.DELETE_VERSION);
     }
 
     /**
-     * Ctor.
-     * @param rtype Repository type
-     * @param rname Repository name
+     * @param repoType Repository type
+     * @param repoName Repository name
      * @param owner Owner username
-     * @param aname Artifact name
+     * @param artifactName Artifact name
      * @param version Artifact version
      * @param size Artifact size
      * @param created Artifact created date
      * @param etype Event type
      */
-    public ArtifactEvent(final String rtype, final String rname, final String owner,
-        final String aname, final String version, final long size,
-        final long created, final Type etype) {
-        this.rtype = rtype;
-        this.rname = rname;
+    public ArtifactEvent(String repoType, String repoName, String owner,
+                         String artifactName, String version, long size,
+                         long created, Type etype) {
+        this.repoType = repoType;
+        this.repoName = repoName;
         this.owner = owner;
-        this.aname = aname;
+        this.artifactName = artifactName;
         this.version = version;
         this.size = size;
         this.created = created;
-        this.etype = etype;
+        this.eventType = etype;
     }
 
     /**
-     * Ctor.
-     * @param rtype Repository type
-     * @param rname Repository name
+     * @param repoType Repository type
+     * @param repoName Repository name
      * @param owner Owner username
-     * @param aname Artifact name
+     * @param artifactName Artifact name
      * @param version Artifact version
      * @param size Artifact size
      * @param created Artifact created date
      */
-    public ArtifactEvent(final String rtype, final String rname, final String owner,
-        final String aname, final String version, final long size,
-        final long created) {
-        this(rtype, rname, owner, aname, version, size, created, Type.INSERT);
+    public ArtifactEvent(final String repoType, final String repoName, final String owner,
+                         final String artifactName, final String version, final long size,
+                         final long created) {
+        this(repoType, repoName, owner, artifactName, version, size, created, Type.INSERT);
     }
 
     /**
      * Ctor to insert artifact data with creation time {@link System#currentTimeMillis()}.
-     * @param rtype Repository type
-     * @param rname Repository name
+     * @param repoType Repository type
+     * @param repoName Repository name
      * @param owner Owner username
-     * @param aname Artifact name
+     * @param artifactName Artifact name
      * @param version Artifact version
      * @param size Artifact size
      */
-    public ArtifactEvent(final String rtype, final String rname, final String owner,
-        final String aname, final String version, final long size) {
-        this(rtype, rname, owner, aname, version, size, System.currentTimeMillis(), Type.INSERT);
+    public ArtifactEvent(final String repoType, final String repoName, final String owner,
+                         final String artifactName, final String version, final long size) {
+        this(repoType, repoName, owner, artifactName, version, size, System.currentTimeMillis(), Type.INSERT);
     }
 
     /**
@@ -139,7 +135,7 @@ public final class ArtifactEvent {
      * @return Repo info
      */
     public String repoType() {
-        return this.rtype;
+        return this.repoType;
     }
 
     /**
@@ -147,7 +143,7 @@ public final class ArtifactEvent {
      * @return Repo info
      */
     public String repoName() {
-        return this.rname;
+        return this.repoName;
     }
 
     /**
@@ -155,7 +151,7 @@ public final class ArtifactEvent {
      * @return Repo id
      */
     public String artifactName() {
-        return this.aname;
+        return this.artifactName;
     }
 
     /**
@@ -195,12 +191,12 @@ public final class ArtifactEvent {
      * @return The type of event
      */
     public Type eventType() {
-        return this.etype;
+        return this.eventType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.rname, this.aname, this.version, this.etype);
+        return Objects.hash(this.repoName, this.artifactName, this.version, this.eventType);
     }
 
     @Override
@@ -212,10 +208,24 @@ public final class ArtifactEvent {
             res = false;
         } else {
             final ArtifactEvent that = (ArtifactEvent) other;
-            res = that.rname.equals(this.rname) && that.aname.equals(this.aname)
-                && that.version.equals(this.version) && that.etype.equals(this.etype);
+            res = that.repoName.equals(this.repoName) && that.artifactName.equals(this.artifactName)
+                && that.version.equals(this.version) && that.eventType.equals(this.eventType);
         }
         return res;
+    }
+
+    @Override
+    public String toString() {
+        return "ArtifactEvent{" +
+            "repoType='" + repoType + '\'' +
+            ", repoName='" + repoName + '\'' +
+            ", owner='" + owner + '\'' +
+            ", eventType=" + eventType +
+            ", artifactName='" + artifactName + '\'' +
+            ", version='" + version + '\'' +
+            ", size=" + size +
+            ", created=" + created +
+            '}';
     }
 
     /**

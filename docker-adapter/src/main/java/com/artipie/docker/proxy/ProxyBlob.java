@@ -7,7 +7,6 @@ package com.artipie.docker.proxy;
 import com.artipie.asto.Content;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
-import com.artipie.docker.RepoName;
 import com.artipie.http.ArtipieHttpException;
 import com.artipie.http.Headers;
 import com.artipie.http.RsStatus;
@@ -31,7 +30,7 @@ public final class ProxyBlob implements Blob {
     /**
      * Repository name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
      * Blob digest.
@@ -49,7 +48,7 @@ public final class ProxyBlob implements Blob {
      * @param digest Blob digest.
      * @param size Blob size.
      */
-    public ProxyBlob(Slice remote, RepoName name, Digest digest, long size) {
+    public ProxyBlob(Slice remote, String name, Digest digest, long size) {
         this.remote = remote;
         this.name = name;
         this.digest = digest;
@@ -68,7 +67,7 @@ public final class ProxyBlob implements Blob {
 
     @Override
     public CompletableFuture<Content> content() {
-        String blobPath = String.format("/v2/%s/blobs/%s", this.name.value(), this.digest.string());
+        String blobPath = String.format("/v2/%s/blobs/%s", this.name, this.digest.string());
         return this.remote
             .response(new RequestLine(RqMethod.GET, blobPath), Headers.EMPTY, Content.EMPTY)
             .thenCompose(response -> {

@@ -7,7 +7,6 @@ package com.artipie.docker.http;
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.Upload;
 import com.artipie.http.Headers;
@@ -40,7 +39,7 @@ class UploadEntityPatchTest {
     @Test
     void shouldReturnUpdatedUploadStatus() {
         final String name = "test";
-        final Upload upload = this.docker.repo(new RepoName.Valid(name)).uploads()
+        final Upload upload = this.docker.repo(name).uploads()
             .start()
             .toCompletableFuture().join();
         final String uuid = upload.uuid();

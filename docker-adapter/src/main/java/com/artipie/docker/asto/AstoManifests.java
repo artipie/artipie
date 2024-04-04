@@ -10,12 +10,11 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.error.InvalidManifestException;
-import com.artipie.docker.manifest.ManifestLayer;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.manifest.ManifestLayer;
+import com.artipie.docker.misc.Pagination;
 import com.google.common.base.Strings;
 
 import javax.json.JsonException;
@@ -43,14 +42,14 @@ public final class AstoManifests implements Manifests {
     /**
      * Repository name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
      * @param asto Asto storage
      * @param blobs Blobs storage.
      * @param name Repository name
      */
-    public AstoManifests(Storage asto, Blobs blobs, RepoName name) {
+    public AstoManifests(Storage asto, Blobs blobs, String name) {
         this.storage = asto;
         this.blobs = blobs;
         this.name = name;
@@ -90,10 +89,10 @@ public final class AstoManifests implements Manifests {
     }
 
     @Override
-    public CompletableFuture<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(Pagination pagination) {
         final Key root = Layout.tags(this.name);
         return this.storage.list(root).thenApply(
-            keys -> new AstoTags(this.name, root, keys, from, limit)
+            keys -> new AstoTags(this.name, root, keys, pagination)
         );
     }
 

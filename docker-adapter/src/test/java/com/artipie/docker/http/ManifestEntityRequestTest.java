@@ -12,9 +12,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link ManifestEntity.Request}.
- * @since 0.4
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class ManifestEntityRequestTest {
 
     @Test
@@ -22,7 +20,7 @@ class ManifestEntityRequestTest {
         final ManifestEntity.Request request = new ManifestEntity.Request(
             new RequestLine(RqMethod.GET, "/v2/my-repo/manifests/3")
         );
-        MatcherAssert.assertThat(request.name().value(), new IsEqual<>("my-repo"));
+        MatcherAssert.assertThat(request.name(), new IsEqual<>("my-repo"));
     }
 
     @Test
@@ -41,7 +39,7 @@ class ManifestEntityRequestTest {
                 new RequestLine(
                     "HEAD", String.format("/v2/%s/manifests/sha256:234434df", name)
                 )
-            ).name().value(),
+            ).name(),
             new IsEqual<>(name)
         );
     }

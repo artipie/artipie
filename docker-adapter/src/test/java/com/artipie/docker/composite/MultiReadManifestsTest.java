@@ -7,11 +7,10 @@ package com.artipie.docker.composite;
 import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ManifestReference;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.fake.FakeManifests;
 import com.artipie.docker.fake.FullTagsManifests;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -48,7 +47,7 @@ final class MultiReadManifestsTest {
         final String expected
     ) {
         final MultiReadManifests manifests = new MultiReadManifests(
-            new RepoName.Simple("test"),
+            "test",
             Arrays.asList(
                 new FakeManifests(origin, "one"),
                 new FakeManifests(cache, "two")
@@ -69,7 +68,7 @@ final class MultiReadManifestsTest {
         final String name = "tags-test";
         MatcherAssert.assertThat(
             new MultiReadManifests(
-                new RepoName.Simple(name),
+                "tags-test",
                 Arrays.asList(
                     new FullTagsManifests(
                         () -> new Content.From("{\"tags\":[\"one\",\"three\",\"four\"]}".getBytes())
@@ -78,9 +77,9 @@ final class MultiReadManifestsTest {
                         () -> new Content.From("{\"tags\":[\"one\",\"two\"]}".getBytes())
                     )
                 )
-            ).tags(Optional.of(new Tag.Valid("four")), limit).thenCompose(
+            ).tags(Pagination.from("four", limit)).thenCompose(
                 tags -> tags.json().asStringFuture()
-            ).toCompletableFuture().join(),
+            ).join(),
             new StringIsJson.Object(
                 Matchers.allOf(
                     new JsonHas("name", new JsonValueIs(name)),

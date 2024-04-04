@@ -7,12 +7,10 @@ package com.artipie.docker.asto;
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
 import com.artipie.docker.Catalog;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.CatalogPage;
 import com.artipie.docker.misc.Pagination;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 /**
  * Asto implementation of {@link Catalog}. Catalog created from list of keys.
@@ -53,9 +51,8 @@ final class AstoCatalog implements Catalog {
      *
      * @return Ordered repository names.
      */
-    private Collection<RepoName> repos() {
-        return new Children(this.root, this.keys).names().stream()
-            .map(RepoName.Simple::new)
-            .collect(Collectors.toList());
+    private Collection<String> repos() {
+        return new Children(this.root, this.keys)
+            .names();
     }
 }

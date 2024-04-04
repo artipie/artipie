@@ -10,7 +10,6 @@ import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Catalog;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.Pagination;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -24,7 +23,7 @@ final class AstoDockerTest {
     @Test
     void createsAstoRepo() {
         MatcherAssert.assertThat(
-            new AstoDocker(new InMemoryStorage()).repo(new RepoName.Simple("repo1")),
+            new AstoDocker(new InMemoryStorage()).repo("repo1"),
             Matchers.instanceOf(AstoRepo.class)
         );
     }

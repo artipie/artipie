@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.Pagination;
 import com.artipie.http.Headers;
 import com.artipie.http.RsStatus;
@@ -59,7 +58,7 @@ class CatalogEntityGetTest {
         ).join();
         MatcherAssert.assertThat(
             "Parses from",
-            docker.paginationRef.get().last().value(),
+            docker.paginationRef.get().last(),
             Matchers.is(from)
         );
         MatcherAssert.assertThat(
@@ -88,7 +87,7 @@ class CatalogEntityGetTest {
         }
 
         @Override
-        public Repo repo(final RepoName name) {
+        public Repo repo(String name) {
             throw new UnsupportedOperationException();
         }
 

@@ -6,7 +6,6 @@ package com.artipie.docker.asto;
 
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.docker.RepoName;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,12 +28,12 @@ final class UploadsTest {
     /**
      * RepoName.
      */
-    private RepoName reponame;
+    private String reponame;
 
     @BeforeEach
     void setUp() {
         this.storage = new InMemoryStorage();
-        this.reponame = new RepoName.Valid("test");
+        this.reponame = "test";
         this.uploads = new Uploads(this.storage, this.reponame);
     }
 

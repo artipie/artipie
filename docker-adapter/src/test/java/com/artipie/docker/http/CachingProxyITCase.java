@@ -7,8 +7,8 @@ package com.artipie.docker.http;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Docker;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.cache.CacheDocker;
 import com.artipie.docker.composite.MultiReadDocker;
@@ -17,7 +17,6 @@ import com.artipie.docker.junit.DockerClient;
 import com.artipie.docker.junit.DockerClientSupport;
 import com.artipie.docker.junit.DockerRepository;
 import com.artipie.docker.proxy.ProxyDocker;
-import com.artipie.docker.ManifestReference;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.GenericAuthenticator;
@@ -146,9 +145,7 @@ final class CachingProxyITCase {
     }
 
     private void awaitManifestCached() throws Exception {
-        final Manifests manifests = this.cache.repo(
-            new RepoName.Simple(this.img.name())
-        ).manifests();
+        final Manifests manifests = this.cache.repo(img.name()).manifests();
         final ManifestReference ref = ManifestReference.from(
             new Digest.FromString(this.img.digest())
         );
