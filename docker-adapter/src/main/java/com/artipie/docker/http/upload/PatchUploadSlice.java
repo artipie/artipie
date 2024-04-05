@@ -25,9 +25,9 @@ public class PatchUploadSlice extends UploadSlice {
     }
 
     @Override
-    public Permission permission(RequestLine line, String registryName) {
+    public Permission permission(RequestLine line) {
         return new DockerRepositoryPermission(
-            registryName, UploadRequest.from(line).name(), DockerActions.PUSH.mask()
+            docker.registryName(), UploadRequest.from(line).name(), DockerActions.PUSH.mask()
         );
     }
 

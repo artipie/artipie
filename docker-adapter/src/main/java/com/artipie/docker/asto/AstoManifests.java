@@ -58,13 +58,14 @@ public final class AstoManifests implements Manifests {
     @Override
     public CompletableFuture<Manifest> put(ManifestReference ref, Content content) {
         return content.asBytesFuture()
-            .thenCompose(bytes -> this.blobs.put(new TrustedBlobSource(bytes))
-                .thenApply(blob -> new Manifest(blob.digest(), bytes))
-                .thenCompose(
-                    manifest -> this.validate(manifest)
-                        .thenCompose(nothing -> this.addManifestLinks(ref, manifest.digest()))
-                        .thenApply(nothing -> manifest)
-                )
+            .thenCompose(
+                bytes -> this.blobs.put(new TrustedBlobSource(bytes))
+                    .thenApply(blob -> new Manifest(blob.digest(), bytes))
+                    .thenCompose(
+                        manifest -> this.validate(manifest)
+                            .thenCompose(nothing -> this.addManifestLinks(ref, manifest.digest()))
+                            .thenApply(nothing -> manifest)
+                    )
             );
     }
 

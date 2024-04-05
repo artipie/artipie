@@ -28,7 +28,7 @@ final class ProxyDockerTest {
 
     @Test
     void createsProxyRepo() {
-        final ProxyDocker docker = new ProxyDocker((line, headers, body) ->
+        final ProxyDocker docker = new ProxyDocker("test_registry", (line, headers, body) ->
             ResponseBuilder.ok().completedFuture());
         MatcherAssert.assertThat(
             docker.repo("test"),
@@ -45,6 +45,7 @@ final class ProxyDockerTest {
         cheaders = new AtomicReference<>();
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
         new ProxyDocker(
+            "test_registry",
             (line, headers, body) -> {
                 cline.set(line.toString());
                 cheaders.set(headers);
@@ -78,6 +79,7 @@ final class ProxyDockerTest {
         final byte[] bytes = "{\"repositories\":[\"one\",\"two\"]}".getBytes();
         MatcherAssert.assertThat(
             new ProxyDocker(
+                "test_registry",
                 (line, headers, body) -> ResponseBuilder.ok().body(bytes).completedFuture()
             ).catalog(Pagination.empty()).thenCompose(
                 catalog -> catalog.json().asBytesFuture()
@@ -89,6 +91,7 @@ final class ProxyDockerTest {
     @Test
     void shouldFailReturnCatalogWhenRemoteRespondsWithNotOk() {
         final CompletionStage<Catalog> stage = new ProxyDocker(
+            "test_registry",
             (line, headers, body) -> ResponseBuilder.notFound().completedFuture()
         ).catalog(Pagination.empty());
         Assertions.assertThrows(

@@ -39,7 +39,7 @@ class UploadEntityPutTest {
     @BeforeEach
     void setUp() {
         final Storage storage = new InMemoryStorage();
-        this.docker = new AstoDocker(storage);
+        this.docker = new AstoDocker("test_registry", storage);
         this.slice = new DockerSlice(this.docker);
     }
 

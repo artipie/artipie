@@ -4,29 +4,28 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.docker.http.blobs.BlobsRequest;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link BlobEntity.Request}.
- * @since 0.3
+ * Test for {@link BlobsRequest}.
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class BlobEntityRequestTest {
 
     @Test
     void shouldReadName() {
         final String name = "my-repo";
         MatcherAssert.assertThat(
-            new BlobEntity.Request(
+            BlobsRequest.from(
                 new RequestLine(
                     RqMethod.HEAD, String.format("/v2/%s/blobs/sha256:098", name)
                 )
             ).name(),
-            new IsEqual<>(name)
+            Matchers.is(name)
         );
     }
 
@@ -34,12 +33,12 @@ class BlobEntityRequestTest {
     void shouldReadDigest() {
         final String digest = "sha256:abc123";
         MatcherAssert.assertThat(
-            new BlobEntity.Request(
+            BlobsRequest.from(
                 new RequestLine(
                     RqMethod.GET, String.format("/v2/some-repo/blobs/%s", digest)
                 )
             ).digest().string(),
-            new IsEqual<>(digest)
+            Matchers.is(digest)
         );
     }
 
@@ -47,12 +46,12 @@ class BlobEntityRequestTest {
     void shouldReadCompositeName() {
         final String name = "zero-one/two.three/four_five";
         MatcherAssert.assertThat(
-            new BlobEntity.Request(
+            BlobsRequest.from(
                 new RequestLine(
                     RqMethod.HEAD, String.format("/v2/%s/blobs/sha256:234434df", name)
                 )
             ).name(),
-            new IsEqual<>(name)
+            Matchers.is(name)
         );
     }
 

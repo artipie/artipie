@@ -35,6 +35,11 @@ public final class FakeCatalogDocker implements Docker {
         this.paginationRef = new AtomicReference<>();
     }
 
+    @Override
+    public String registryName() {
+        return "registry";
+    }
+
     /**
      * Get captured from parameter.
      *

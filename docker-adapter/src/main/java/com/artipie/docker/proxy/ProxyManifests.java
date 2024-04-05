@@ -77,7 +77,7 @@ public final class ProxyManifests implements Manifests {
     public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return new ResponseSink<>(
             this.remote.response(
-                new RequestLine(RqMethod.GET, String.format("/v2/%s/manifests/%s", name, ref.reference())),
+                new RequestLine(RqMethod.GET, String.format("/v2/%s/manifests/%s", name, ref.digest())),
                 MANIFEST_ACCEPT_HEADERS,
                 Content.EMPTY
             ),

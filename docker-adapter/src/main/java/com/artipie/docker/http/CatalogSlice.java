@@ -16,31 +16,20 @@ import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 
 /**
  * Catalog entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#catalog">Catalog</a>.
  */
-public final class CatalogSlice implements ScopeSlice {
-
-    /**
-     * RegEx pattern for path.
-     */
-    public static final Pattern PATH = Pattern.compile("^/v2/_catalog$");
-
-    /**
-     * Docker repository.
-     */
-    private final Docker docker;
+public final class CatalogSlice extends DockerActionSlice {
 
     public CatalogSlice(Docker docker) {
-        this.docker = docker;
+        super(docker);
     }
 
     @Override
-    public DockerRegistryPermission permission(final RequestLine line, final String registryName) {
-        return new DockerRegistryPermission(registryName, RegistryCategory.CATALOG.mask());
+    public DockerRegistryPermission permission(RequestLine line) {
+        return new DockerRegistryPermission(docker.registryName(), RegistryCategory.CATALOG.mask());
     }
 
     @Override

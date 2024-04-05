@@ -85,9 +85,6 @@ public final class DockerRegistryPermission extends Permission {
     public String getActions() {
         if (this.actions == null) {
             final StringJoiner joiner = new StringJoiner(",");
-            if ((this.mask & RegistryCategory.BASE.mask()) == RegistryCategory.BASE.mask()) {
-                joiner.add(RegistryCategory.BASE.name().toLowerCase(Locale.ROOT));
-            }
             if ((this.mask & RegistryCategory.CATALOG.mask()) == RegistryCategory.CATALOG.mask()) {
                 joiner.add(RegistryCategory.CATALOG.name().toLowerCase(Locale.ROOT));
             }

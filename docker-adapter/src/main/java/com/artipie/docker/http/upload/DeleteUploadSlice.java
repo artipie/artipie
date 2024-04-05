@@ -24,9 +24,9 @@ public class DeleteUploadSlice extends UploadSlice {
     }
 
     @Override
-    public Permission permission(RequestLine line, String registryName) {
+    public Permission permission(RequestLine line) {
         return new DockerRepositoryPermission(
-            registryName, UploadRequest.from(line).name(), DockerActions.PULL.mask()
+            docker.registryName(), UploadRequest.from(line).name(), DockerActions.PULL.mask()
         );
     }
 

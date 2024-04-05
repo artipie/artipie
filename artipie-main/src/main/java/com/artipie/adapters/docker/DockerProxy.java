@@ -32,7 +32,6 @@ import com.artipie.settings.repo.RepoConfig;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 /**
  * Docker proxy slice created from config.
@@ -85,12 +84,13 @@ public final class DockerProxy implements Slice {
     ) {
         final Docker proxies = new MultiReadDocker(
             cfg.remotes().stream().map(r -> proxy(client, cfg, events, r))
-                .collect(Collectors.toList())
+                .toList()
         );
         Docker docker = cfg.storageOpt()
             .<Docker>map(
                 storage -> {
                     final AstoDocker local = new AstoDocker(
+                        cfg.name(),
                         new SubStorage(RegistryRoot.V2, storage)
                     );
                     return new ReadWriteDocker(new MultiReadDocker(local, proxies), local);
@@ -99,10 +99,7 @@ public final class DockerProxy implements Slice {
             .orElse(proxies);
         docker = new TrimmedDocker(docker, cfg.name());
         Slice slice = new DockerSlice(
-            docker,
-            policy,
-            new BasicAuthScheme(auth),
-            events, cfg.name()
+            docker, policy, new BasicAuthScheme(auth), events
         );
         if (cfg.port().isEmpty()) {
             slice = new DockerRoutingSlice.Reverted(slice);
@@ -123,14 +120,14 @@ public final class DockerProxy implements Slice {
             final RemoteConfig remote
     ) {
         final Docker proxy = new ProxyDocker(
+            cfg.name(),
             AuthClientSlice.withClientSlice(client, remote)
         );
         return cfg.storageOpt().<Docker>map(
             cache -> new CacheDocker(
                 proxy,
-                new AstoDocker(new SubStorage(RegistryRoot.V2, cache)),
-                events,
-                cfg.name()
+                new AstoDocker(cfg.name(), new SubStorage(RegistryRoot.V2, cache)),
+                events
             )
         ).orElse(proxy);
     }

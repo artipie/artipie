@@ -4,43 +4,44 @@
  */
 package com.artipie.docker.http;
 
+import com.artipie.docker.http.manifest.ManifestRequest;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
 /**
- * Test for {@link ManifestEntity.Request}.
+ * Test for {@link ManifestRequest}.
  */
-class ManifestEntityRequestTest {
+class ManifestRequestTest {
 
     @Test
     void shouldReadName() {
-        final ManifestEntity.Request request = new ManifestEntity.Request(
+        ManifestRequest request = ManifestRequest.from(
             new RequestLine(RqMethod.GET, "/v2/my-repo/manifests/3")
         );
-        MatcherAssert.assertThat(request.name(), new IsEqual<>("my-repo"));
+        MatcherAssert.assertThat(request.name(), Matchers.is("my-repo"));
     }
 
     @Test
     void shouldReadReference() {
-        final ManifestEntity.Request request = new ManifestEntity.Request(
+        ManifestRequest request = ManifestRequest.from(
             new RequestLine(RqMethod.GET, "/v2/my-repo/manifests/sha256:123abc")
         );
-        MatcherAssert.assertThat(request.reference().reference(), new IsEqual<>("sha256:123abc"));
+        MatcherAssert.assertThat(request.reference().digest(), Matchers.is("sha256:123abc"));
     }
 
     @Test
     void shouldReadCompositeName() {
         final String name = "zero-one/two.three/four_five";
         MatcherAssert.assertThat(
-            new ManifestEntity.Request(
+            ManifestRequest.from(
                 new RequestLine(
                     "HEAD", String.format("/v2/%s/manifests/sha256:234434df", name)
                 )
             ).name(),
-            new IsEqual<>(name)
+            Matchers.is(name)
         );
     }
 

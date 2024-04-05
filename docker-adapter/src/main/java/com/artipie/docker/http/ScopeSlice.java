@@ -14,6 +14,6 @@ import java.security.Permission;
  */
 public interface ScopeSlice extends Slice {
 
-    Permission permission(RequestLine line, String registryName);
+    Permission permission(RequestLine line);
 
 }

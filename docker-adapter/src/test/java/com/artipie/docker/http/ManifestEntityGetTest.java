@@ -35,7 +35,7 @@ class ManifestEntityGetTest {
 
     @BeforeEach
     void setUp() {
-        this.slice = new DockerSlice(new AstoDocker(new ExampleStorage()));
+        this.slice = new DockerSlice(new AstoDocker("test_registry", new ExampleStorage()));
     }
 
     @Test

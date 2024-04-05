@@ -5,7 +5,6 @@
 package com.artipie.http;
 
 import com.artipie.asto.Content;
-import com.artipie.docker.http.BaseEntity;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.auth.BasicAuthzSlice;
@@ -57,15 +56,18 @@ public final class DockerRoutingSlice implements Slice {
 
     @Override
     @SuppressWarnings("PMD.NestedIfDepthCheck")
-    public CompletableFuture<Response> response(final RequestLine line, final Headers headers,
-                                                final Content body) {
+    public CompletableFuture<Response> response(
+        RequestLine line, Headers headers, Content body
+    ) {
         final String path = line.uri().getPath();
         final Matcher matcher = PTN_PATH.matcher(path);
         if (matcher.matches()) {
             final String group = matcher.group(1);
             if (group.isEmpty() || group.equals("/")) {
                 return new BasicAuthzSlice(
-                    new BaseEntity(),
+                    (l, h, b) -> ResponseBuilder.ok()
+                        .header("Docker-Distribution-API-Version", "registry/2.0")
+                        .completedFuture(),
                     this.settings.authz().authentication(),
                     new OperationControl(
                         user -> user.isAnonymous() ? EmptyPermissions.INSTANCE

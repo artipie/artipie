@@ -67,15 +67,15 @@ public final class CacheManifests implements Manifests {
      * @param origin Origin repository.
      * @param cache Cache repository.
      * @param events Artifact metadata events
-     * @param rname Artipie repository name
+     * @param registryName Artipie repository name
      */
     public CacheManifests(String name, Repo origin, Repo cache,
-        Optional<Queue<ArtifactEvent>> events, String rname) {
+        Optional<Queue<ArtifactEvent>> events, String registryName) {
         this.name = name;
         this.origin = origin;
         this.cache = cache;
         this.events = events;
-        this.rname = rname;
+        this.rname = registryName;
     }
 
     @Override
@@ -96,14 +96,14 @@ public final class CacheManifests implements Manifests {
                             result = this.copy(ref).thenApply(unused -> original);
                         } else {
                             LOGGER.warn("Cannot add manifest to cache: [manifest={}, mediaType={}]",
-                                    ref.reference(), manifest.mediaType());
+                                    ref.digest(), manifest.mediaType());
                             result = CompletableFuture.completedFuture(original);
                         }
                     } else {
                         result = this.cache.manifests().get(ref).exceptionally(ignored -> original);
                     }
                 } else {
-                    LOGGER.error("Failed getting manifest ref=" + ref.reference(), throwable);
+                    LOGGER.error("Failed getting manifest ref=" + ref.digest(), throwable);
                     result = this.cache.manifests().get(ref);
                 }
                 return result;
@@ -141,8 +141,11 @@ public final class CacheManifests implements Manifests {
                     this.events.ifPresent(
                         queue -> queue.add(
                             new ArtifactEvent(
-                                CacheManifests.REPO_TYPE, this.rname,
-                                ArtifactEvent.DEF_OWNER, this.name, ref.reference(),
+                                CacheManifests.REPO_TYPE,
+                                this.rname,
+                                ArtifactEvent.DEF_OWNER,
+                                this.name,
+                                ref.digest(),
                                 manifest.layers().stream().mapToLong(ManifestLayer::size).sum()
                             )
                         )
@@ -153,7 +156,7 @@ public final class CacheManifests implements Manifests {
         ).handle(
             (ignored, ex) -> {
                 if (ex != null) {
-                    LOGGER.error("Failed to cache manifest " + ref.reference(), ex);
+                    LOGGER.error("Failed to cache manifest " + ref.digest(), ex);
                 }
                 return null;
             }

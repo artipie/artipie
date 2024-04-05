@@ -73,23 +73,23 @@ final class CachingProxyITCase {
             new HttpClientSettings().setFollowRedirects(true)
         );
         this.client.start();
-        this.cache = new AstoDocker(new InMemoryStorage());
-        final Docker local = new AstoDocker(new InMemoryStorage());
+        this.cache = new AstoDocker("test_registry", new InMemoryStorage());
+        final Docker local = new AstoDocker("test_registry", new InMemoryStorage());
         this.repo = new DockerRepository(
             new ReadWriteDocker(
                 new MultiReadDocker(
                     local,
                     new CacheDocker(
                         new MultiReadDocker(
-                            new ProxyDocker(this.client.https("mcr.microsoft.com")),
-                            new ProxyDocker(
+                            new ProxyDocker("test_registry", this.client.https("mcr.microsoft.com")),
+                            new ProxyDocker("test_registry",
                                 new AuthClientSlice(
                                     this.client.https("registry-1.docker.io"),
                                     new GenericAuthenticator(this.client)
                                 )
                             )
                         ),
-                        this.cache, Optional.empty(), "*"
+                        this.cache, Optional.empty()
                     )
                 ),
                 local

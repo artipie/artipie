@@ -18,32 +18,21 @@ import com.artipie.http.headers.ContentType;
 import com.artipie.http.rq.RequestLine;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
 
 /**
  * Tags entity in Docker HTTP API.
  * See <a href="https://docs.docker.com/registry/spec/api/#tags">Tags</a>.
  */
-final class TagsSlice implements ScopeSlice {
-
-    /**
-     * RegEx pattern for path.
-     */
-    public static final Pattern PATH = Pattern.compile("^/v2/(?<name>.*)/tags/list$");
-
-    /**
-     * Docker repository.
-     */
-    private final Docker docker;
+final class TagsSlice extends DockerActionSlice {
 
     public TagsSlice(Docker docker) {
-        this.docker = docker;
+        super(docker);
     }
 
     @Override
-    public DockerRepositoryPermission permission(RequestLine line, String registryName) {
+    public DockerRepositoryPermission permission(RequestLine line) {
         return new DockerRepositoryPermission(
-            registryName, name(line), DockerActions.PULL.mask()
+            docker.registryName(), name(line), DockerActions.PULL.mask()
         );
     }
 
@@ -60,13 +49,8 @@ final class TagsSlice implements ScopeSlice {
             );
     }
 
-    /**
-     * Extract repository name from HTTP request line.
-     *
-     * @param line Request line.
-     * @return Repository name.
-     */
-    private static String name(RequestLine line) {
-        return ImageRepositoryName.validate(new RqByRegex(line, TagsSlice.PATH).path().group("name"));
+    private String name(RequestLine line) {
+        return ImageRepositoryName.validate(new RqByRegex(line, PathPatterns.TAGS)
+            .path().group("name"));
     }
 }

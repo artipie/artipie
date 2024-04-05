@@ -61,7 +61,7 @@ public final class MultiReadManifests implements Manifests {
                         if (throwable == null) {
                             result = manifest;
                         } else {
-                            LOGGER.error("Failed to read manifest " + ref.reference(), throwable);
+                            LOGGER.error("Failed to read manifest " + ref.digest(), throwable);
                             result = Optional.empty();
                         }
                         return result;

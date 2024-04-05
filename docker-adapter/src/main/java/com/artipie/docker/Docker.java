@@ -16,6 +16,13 @@ import java.util.concurrent.CompletableFuture;
 public interface Docker {
 
     /**
+     * Gets registry name.
+     *
+     * @return Registry name.
+     */
+    String registryName();
+
+    /**
      * Docker repo by name.
      *
      * @param name Repository name

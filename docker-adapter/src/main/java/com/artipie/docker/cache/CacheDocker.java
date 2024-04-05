@@ -38,31 +38,27 @@ public final class CacheDocker implements Docker {
     private final Optional<Queue<ArtifactEvent>> events;
 
     /**
-     * Artipie repository name.
-     */
-    private final String rname;
-
-    /**
-     * Ctor.
-     *
      * @param origin Origin repository.
      * @param cache Cache repository.
      * @param events Artifact metadata events queue
-     * @param rname Artipie repository name
      */
-    public CacheDocker(final Docker origin, final Docker cache,
-        final Optional<Queue<ArtifactEvent>> events, final String rname) {
+    public CacheDocker(Docker origin,
+                       Docker cache,
+                       Optional<Queue<ArtifactEvent>> events
+    ) {
         this.origin = origin;
         this.cache = cache;
         this.events = events;
-        this.rname = rname;
+    }
+
+    @Override
+    public String registryName() {
+        return origin.registryName();
     }
 
     @Override
     public Repo repo(final String name) {
-        return new CacheRepo(
-            name, this.origin.repo(name), this.cache.repo(name), this.events, this.rname
-        );
+        return new CacheRepo(name, this.origin.repo(name), this.cache.repo(name), this.events, registryName());
     }
 
     @Override

@@ -50,7 +50,7 @@ final class DockerSliceITCase {
     void setUp() throws Exception {
         this.events = new LinkedList<>();
         this.repository = new DockerRepository(
-            new DockerSlice(new AstoDocker(new InMemoryStorage()), this.events)
+            new DockerSlice(new AstoDocker("test_registry", new InMemoryStorage()), this.events)
         );
         this.repository.start();
         this.image = this.prepareImage();

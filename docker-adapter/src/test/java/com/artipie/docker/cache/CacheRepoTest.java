@@ -35,7 +35,7 @@ final class CacheRepoTest {
                 (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
                 "test-origin"
             ),
-            new AstoDocker(new InMemoryStorage())
+            new AstoDocker("registry", new InMemoryStorage())
                 .repo("test-cache"), Optional.empty(), "*"
         );
     }

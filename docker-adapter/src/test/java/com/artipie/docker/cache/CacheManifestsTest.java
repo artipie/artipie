@@ -76,10 +76,10 @@ final class CacheManifestsTest {
     void shouldCacheManifest() throws Exception {
         final ManifestReference ref = ManifestReference.from("1");
         final Queue<ArtifactEvent> events = new ConcurrentLinkedQueue<>();
-        final Repo cache = new AstoDocker(new LoggingStorage(new InMemoryStorage()))
+        final Repo cache = new AstoDocker("registry", new LoggingStorage(new InMemoryStorage()))
             .repo("my-cache");
         new CacheManifests("cache-alpine",
-            new AstoDocker(new ExampleStorage()).repo("my-alpine"),
+            new AstoDocker("registry", new ExampleStorage()).repo("my-alpine"),
             cache, Optional.of(events), "my-docker-proxy"
         ).get(ref).toCompletableFuture().join();
         final Stopwatch stopwatch = Stopwatch.createStarted();
@@ -147,22 +147,16 @@ final class CacheManifestsTest {
 
     /**
      * Simple repo implementation.
-     *
-     * @since 0.3
      */
     private static final class SimpleRepo implements Repo {
-        /**
-         * Manifests.
-         */
-        private final Manifests mnfs;
+
+        private final Manifests manifests;
 
         /**
-         * Ctor.
-         *
-         * @param mnfs Manifests.
+         * @param manifests Manifests.
          */
-        private SimpleRepo(final Manifests mnfs) {
-            this.mnfs = mnfs;
+        private SimpleRepo(final Manifests manifests) {
+            this.manifests = manifests;
         }
 
         @Override
@@ -172,7 +166,7 @@ final class CacheManifestsTest {
 
         @Override
         public Manifests manifests() {
-            return this.mnfs;
+            return this.manifests;
         }
 
         @Override
