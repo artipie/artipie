@@ -10,7 +10,6 @@ import com.artipie.docker.Tags;
 import com.artipie.docker.misc.Pagination;
 
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import java.util.Collection;
 
 /**
@@ -38,7 +37,7 @@ final class AstoTags implements Tags {
     private final Pagination pagination;
 
     /**
-     * @param name Repository name.
+     * @param name Image repository name.
      * @param root Tags root key.
      * @param keys List of keys inside tags root.
      * @param pagination Pagination parameters.
@@ -52,16 +51,10 @@ final class AstoTags implements Tags {
 
     @Override
     public Content json() {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-        new Children(this.root, this.keys).names()
-            .stream()
-            .filter(pagination::lessThan)
-            .limit(pagination.limit())
-            .forEach(builder::add);
         return new Content.From(
             Json.createObjectBuilder()
                 .add("name", this.name)
-                .add("tags", builder)
+                .add("tags", pagination.apply(new Children(root, keys).names().stream()))
                 .build()
                 .toString()
                 .getBytes()

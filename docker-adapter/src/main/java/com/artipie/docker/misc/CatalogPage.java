@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import java.util.Collection;
 
 /**
@@ -36,16 +35,9 @@ public final class CatalogPage implements Catalog {
 
     @Override
     public Content json() {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-        this.names.stream()
-            .filter(pagination::lessThan)
-            .sorted()
-            .distinct()
-            .limit(pagination.limit())
-            .forEach(builder::add);
         return new Content.From(
             Json.createObjectBuilder()
-                .add("repositories", builder)
+                .add("repositories", pagination.apply(names.stream()))
                 .build()
                 .toString()
                 .getBytes()

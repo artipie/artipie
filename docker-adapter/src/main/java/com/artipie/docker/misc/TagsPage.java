@@ -8,7 +8,6 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Tags;
 
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import java.util.List;
 
 /**
@@ -35,17 +34,10 @@ public final class TagsPage implements Tags {
 
     @Override
     public Content json() {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-        this.tags.stream()
-            .filter(pagination::lessThan)
-            .sorted()
-            .distinct()
-            .limit(pagination.limit())
-            .forEach(builder::add);
         return new Content.From(
             Json.createObjectBuilder()
                 .add("name", this.repoName)
-                .add("tags", builder)
+                .add("tags", pagination.apply(tags.stream()))
                 .build()
                 .toString()
                 .getBytes()

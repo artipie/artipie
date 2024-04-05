@@ -52,7 +52,6 @@ final class AstoCatalog implements Catalog {
      * @return Ordered repository names.
      */
     private Collection<String> repos() {
-        return new Children(this.root, this.keys)
-            .names();
+        return new Children(this.root, this.keys).names();
     }
 }

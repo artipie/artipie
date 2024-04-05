@@ -45,11 +45,12 @@ public final class ParsedCatalog implements Catalog {
     public CompletionStage<List<String>> repos() {
         return this.origin.json().asBytesFuture().thenApply(
             bytes -> Json.createReader(new ByteArrayInputStream(bytes)).readObject()
-        ).thenApply(root -> root.getJsonArray("repositories")).thenApply(
-            repos -> repos.getValuesAs(JsonString.class).stream()
+            ).thenApply(root -> root.getJsonArray("repositories"))
+            .thenApply(
+                repos -> repos.getValuesAs(JsonString.class).stream()
                 .map(JsonString::getString)
                 .map(ImageRepositoryName::validate)
-                .collect(Collectors.toList())
+                .toList()
         );
     }
 }

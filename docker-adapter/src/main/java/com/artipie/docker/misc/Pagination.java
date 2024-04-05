@@ -8,8 +8,11 @@ import com.artipie.ArtipieException;
 import com.artipie.http.rq.RqParams;
 import org.apache.hc.core5.net.URIBuilder;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.stream.Stream;
 
 /**
  * Pagination parameters.
@@ -35,6 +38,16 @@ public record Pagination(String last, int limit) {
         return new Pagination(
             repoName, limit != null ? limit : Integer.MAX_VALUE
         );
+    }
+
+    public JsonArrayBuilder apply(Stream<String> stream) {
+        final JsonArrayBuilder res = Json.createArrayBuilder();
+        stream.filter(this::lessThan)
+            .sorted()
+            .distinct()
+            .limit(this.limit())
+            .forEach(res::add);
+        return res;
     }
 
     /**
@@ -67,7 +80,7 @@ public record Pagination(String last, int limit) {
      * @param name Image repository name.
      * @return True if given {@code name} more than {@code Pagination.last}.
      */
-    public boolean lessThan(String name) {
+    private boolean lessThan(String name) {
         return last == null || name.compareTo(last) > 0;
     }
 }
