@@ -33,20 +33,26 @@ public class TestDockerClient {
     public static final int[] INSECURE_PORTS = {52001, 52002, 52003};
 
     /**
-     * Built from src/test/resources/Dockerfile.
+     * Built from {@link src/test/resources/docker/Dockerfile}.
      */
-    private static final DockerImageName DOCKER_CLIENT = DockerImageName.parse("artipie/test-docker-client:1.0");
+    protected static final DockerImageName DOCKER_CLIENT = DockerImageName.parse("artipie/test-docker-client:1.0");
 
     private final int port;
     private final GenericContainer<?> client;
 
     public TestDockerClient(int port) {
-        this.port = port;
-        Testcontainers.exposeHostPorts(this.port);
-        this.client = new GenericContainer<>(DOCKER_CLIENT)
+        this(
+            port, new GenericContainer<>(DOCKER_CLIENT)
                 .withEnv("PORT", String.valueOf(port))
                 .withPrivilegedMode(true)
-                .withCommand("tail", "-f", "/dev/null");
+                .withCommand("tail", "-f", "/dev/null")
+        );
+    }
+
+    public TestDockerClient(int port, final GenericContainer<?> client) {
+        this.port = port;
+        Testcontainers.exposeHostPorts(this.port);
+        this.client = client;
     }
 
     public void start() throws IOException {
@@ -108,6 +114,10 @@ public class TestDockerClient {
 
     public TestDockerClient tag(String source, String target) throws IOException {
         return executeAssert("docker", "tag", source, target);
+    }
+
+    public int getMappedPort(int port) {
+        return this.client.getMappedPort(port);
     }
 
     public TestDockerClient executeAssert(String... cmd) throws IOException {

@@ -124,19 +124,31 @@ public class TestVertxMainBuilder {
     }
 
     /**
-     * Creates a docker repository config file in the server's work directory.
+     * Creates a docker repository config file with FS storage in the server's work directory.
      *
      * @param name Repository name
-     * @param data Repository data path
+     * @param data Repository data path for FS type of storage
      * @return TestVertxMainBuilder
      * @throws IOException If the create operation failed
      */
-    public TestVertxMainBuilder withDockerRepo(String name, Path data) throws IOException {
+    public TestVertxMainBuilder withDockerRepo(final String name, final Path data) throws IOException {
+        return this.withDockerRepo(name, fileStorageCfg(data));
+    }
+
+    /**
+     * Creates a docker repository config file with provided `storage` in the server's work directory.
+     *
+     * @param name Repository name
+     * @param storage Storage definition for docker repository
+     * @return TestVertxMainBuilder
+     * @throws IOException If the create operation failed
+     */
+    public TestVertxMainBuilder withDockerRepo(final String name, final YamlMapping storage) throws IOException {
         saveRepoConfig(name,
-                Yaml.createYamlMappingBuilder()
-                        .add("type", "docker")
-                        .add("storage", fileStorageCfg(data))
-                        .build()
+            Yaml.createYamlMappingBuilder()
+                .add("type", "docker")
+                .add("storage", storage)
+                .build()
         );
         return this;
     }
