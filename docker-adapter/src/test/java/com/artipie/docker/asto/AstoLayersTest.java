@@ -43,7 +43,7 @@ final class AstoLayersTest {
     @Test
     void shouldAddLayer() {
         final byte[] data = "data".getBytes();
-        final Digest digest = this.layers.put(new TrustedBlobSource(data)).join().digest();
+        final Digest digest = this.layers.put(new TrustedBlobSource(data)).join();
         final Optional<Blob> found = this.blobs.blob(digest).join();
         MatcherAssert.assertThat(found.isPresent(), Matchers.is(true));
         MatcherAssert.assertThat(bytes(found.orElseThrow()), Matchers.is(data));
@@ -52,7 +52,7 @@ final class AstoLayersTest {
     @Test
     void shouldReadExistingLayer() {
         final byte[] data = "content".getBytes();
-        final Digest digest = this.blobs.put(new TrustedBlobSource(data)).join().digest();
+        final Digest digest = this.blobs.put(new TrustedBlobSource(data)).join();
         final Optional<Blob> found = this.layers.get(digest).join();
         MatcherAssert.assertThat(found.isPresent(), Matchers.is(true));
         MatcherAssert.assertThat(found.orElseThrow().digest(), Matchers.is(digest));

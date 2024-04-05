@@ -35,8 +35,7 @@ final class BlobsITCase {
             new SubStorage(RegistryRoot.V2, storage)
         );
         final byte[] bytes = new byte[]{0x00, 0x01, 0x02, 0x03};
-        final Digest digest = blobs.put(new TrustedBlobSource(bytes))
-            .toCompletableFuture().get().digest();
+        final Digest digest = blobs.put(new TrustedBlobSource(bytes)).get();
         MatcherAssert.assertThat(
             "Digest alg is not correct",
             digest.alg(), Matchers.equalTo("sha256")
@@ -99,8 +98,7 @@ final class BlobsITCase {
             new InMemoryStorage()
         );
         final byte[] bytes = {0x05, 0x06, 0x07, 0x08};
-        final Digest digest = blobs.put(new TrustedBlobSource(bytes))
-            .toCompletableFuture().get().digest();
+        final Digest digest = blobs.put(new TrustedBlobSource(bytes)).get();
         final byte[] read = Flowable.fromPublisher(
             blobs.blob(digest).get()
                 .get().content()

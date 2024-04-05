@@ -20,7 +20,7 @@ public interface Layers {
      * @param source Blob source.
      * @return Added layer blob.
      */
-    CompletableFuture<Blob> put(BlobSource source);
+    CompletableFuture<Digest> put(BlobSource source);
 
     /**
      * Mount blob to repository.

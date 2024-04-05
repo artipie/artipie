@@ -184,7 +184,7 @@ class UploadTest {
         private volatile byte[] content;
 
         @Override
-        public CompletableFuture<Blob> put(final BlobSource source) {
+        public CompletableFuture<Digest> put(final BlobSource source) {
             final Key key = new Key.From(UUID.randomUUID().toString());
             source.saveTo(UploadTest.this.storage, key).toCompletableFuture().join();
             this.content = UploadTest.this.storage.value(key)

@@ -32,7 +32,7 @@ public final class FakeLayers implements Layers {
     }
 
     @Override
-    public CompletableFuture<Blob> put(final BlobSource source) {
+    public CompletableFuture<Digest> put(final BlobSource source) {
         return this.layers.put(source);
     }
 

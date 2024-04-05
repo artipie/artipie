@@ -6,7 +6,7 @@ package com.artipie.docker.http;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.docker.Blob;
+import com.artipie.docker.Digest;
 import com.artipie.docker.Docker;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.asto.TrustedBlobSource;
@@ -89,12 +89,12 @@ class ManifestEntityPutTest {
      */
     private Content manifest() {
         final byte[] content = "config".getBytes();
-        final Blob config = this.docker.repo("my-alpine").layers()
+        final Digest digest = this.docker.repo("my-alpine").layers()
             .put(new TrustedBlobSource(content))
             .toCompletableFuture().join();
         final byte[] data = String.format(
             "{\"config\":{\"digest\":\"%s\"},\"layers\":[],\"mediaType\":\"my-type\"}",
-            config.digest().string()
+            digest.string()
         ).getBytes();
         return new Content.From(data);
     }

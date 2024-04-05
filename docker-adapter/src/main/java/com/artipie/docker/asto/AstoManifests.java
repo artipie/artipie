@@ -60,7 +60,7 @@ public final class AstoManifests implements Manifests {
         return content.asBytesFuture()
             .thenCompose(
                 bytes -> this.blobs.put(new TrustedBlobSource(bytes))
-                    .thenApply(blob -> new Manifest(blob.digest(), bytes))
+                    .thenApply(digest -> new Manifest(digest, bytes))
                     .thenCompose(
                         manifest -> this.validate(manifest)
                             .thenCompose(nothing -> this.addManifestLinks(ref, manifest.digest()))

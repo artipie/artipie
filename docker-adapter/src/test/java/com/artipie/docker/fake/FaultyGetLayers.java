@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 public final class FaultyGetLayers implements Layers {
 
     @Override
-    public CompletableFuture<Blob> put(final BlobSource source) {
+    public CompletableFuture<Digest> put(final BlobSource source) {
         throw new UnsupportedOperationException();
     }
 

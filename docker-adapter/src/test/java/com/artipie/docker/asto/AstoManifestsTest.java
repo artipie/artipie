@@ -7,7 +7,7 @@ package com.artipie.docker.asto;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
-import com.artipie.docker.Blob;
+import com.artipie.docker.Digest;
 import com.artipie.docker.ExampleStorage;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Tags;
@@ -68,8 +68,8 @@ final class AstoManifestsTest {
     @Test
     @Timeout(5)
     void shouldReadAddedManifest() {
-        final Blob config = this.blobs.put(new TrustedBlobSource("config".getBytes())).join();
-        final Blob layer = this.blobs.put(new TrustedBlobSource("layer".getBytes())).join();
+        final Digest config = this.blobs.put(new TrustedBlobSource("config".getBytes())).join();
+        final Digest layer = this.blobs.put(new TrustedBlobSource("layer".getBytes())).join();
         final byte[] data = this.getJsonBytes(config, layer, "my-type");
         final ManifestReference ref = ManifestReference.fromTag("some-tag");
         final Manifest manifest = this.manifests.put(ref, new Content.From(data)).join();
@@ -83,10 +83,8 @@ final class AstoManifestsTest {
     @Test
     @Timeout(5)
     void shouldFailPutManifestIfMediaTypeIsEmpty() {
-        final Blob config = this.blobs.put(new TrustedBlobSource("config".getBytes()))
-            .toCompletableFuture().join();
-        final Blob layer = this.blobs.put(new TrustedBlobSource("layer".getBytes()))
-            .toCompletableFuture().join();
+        final Digest config = this.blobs.put(new TrustedBlobSource("config".getBytes())).join();
+        final Digest layer = this.blobs.put(new TrustedBlobSource("layer".getBytes())).join();
         final byte[] data = this.getJsonBytes(config, layer, "");
         final CompletionStage<Manifest> future = this.manifests.put(
             ManifestReference.fromTag("ddd"),
@@ -143,18 +141,18 @@ final class AstoManifestsTest {
             .join();
     }
 
-    private byte[] getJsonBytes(final Blob config, final Blob layer, final String mtype) {
+    private byte[] getJsonBytes(Digest config, Digest layer, String mtype) {
         return Json.createObjectBuilder()
             .add(
                 "config",
-                Json.createObjectBuilder().add("digest", config.digest().string())
+                Json.createObjectBuilder().add("digest", config.string())
             )
             .add("mediaType", mtype)
             .add(
                 "layers",
                 Json.createArrayBuilder()
                     .add(
-                        Json.createObjectBuilder().add("digest", layer.digest().string())
+                        Json.createObjectBuilder().add("digest", layer.string())
                     )
                     .add(
                         Json.createObjectBuilder()

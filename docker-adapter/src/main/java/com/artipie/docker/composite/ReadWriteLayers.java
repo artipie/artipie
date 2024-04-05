@@ -40,7 +40,7 @@ public final class ReadWriteLayers implements Layers {
     }
 
     @Override
-    public CompletableFuture<Blob> put(final BlobSource source) {
+    public CompletableFuture<Digest> put(final BlobSource source) {
         return this.write.put(source);
     }
 

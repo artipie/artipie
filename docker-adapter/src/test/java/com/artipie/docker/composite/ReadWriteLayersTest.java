@@ -76,7 +76,7 @@ final class ReadWriteLayersTest {
         private volatile Digest digestcheck;
 
         @Override
-        public CompletableFuture<Blob> put(final BlobSource source) {
+        public CompletableFuture<Digest> put(final BlobSource source) {
             throw new UnsupportedOperationException();
         }
 
@@ -109,7 +109,7 @@ final class ReadWriteLayersTest {
         private volatile BlobSource source;
 
         @Override
-        public CompletableFuture<Blob> put(final BlobSource source) {
+        public CompletableFuture<Digest> put(final BlobSource source) {
             this.source = source;
             return CompletableFuture.completedFuture(null);
         }
@@ -152,7 +152,7 @@ final class ReadWriteLayersTest {
         }
 
         @Override
-        public CompletableFuture<Blob> put(final BlobSource source) {
+        public CompletableFuture<Digest> put(final BlobSource source) {
             throw new UnsupportedOperationException();
         }
 

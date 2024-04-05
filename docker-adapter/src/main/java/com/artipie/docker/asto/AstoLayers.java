@@ -30,7 +30,7 @@ public final class AstoLayers implements Layers {
     }
 
     @Override
-    public CompletableFuture<Blob> put(final BlobSource source) {
+    public CompletableFuture<Digest> put(final BlobSource source) {
         return this.blobs.put(source);
     }
 

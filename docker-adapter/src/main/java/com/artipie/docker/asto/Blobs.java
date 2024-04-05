@@ -49,10 +49,10 @@ public final class Blobs {
      * @param source Blob source.
      * @return Added blob.
      */
-    public CompletableFuture<Blob> put(BlobSource source) {
+    public CompletableFuture<Digest> put(BlobSource source) {
         final Digest digest = source.digest();
         final Key key = Layout.blob(digest);
         return source.saveTo(storage, key)
-            .thenApply(nothing -> new AstoBlob(storage, key, digest));
+            .thenApply(nothing -> digest);
     }
 }
