@@ -113,7 +113,7 @@ class TagsSliceGetTest {
         }
 
         @Override
-        public String registryName() {
+        public String registry() {
             return "test_registry";
         }
 

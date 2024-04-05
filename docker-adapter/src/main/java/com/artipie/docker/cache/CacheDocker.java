@@ -52,13 +52,13 @@ public final class CacheDocker implements Docker {
     }
 
     @Override
-    public String registryName() {
-        return origin.registryName();
+    public String registry() {
+        return origin.registry();
     }
 
     @Override
     public Repo repo(final String name) {
-        return new CacheRepo(name, this.origin.repo(name), this.cache.repo(name), this.events, registryName());
+        return new CacheRepo(name, this.origin.repo(name), this.cache.repo(name), this.events, registry());
     }
 
     @Override

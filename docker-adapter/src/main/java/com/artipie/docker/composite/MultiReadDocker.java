@@ -49,8 +49,8 @@ public final class MultiReadDocker implements Docker {
     }
 
     @Override
-    public String registryName() {
-        return dockers.getFirst().registryName();
+    public String registry() {
+        return dockers.getFirst().registry();
     }
 
     @Override

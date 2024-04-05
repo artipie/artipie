@@ -57,7 +57,7 @@ public class GetBlobsSlice extends DockerActionSlice {
     @Override
     public Permission permission(RequestLine line) {
         return new DockerRepositoryPermission(
-            docker.registryName(), BlobsRequest.from(line).name(), DockerActions.PULL.mask()
+            docker.registry(), BlobsRequest.from(line).name(), DockerActions.PULL.mask()
         );
     }
 }

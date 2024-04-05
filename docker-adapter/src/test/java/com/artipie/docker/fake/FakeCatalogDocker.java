@@ -36,7 +36,7 @@ public final class FakeCatalogDocker implements Docker {
     }
 
     @Override
-    public String registryName() {
+    public String registry() {
         return "registry";
     }
 

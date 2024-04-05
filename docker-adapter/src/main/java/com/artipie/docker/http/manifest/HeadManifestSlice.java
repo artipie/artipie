@@ -51,7 +51,7 @@ public class HeadManifestSlice extends DockerActionSlice {
     @Override
     public Permission permission(RequestLine line) {
         return new DockerRepositoryPermission(
-            docker.registryName(), ManifestRequest.from(line).name(), DockerActions.PULL.mask()
+            docker.registry(), ManifestRequest.from(line).name(), DockerActions.PULL.mask()
         );
     }
 }

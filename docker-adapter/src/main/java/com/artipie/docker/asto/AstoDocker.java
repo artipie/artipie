@@ -19,18 +19,18 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class AstoDocker implements Docker {
 
-    private final String registryName;
+    private final String registry;
 
     private final Storage storage;
 
-    public AstoDocker(String registryName, Storage storage) {
-        this.registryName = registryName;
+    public AstoDocker(String registry, Storage storage) {
+        this.registry = registry;
         this.storage = storage;
     }
 
     @Override
-    public String registryName() {
-        return registryName;
+    public String registry() {
+        return registry;
     }
 
     @Override

@@ -48,7 +48,7 @@ public class PushManifestSlice extends DockerActionSlice {
                         queue.add(
                             new ArtifactEvent(
                                 "docker",
-                                docker.registryName(),
+                                docker.registry(),
                                 new Login(headers).getValue(),
                                 request.name(), ref.digest(),
                                 manifest.layers().stream().mapToLong(ManifestLayer::size).sum()
@@ -67,7 +67,7 @@ public class PushManifestSlice extends DockerActionSlice {
     @Override
     public Permission permission(RequestLine line) {
         return new DockerRepositoryPermission(
-            docker.registryName(), ManifestRequest.from(line).name(), DockerActions.PUSH.mask()
+            docker.registry(), ManifestRequest.from(line).name(), DockerActions.PUSH.mask()
         );
     }
 }

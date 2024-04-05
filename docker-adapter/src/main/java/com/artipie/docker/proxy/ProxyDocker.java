@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class ProxyDocker implements Docker {
 
-    private final String registryName;
+    private final String registry;
     /**
      * Remote repository.
      */
@@ -31,14 +31,14 @@ public final class ProxyDocker implements Docker {
     /**
      * @param remote Remote repository.
      */
-    public ProxyDocker(String registryName, Slice remote) {
-        this.registryName = registryName;
+    public ProxyDocker(String registry, Slice remote) {
+        this.registry = registry;
         this.remote = remote;
     }
 
     @Override
-    public String registryName() {
-        return registryName;
+    public String registry() {
+        return registry;
     }
 
     @Override

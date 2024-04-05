@@ -29,7 +29,7 @@ public final class CatalogSlice extends DockerActionSlice {
 
     @Override
     public DockerRegistryPermission permission(RequestLine line) {
-        return new DockerRegistryPermission(docker.registryName(), RegistryCategory.CATALOG.mask());
+        return new DockerRegistryPermission(docker.registry(), RegistryCategory.CATALOG.mask());
     }
 
     @Override

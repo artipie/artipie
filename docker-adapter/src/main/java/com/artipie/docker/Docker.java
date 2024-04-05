@@ -20,7 +20,7 @@ public interface Docker {
      *
      * @return Registry name.
      */
-    String registryName();
+    String registry();
 
     /**
      * Docker repo by name.

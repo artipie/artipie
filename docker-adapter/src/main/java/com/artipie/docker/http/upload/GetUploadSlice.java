@@ -29,7 +29,7 @@ public class GetUploadSlice extends UploadSlice {
     @Override
     public Permission permission(RequestLine line) {
         return new DockerRepositoryPermission(
-            docker.registryName(), UploadRequest.from(line).name(), DockerActions.PULL.mask()
+            docker.registry(), UploadRequest.from(line).name(), DockerActions.PULL.mask()
         );
     }
 

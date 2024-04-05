@@ -32,7 +32,7 @@ final class TagsSlice extends DockerActionSlice {
     @Override
     public DockerRepositoryPermission permission(RequestLine line) {
         return new DockerRepositoryPermission(
-            docker.registryName(), name(line), DockerActions.PULL.mask()
+            docker.registry(), name(line), DockerActions.PULL.mask()
         );
     }
 
