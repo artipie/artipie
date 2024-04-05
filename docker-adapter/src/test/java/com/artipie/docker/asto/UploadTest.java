@@ -62,7 +62,7 @@ class UploadTest {
         this.upload.start().toCompletableFuture().join();
         MatcherAssert.assertThat(
             this.storage.list(this.upload.root()).join().isEmpty(),
-            new IsEqual<>(false)
+            Matchers.is(false)
         );
     }
 
@@ -83,17 +83,16 @@ class UploadTest {
     @Test
     void shouldReturnOffsetWhenAppendedChunk() {
         final byte[] chunk = "sample".getBytes();
-        this.upload.start().toCompletableFuture().join();
-        final Long offset = this.upload.append(new Content.From(chunk))
-            .toCompletableFuture().join();
-        MatcherAssert.assertThat(offset, new IsEqual<>((long) chunk.length - 1));
+        this.upload.start().join();
+        final Long offset = this.upload.append(new Content.From(chunk)).join();
+        MatcherAssert.assertThat(offset, Matchers.is((long) chunk.length - 1));
     }
 
     @Test
     void shouldReadAppendedChunk() {
         final byte[] chunk = "chunk".getBytes();
-        this.upload.start().toCompletableFuture().join();
-        this.upload.append(new Content.From(chunk)).toCompletableFuture().join();
+        this.upload.start().join();
+        this.upload.append(new Content.From(chunk)).join();
         MatcherAssert.assertThat(
             this.upload,
             new IsUploadWithContent(chunk)
@@ -104,13 +103,11 @@ class UploadTest {
     void shouldFailAppendedSecondChunk() {
         this.upload.start().toCompletableFuture().join();
         this.upload.append(new Content.From("one".getBytes()))
-            .toCompletableFuture()
             .join();
         MatcherAssert.assertThat(
             Assertions.assertThrows(
                 CompletionException.class,
                 () -> this.upload.append(new Content.From("two".getBytes()))
-                    .toCompletableFuture()
                     .join()
             ).getCause(),
             new IsInstanceOf(UnsupportedOperationException.class)
@@ -119,7 +116,7 @@ class UploadTest {
 
     @Test
     void shouldAppendedSecondChunkIfFirstOneFailed() {
-        this.upload.start().toCompletableFuture().join();
+        this.upload.start().join();
         try {
             this.upload.append(new Content.From(1, Flowable.error(new IllegalStateException())))
                 .toCompletableFuture()
@@ -127,7 +124,7 @@ class UploadTest {
         } catch (final CompletionException ignored) {
         }
         final byte[] chunk = "content".getBytes();
-        this.upload.append(new Content.From(chunk)).toCompletableFuture().join();
+        this.upload.append(new Content.From(chunk)).join();
         MatcherAssert.assertThat(
             this.upload,
             new IsUploadWithContent(chunk)
@@ -138,9 +135,8 @@ class UploadTest {
     void shouldRemoveUploadedFiles() throws ExecutionException, InterruptedException {
         this.upload.start().toCompletableFuture().join();
         final byte[] chunk = "some bytes".getBytes();
-        this.upload.append(new Content.From(chunk)).toCompletableFuture().get();
-        this.upload.putTo(new CapturePutLayers(), new Digest.Sha256(chunk))
-            .toCompletableFuture().get();
+        this.upload.append(new Content.From(chunk)).get();
+        this.upload.putTo(new CapturePutLayers(), new Digest.Sha256(chunk)).get();
         MatcherAssert.assertThat(
             this.storage.list(this.upload.root()).get(),
             new IsEmptyCollection<>()

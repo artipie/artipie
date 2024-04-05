@@ -49,11 +49,13 @@ public class PostUploadSlice extends UploadSlice {
     private CompletableFuture<Response> mount(
         Digest digest, String source, String target
     ) {
-        return this.docker.repo(source).layers()
+        return this.docker.repo(source)
+            .layers()
             .get(digest)
             .thenCompose(
                 opt -> opt.map(
-                    src -> this.docker.repo(target).layers()
+                    src -> this.docker.repo(target)
+                        .layers()
                         .mount(src)
                         .thenCompose(blob -> createdResponse(target, blob.digest()))
                 ).orElseGet(

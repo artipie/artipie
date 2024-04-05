@@ -25,7 +25,7 @@ public final class AstoLayers implements Layers {
     /**
      * @param blobs Blobs storage.
      */
-    public AstoLayers(final Blobs blobs) {
+    public AstoLayers(Blobs blobs) {
         this.blobs = blobs;
     }
 

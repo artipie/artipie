@@ -86,7 +86,7 @@ public final class Upload {
      *
      * @return Completion or error signal.
      */
-    public CompletionStage<Void> cancel() {
+    public CompletableFuture<Void> cancel() {
         final Key key = this.started();
         return this.storage
             .exists(key)
@@ -99,7 +99,7 @@ public final class Upload {
      * @param chunk Chunk of data.
      * @return Offset after appending chunk.
      */
-    public CompletionStage<Long> append(final Content chunk) {
+    public CompletableFuture<Long> append(final Content chunk) {
         return this.chunks().thenCompose(
             chunks -> {
                 if (!chunks.isEmpty()) {
@@ -126,7 +126,7 @@ public final class Upload {
      *
      * @return Offset.
      */
-    public CompletionStage<Long> offset() {
+    public CompletableFuture<Long> offset() {
         return this.chunks().thenCompose(
             chunks -> {
                 final CompletionStage<Long> result;
@@ -151,14 +151,13 @@ public final class Upload {
      * @param digest Expected blob digest.
      * @return Created blob.
      */
-    public CompletionStage<Blob> putTo(Layers layers, Digest digest) {
+    public CompletableFuture<Void> putTo(Layers layers, Digest digest) {
         final Key source = this.chunk(digest);
         return this.storage.exists(source)
             .thenCompose(
                 exists -> {
-                    final CompletionStage<Blob> result;
                     if (exists) {
-                        result = layers.put(
+                        return layers.put(
                             new BlobSource() {
                                 @Override
                                 public Digest digest() {
@@ -171,12 +170,10 @@ public final class Upload {
                                 }
                             }
                         ).thenCompose(
-                            blob -> this.delete().thenApply(nothing -> blob)
+                            blob -> this.delete()
                         );
-                    } else {
-                        result = CompletableFuture.failedFuture(new InvalidDigestException(digest.toString()));
                     }
-                    return result;
+                    return CompletableFuture.failedFuture(new InvalidDigestException(digest.toString()));
                 }
             );
     }

@@ -61,27 +61,22 @@ final class AstoManifestsTest {
     @Test
     @Timeout(5)
     void shouldReadNoManifestIfAbsent() throws Exception {
-        final Optional<Manifest> manifest = this.manifests.get(
-            ManifestReference.from("2")
-        ).toCompletableFuture().get();
+        final Optional<Manifest> manifest = this.manifests.get(ManifestReference.from("2")).get();
         MatcherAssert.assertThat(manifest.isPresent(), new IsEqual<>(false));
     }
 
     @Test
     @Timeout(5)
     void shouldReadAddedManifest() {
-        final Blob config = this.blobs.put(new TrustedBlobSource("config".getBytes()))
-            .toCompletableFuture().join();
-        final Blob layer = this.blobs.put(new TrustedBlobSource("layer".getBytes()))
-            .toCompletableFuture().join();
+        final Blob config = this.blobs.put(new TrustedBlobSource("config".getBytes())).join();
+        final Blob layer = this.blobs.put(new TrustedBlobSource("layer".getBytes())).join();
         final byte[] data = this.getJsonBytes(config, layer, "my-type");
         final ManifestReference ref = ManifestReference.fromTag("some-tag");
-        final Manifest manifest = this.manifests.put(ref, new Content.From(data))
-            .toCompletableFuture().join();
+        final Manifest manifest = this.manifests.put(ref, new Content.From(data)).join();
         MatcherAssert.assertThat(this.manifest(ref), new IsEqual<>(data));
         MatcherAssert.assertThat(
             this.manifest(ManifestReference.from(manifest.digest())),
-            new IsEqual<>(data)
+            Matchers.is(data)
         );
     }
 
@@ -137,7 +132,7 @@ final class AstoManifestsTest {
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             tags.json().asString(),
-            new IsEqual<>("{\"name\":\"my-alpine\",\"tags\":[\"1\",\"latest\"]}")
+            Matchers.is("{\"name\":\"my-alpine\",\"tags\":[\"1\",\"latest\"]}")
         );
     }
 
@@ -145,7 +140,7 @@ final class AstoManifestsTest {
         return this.manifests.get(ref)
             .thenApply(res -> res.orElseThrow().content())
             .thenCompose(Content::asBytesFuture)
-            .toCompletableFuture().join();
+            .join();
     }
 
     private byte[] getJsonBytes(final Blob config, final Blob layer, final String mtype) {
