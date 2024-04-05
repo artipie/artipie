@@ -10,7 +10,6 @@ import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.factory.StoragesLoader;
-import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.junit.DockerClient;
 import com.artipie.docker.junit.DockerClientSupport;
@@ -31,10 +30,7 @@ import java.util.UUID;
 
 /**
  * Integration test for {@link DockerSlice}.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DockerClientSupport
 final class DockerSliceS3ITCase {
 
@@ -94,7 +90,7 @@ final class DockerSliceS3ITCase {
             );
         this.events = new LinkedList<>();
         this.repository = new DockerRepository(
-            new DockerSlice(new AstoDocker(storage), this.events)
+            new DockerSlice(new AstoDocker("test)registry", storage), this.events)
         );
         this.repository.start();
         this.image = this.prepareImage();
