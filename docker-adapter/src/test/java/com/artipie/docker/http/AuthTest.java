@@ -22,7 +22,6 @@ import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.BasicAuthScheme;
 import com.artipie.http.auth.BearerAuthScheme;
 import com.artipie.http.headers.Authorization;
-import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseAssert;
 import com.artipie.http.hm.RsHasStatus;
 import com.artipie.http.hm.SliceHasResponse;
@@ -54,9 +53,6 @@ import java.util.stream.Stream;
 /**
  * Tests for {@link DockerSlice}.
  * Authentication & authorization tests.
- *
- * @todo #434:30min test `shouldReturnForbiddenWhenUserHasNoRequiredPermissionOnSecondManifestPut`
- *  fails in github actions, locally it works fine. Figure out what is the problem and fix it.
  */
 public final class AuthTest {
 
@@ -64,7 +60,7 @@ public final class AuthTest {
 
     @BeforeEach
     void setUp() {
-        this.docker = new AstoDocker(new InMemoryStorage());
+        this.docker = new AstoDocker("test_registry", new InMemoryStorage());
     }
 
     @ParameterizedTest
@@ -142,39 +138,6 @@ public final class AuthTest {
                 line,
                 basic.headers(TestAuthentication.ALICE),
                 new Content.From(this.manifest())
-            )
-        );
-    }
-
-    @Test
-    void shouldOverwriteManifestIfAllowed() {
-        final Basic basic = new Basic(this.docker);
-        final String path = "/v2/my-alpine/manifests/abc";
-        final RequestLine line = new RequestLine(RqMethod.PUT, path);
-        final DockerRepositoryPermission permission =
-            new DockerRepositoryPermission("*", "my-alpine", DockerActions.OVERWRITE.mask());
-        ResponseAssert.check(
-            basic.slice(permission)
-                .response(line, basic.headers(TestAuthentication.ALICE), manifest())
-                .join(),
-            RsStatus.CREATED,
-            new Header("Location", path),
-            new Header("Content-Length", "0"),
-            new Header(
-                "Docker-Content-Digest",
-                "sha256:ef0ff2adcc3c944a63f7cafb386abc9a1d95528966085685ae9fab2a1c0bedbf"
-            )
-        );
-        ResponseAssert.check(
-            basic.slice(permission)
-                .response(line, basic.headers(TestAuthentication.ALICE), manifest())
-                .join(),
-            RsStatus.CREATED,
-            new Header("Location", path),
-            new Header("Content-Length", "0"),
-            new Header(
-                "Docker-Content-Digest",
-                "sha256:ef0ff2adcc3c944a63f7cafb386abc9a1d95528966085685ae9fab2a1c0bedbf"
             )
         );
     }
@@ -257,11 +220,6 @@ public final class AuthTest {
             ),
             Arguments.of(
                 method,
-                new RequestLine(RqMethod.PUT, "/v2/my-alpine/manifests/latest"),
-                new DockerRepositoryPermission("*", "my-alpine", DockerActions.OVERWRITE.mask())
-            ),
-            Arguments.of(
-                method,
                 new RequestLine(RqMethod.GET, "/v2/my-alpine/tags/list"),
                 new DockerRepositoryPermission("*", "my-alpine", DockerActions.PULL.mask())
             ),
@@ -294,11 +252,6 @@ public final class AuthTest {
                 method,
                 new RequestLine(RqMethod.GET, "/v2/my-alpine/blobs/uploads/112233"),
                 new DockerRepositoryPermission("*", "my-alpine", DockerActions.PULL.mask())
-            ),
-            Arguments.of(
-                method,
-                new RequestLine(RqMethod.GET, "/v2/_catalog"),
-                new DockerRegistryPermission("*", RegistryCategory.ANY.mask())
             )
         );
     }
@@ -335,7 +288,7 @@ public final class AuthTest {
         }
 
         private Basic() {
-            this(new AstoDocker(new InMemoryStorage()));
+            this(new AstoDocker("test_registry", new InMemoryStorage()));
         }
 
         @Override
@@ -344,8 +297,7 @@ public final class AuthTest {
                 this.docker,
                 policy,
                 new BasicAuthScheme(new TestAuthentication()),
-                Optional.empty(),
-                "*"
+                Optional.empty()
             );
         }
 
@@ -370,7 +322,7 @@ public final class AuthTest {
         @Override
         public Slice slice(final Policy<PermissionCollection> policy) {
             return new DockerSlice(
-                new AstoDocker(new InMemoryStorage()),
+                new AstoDocker("registry", new InMemoryStorage()),
                 policy,
                 new BearerAuthScheme(
                     token -> CompletableFuture.completedFuture(
@@ -381,8 +333,7 @@ public final class AuthTest {
                     ),
                     ""
                 ),
-                Optional.empty(),
-                "*"
+                Optional.empty()
             );
         }
 

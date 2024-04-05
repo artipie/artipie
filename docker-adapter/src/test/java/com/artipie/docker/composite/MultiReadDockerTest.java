@@ -20,8 +20,6 @@ import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Tests for {@link MultiReadDocker}.
@@ -32,8 +30,8 @@ final class MultiReadDockerTest {
     void createsMultiReadRepo() {
         final MultiReadDocker docker = new MultiReadDocker(
             Arrays.asList(
-                new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().completedFuture()),
-                new AstoDocker(new InMemoryStorage())
+                new ProxyDocker("registry", (line, headers, body) -> ResponseBuilder.ok().completedFuture()),
+                new AstoDocker("registry", new InMemoryStorage())
             )
         );
         MatcherAssert.assertThat(
@@ -47,12 +45,8 @@ final class MultiReadDockerTest {
         final int limit = 3;
         MatcherAssert.assertThat(
             new MultiReadDocker(
-                Stream.of(
-                    "{\"repositories\":[\"one\",\"two\"]}",
-                    "{\"repositories\":[\"one\",\"three\",\"four\"]}"
-                ).map(
-                    json -> new FakeCatalogDocker(() -> new Content.From(json.getBytes()))
-                ).collect(Collectors.toList())
+                new FakeCatalogDocker(() -> new Content.From("{\"repositories\":[\"one\",\"two\"]}".getBytes())),
+                new FakeCatalogDocker(() -> new Content.From("{\"repositories\":[\"one\",\"three\",\"four\"]}".getBytes()))
             ).catalog(Pagination.from("four", limit))
                 .thenCompose(catalog -> catalog.json().asStringFuture())
                 .join(),

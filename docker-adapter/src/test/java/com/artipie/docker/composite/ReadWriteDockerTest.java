@@ -27,8 +27,8 @@ final class ReadWriteDockerTest {
     @Test
     void createsReadWriteRepo() {
         final ReadWriteDocker docker = new ReadWriteDocker(
-            new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().completedFuture()),
-            new AstoDocker(new InMemoryStorage())
+            new ProxyDocker("test_registry", (line, headers, body) -> ResponseBuilder.ok().completedFuture()),
+            new AstoDocker("test_registry", new InMemoryStorage())
         );
         MatcherAssert.assertThat(
             docker.repo("test"),
@@ -43,7 +43,7 @@ final class ReadWriteDockerTest {
         final FakeCatalogDocker fake = new FakeCatalogDocker(catalog);
         final ReadWriteDocker docker = new ReadWriteDocker(
             fake,
-            new AstoDocker(new InMemoryStorage())
+            new AstoDocker("test_registry", new InMemoryStorage())
         );
         final Catalog result = docker.catalog(Pagination.from("foo", limit)).join();
         MatcherAssert.assertThat(

@@ -40,6 +40,11 @@ public final class ReadWriteDocker implements Docker {
     }
 
     @Override
+    public String registryName() {
+        return read.registryName();
+    }
+
+    @Override
     public Repo repo(String name) {
         return new ReadWriteRepo(this.read.repo(name), this.write.repo(name));
     }

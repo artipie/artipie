@@ -75,6 +75,7 @@ class ProxyManifestsTest {
         cheaders = new AtomicReference<>();
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
         new ProxyDocker(
+            "test_registry",
             (line, headers, body) -> {
                 cline.set(line);
                 cheaders.set(headers);
@@ -105,6 +106,7 @@ class ProxyManifestsTest {
         Assertions.assertArrayEquals(
             bytes,
             new ProxyDocker(
+                "test_registry",
                 (line, headers, body) -> ResponseBuilder.ok().body(bytes).completedFuture()
             ).catalog(Pagination.empty()).thenCompose(
                 catalog -> catalog.json().asBytesFuture()
@@ -115,6 +117,7 @@ class ProxyManifestsTest {
     @Test
     void shouldFailReturnCatalogWhenRemoteRespondsWithNotOk() {
         final CompletionStage<Catalog> stage = new ProxyDocker(
+            "test_registry",
             (line, headers, body) -> ResponseBuilder.notFound().completedFuture()
         ).catalog(Pagination.empty());
         Assertions.assertThrows(

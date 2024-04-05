@@ -23,10 +23,9 @@ import java.util.stream.Collectors;
  * then image from repository coming first is returned.
  * Write operations are not supported.
  * Might be used to join multiple proxy Dockers into single repository.
- *
- * @since 0.3
  */
 public final class MultiReadDocker implements Docker {
+
 
     /**
      * Dockers for reading.
@@ -34,11 +33,9 @@ public final class MultiReadDocker implements Docker {
     private final List<Docker> dockers;
 
     /**
-     * Ctor.
-     *
      * @param dockers Dockers for reading.
      */
-    public MultiReadDocker(final Docker... dockers) {
+    public MultiReadDocker(Docker... dockers) {
         this(Arrays.asList(dockers));
     }
 
@@ -47,8 +44,13 @@ public final class MultiReadDocker implements Docker {
      *
      * @param dockers Dockers for reading.
      */
-    public MultiReadDocker(final List<Docker> dockers) {
+    public MultiReadDocker(List<Docker> dockers) {
         this.dockers = dockers;
+    }
+
+    @Override
+    public String registryName() {
+        return dockers.getFirst().registryName();
     }
 
     @Override

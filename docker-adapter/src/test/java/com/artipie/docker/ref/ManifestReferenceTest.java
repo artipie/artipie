@@ -81,7 +81,7 @@ public final class ManifestReferenceTest {
     @Test
     void stringFromDigestRef() {
         MatcherAssert.assertThat(
-            ManifestReference.from(new Digest.Sha256("0123")).reference(),
+            ManifestReference.from(new Digest.Sha256("0123")).digest(),
             Matchers.equalTo("sha256:0123")
         );
     }
@@ -90,7 +90,7 @@ public final class ManifestReferenceTest {
     void stringFromTagRef() {
         final String tag = "0.2";
         MatcherAssert.assertThat(
-            ManifestReference.fromTag(tag).reference(),
+            ManifestReference.fromTag(tag).digest(),
             Matchers.equalTo(tag)
         );
     }
@@ -99,7 +99,7 @@ public final class ManifestReferenceTest {
     void stringFromStringRef() {
         final String value = "whatever";
         MatcherAssert.assertThat(
-            ManifestReference.from(value).reference(),
+            ManifestReference.from(value).digest(),
             Matchers.equalTo(value)
         );
     }

@@ -113,6 +113,11 @@ class TagsSliceGetTest {
         }
 
         @Override
+        public String registryName() {
+            return "test_registry";
+        }
+
+        @Override
         public Repo repo(String name) {
             this.capture.set(name);
             return new Repo() {

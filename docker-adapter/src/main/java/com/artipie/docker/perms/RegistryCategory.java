@@ -18,11 +18,6 @@ import java.util.Set;
 public enum RegistryCategory implements Action {
 
     /**
-     * Base category, check {@link com.artipie.docker.http.BaseEntity}.
-     */
-    BASE("base", 0x4),
-
-    /**
      * Catalog category, check {@link CatalogSlice}.
      */
     CATALOG("catalog", 0x2),
@@ -30,7 +25,7 @@ public enum RegistryCategory implements Action {
     /**
      * Any category.
      */
-    ANY("*", 0x4 | 0x2);
+    ANY("*", 0x2);
 
     /**
      * The name of the category.

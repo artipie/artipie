@@ -14,9 +14,9 @@ import java.util.Arrays;
  * <p>Can be resolved by image tag or digest.
  *
  * @param link      The key for manifest blob link.
- * @param reference String representation.
+ * @param digest String representation.
  */
-public record ManifestReference(Key link, String reference) {
+public record ManifestReference(Key link, String digest) {
 
     /**
      * Creates a manifest reference from a Content Digest.

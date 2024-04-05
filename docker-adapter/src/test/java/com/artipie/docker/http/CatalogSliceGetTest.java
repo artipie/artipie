@@ -87,6 +87,11 @@ class CatalogSliceGetTest {
         }
 
         @Override
+        public String registryName() {
+            return "test_registry";
+        }
+
+        @Override
         public Repo repo(String name) {
             throw new UnsupportedOperationException();
         }

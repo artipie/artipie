@@ -38,7 +38,7 @@ final class DeleteUploadSliceTest {
 
     @BeforeEach
     void setUp() {
-        this.docker = new AstoDocker(new InMemoryStorage());
+        this.docker = new AstoDocker("registry", new InMemoryStorage());
         this.slice = new DockerSlice(this.docker);
     }
 

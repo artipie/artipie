@@ -59,11 +59,9 @@ public final class CheckedBlobSource implements BlobSource {
                 }
             )
         );
-        return storage
-            .exists(key)
+        return storage.exists(key)
             .thenCompose(
-                exists -> exists
-                    ? CompletableFuture.completedFuture(null)
+                exists -> exists ? CompletableFuture.completedFuture(null)
                     : storage.save(key, checked)
             );
     }

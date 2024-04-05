@@ -47,16 +47,16 @@ public final class CacheRepo implements Repo {
      * @param name Repository name.
      * @param origin Origin repository.
      * @param cache Cache repository.
-     * @param events Artifact events
-     * @param repoName Repository name
+     * @param events Artifact events.
+     * @param registryName Registry name.
      */
     public CacheRepo(String name, Repo origin, Repo cache,
-                     Optional<Queue<ArtifactEvent>> events, String repoName) {
+                     Optional<Queue<ArtifactEvent>> events, String registryName) {
         this.name = name;
         this.origin = origin;
         this.cache = cache;
         this.events = events;
-        this.repoName = repoName;
+        this.repoName = registryName;
     }
 
     @Override

@@ -5,6 +5,7 @@
 package com.artipie.docker.http.upload;
 
 import com.artipie.docker.Digest;
+import com.artipie.docker.http.PathPatterns;
 import com.artipie.docker.misc.ImageRepositoryName;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.http.rq.RequestLine;
@@ -12,7 +13,6 @@ import com.artipie.http.rq.RqParams;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @param name   Image repository name.
@@ -21,13 +21,8 @@ import java.util.regex.Pattern;
  */
 public record UploadRequest(String name, String uuid, RqParams params) {
 
-    /**
-     * RegEx pattern for path.
-     */
-    public static final Pattern PATH = Pattern.compile("^/v2/(?<name>.*)/blobs/uploads/(?<uuid>[^/]*).*$");
-
     public static UploadRequest from(RequestLine line) {
-        Matcher matcher = new RqByRegex(line, UploadSlice.PATH).path();
+        Matcher matcher = new RqByRegex(line, PathPatterns.UPLOADS).path();
         return new UploadRequest(
             ImageRepositoryName.validate(matcher.group("name")),
             matcher.group("uuid"),

@@ -37,21 +37,14 @@ final class AuthScopeSlice implements Slice {
     private final Policy<?> policy;
 
     /**
-     * Docker registry name.
-     */
-    private final String registryName;
-
-    /**
      * @param origin Origin slice.
      * @param auth Authentication scheme.
      * @param policy Access permissions.
-     * @param registryName Docker registry name.
      */
-    AuthScopeSlice(ScopeSlice origin, AuthScheme auth, Policy<?> policy, String registryName) {
+    AuthScopeSlice(ScopeSlice origin, AuthScheme auth, Policy<?> policy) {
         this.origin = origin;
         this.auth = auth;
         this.policy = policy;
-        this.registryName = registryName;
     }
 
     @Override
@@ -59,7 +52,7 @@ final class AuthScopeSlice implements Slice {
         return new AuthzSlice(
             this.origin,
             this.auth,
-            new OperationControl(this.policy, this.origin.permission(line, this.registryName))
+            new OperationControl(this.policy, this.origin.permission(line))
         ).response(line, headers, body);
     }
 }

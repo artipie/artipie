@@ -36,6 +36,11 @@ class TrimmedDockerTest {
      */
     private static final Docker FAKE = new Docker() {
         @Override
+        public String registryName() {
+            return "test";
+        }
+
+        @Override
         public Repo repo(String name) {
             return new FakeRepo(name);
         }

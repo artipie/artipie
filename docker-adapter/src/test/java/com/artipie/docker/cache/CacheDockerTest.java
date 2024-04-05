@@ -31,8 +31,8 @@ final class CacheDockerTest {
     @Test
     void createsCacheRepo() {
         final CacheDocker docker = new CacheDocker(
-            new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().completedFuture()),
-            new AstoDocker(new InMemoryStorage()), Optional.empty(), "*"
+            new ProxyDocker("registry", (line, headers, body) -> ResponseBuilder.ok().completedFuture()),
+            new AstoDocker("registry", new InMemoryStorage()), Optional.empty()
         );
         MatcherAssert.assertThat(
             docker.repo("test"),
@@ -46,7 +46,7 @@ final class CacheDockerTest {
         MatcherAssert.assertThat(
             new CacheDocker(
                 fake("{\"repositories\":[\"one\",\"three\",\"four\"]}"),
-                fake("{\"repositories\":[\"one\",\"two\"]}"), Optional.empty(), "*"
+                fake("{\"repositories\":[\"one\",\"two\"]}"), Optional.empty()
             ).catalog(Pagination.from("four", limit))
                 .thenCompose(catalog -> catalog.json().asStringFuture()).join(),
             new StringIsJson.Object(

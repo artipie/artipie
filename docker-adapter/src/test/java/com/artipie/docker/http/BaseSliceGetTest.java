@@ -21,13 +21,13 @@ import org.junit.jupiter.api.Test;
  * Tests for {@link DockerSlice}.
  * Base GET endpoint.
  */
-class BaseEntityGetTest {
+class BaseSliceGetTest {
 
     private DockerSlice slice;
 
     @BeforeEach
     void setUp() {
-        this.slice = new DockerSlice(new AstoDocker(new InMemoryStorage()));
+        this.slice = new DockerSlice(new AstoDocker("test_registry", new InMemoryStorage()));
     }
 
     @Test

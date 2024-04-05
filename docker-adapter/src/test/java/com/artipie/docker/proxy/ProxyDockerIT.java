@@ -37,7 +37,7 @@ final class ProxyDockerIT {
             new HttpClientSettings().setFollowRedirects(true)
         );
         this.client.start();
-        this.docker = new ProxyDocker(this.client.https("mcr.microsoft.com"));
+        this.docker = new ProxyDocker("test_registry", this.client.https("mcr.microsoft.com"));
     }
 
     @AfterEach

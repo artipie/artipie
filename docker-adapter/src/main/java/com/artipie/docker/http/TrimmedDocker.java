@@ -41,6 +41,11 @@ public final class TrimmedDocker implements Docker {
     }
 
     @Override
+    public String registryName() {
+        return origin.registryName();
+    }
+
+    @Override
     public Repo repo(String name) {
         return this.origin.repo(trim(name));
     }

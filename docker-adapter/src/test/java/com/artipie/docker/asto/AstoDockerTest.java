@@ -23,7 +23,7 @@ final class AstoDockerTest {
     @Test
     void createsAstoRepo() {
         MatcherAssert.assertThat(
-            new AstoDocker(new InMemoryStorage()).repo("repo1"),
+            new AstoDocker("test_registry", new InMemoryStorage()).repo("repo1"),
             Matchers.instanceOf(AstoRepo.class)
         );
     }
@@ -39,7 +39,7 @@ final class AstoDockerTest {
             new Key.From("repositories/test/foo/bar"),
             new Content.From("2".getBytes())
         ).join();
-        final Catalog catalog = new AstoDocker(storage)
+        final Catalog catalog = new AstoDocker("test_registry", storage)
             .catalog(Pagination.empty())
             .join();
         MatcherAssert.assertThat(

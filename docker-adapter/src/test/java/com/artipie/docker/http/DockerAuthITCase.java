@@ -42,11 +42,10 @@ final class DockerAuthITCase {
         final TestAuthentication.User user = TestAuthentication.ALICE;
         this.repo = new DockerRepository(
             new DockerSlice(
-                new AstoDocker(new InMemoryStorage()),
+                new AstoDocker("registry", new InMemoryStorage()),
                 new PolicyByUsername(user.name()),
                 new BasicAuthScheme(new TestAuthentication()),
-                Optional.empty(),
-                "*"
+                Optional.empty()
             )
         );
         this.repo.start();
