@@ -30,13 +30,16 @@ class DockerRegistryPermissionFactoryTest {
                             String.join(
                                 "\n",
                                 "docker-local:",
+                                "  - *",
+                                "www.boo.docker:",
+                                "  - base",
                                 "  - *"
                             )
                         ).readYamlMapping()
                     )
                 ).elements()
             ),
-            Matchers.hasSize(1)
+            Matchers.hasSize(2)
         );
     }
 
@@ -49,7 +52,8 @@ class DockerRegistryPermissionFactoryTest {
                         String.join(
                             "\n",
                             "my-docker:",
-                            "  - catalog"
+                            "  - catalog",
+                            "  - base"
                         )
                     ).readYamlMapping()
                 )
