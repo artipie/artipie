@@ -28,7 +28,7 @@ public interface Layers {
      * @param blob Blob.
      * @return Mounted blob.
      */
-    CompletableFuture<Blob> mount(Blob blob);
+    CompletableFuture<Void> mount(Blob blob);
 
     /**
      * Find layer by digest.

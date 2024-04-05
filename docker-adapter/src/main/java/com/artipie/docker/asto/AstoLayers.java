@@ -35,9 +35,12 @@ public final class AstoLayers implements Layers {
     }
 
     @Override
-    public CompletableFuture<Blob> mount(Blob blob) {
+    public CompletableFuture<Void> mount(Blob blob) {
         return blob.content()
-            .thenCompose(content -> blobs.put(new TrustedBlobSource(content, blob.digest())));
+            .thenCompose(content -> blobs.put(new TrustedBlobSource(content, blob.digest())))
+            .thenRun(() -> {
+                // No-op
+            });
     }
 
     @Override

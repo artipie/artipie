@@ -10,12 +10,13 @@ import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
 import com.artipie.docker.asto.BlobSource;
 import com.artipie.docker.asto.TrustedBlobSource;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Tests for {@link ReadWriteLayers}.
@@ -53,17 +54,12 @@ final class ReadWriteLayersTest {
         final Blob original = new FakeBlob();
         final Blob mounted = new FakeBlob();
         final CaptureMountLayers fake = new CaptureMountLayers(mounted);
-        final Blob result = new ReadWriteLayers(new CaptureGetLayers(), fake).mount(original)
-            .toCompletableFuture().join();
+        new ReadWriteLayers(new CaptureGetLayers(), fake)
+            .mount(original).join();
         MatcherAssert.assertThat(
             "Original blob is captured",
             fake.capturedBlob(),
-            new IsEqual<>(original)
-        );
-        MatcherAssert.assertThat(
-            "Mounted blob is returned",
-            result,
-            new IsEqual<>(mounted)
+            Matchers.is(original)
         );
     }
 
@@ -85,7 +81,7 @@ final class ReadWriteLayersTest {
         }
 
         @Override
-        public CompletableFuture<Blob> mount(final Blob blob) {
+        public CompletableFuture<Void> mount(final Blob blob) {
             throw new UnsupportedOperationException();
         }
 
@@ -119,7 +115,7 @@ final class ReadWriteLayersTest {
         }
 
         @Override
-        public CompletableFuture<Blob> mount(final Blob blob) {
+        public CompletableFuture<Void> mount(final Blob blob) {
             throw new UnsupportedOperationException();
         }
 
@@ -161,9 +157,9 @@ final class ReadWriteLayersTest {
         }
 
         @Override
-        public CompletableFuture<Blob> mount(final Blob pblob) {
+        public CompletableFuture<Void> mount(final Blob pblob) {
             this.cblob = pblob;
-            return CompletableFuture.completedFuture(this.rblob);
+            return CompletableFuture.completedFuture(null);
         }
 
         @Override

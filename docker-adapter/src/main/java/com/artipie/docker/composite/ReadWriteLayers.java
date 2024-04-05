@@ -45,7 +45,7 @@ public final class ReadWriteLayers implements Layers {
     }
 
     @Override
-    public CompletableFuture<Blob> mount(final Blob blob) {
+    public CompletableFuture<Void> mount(final Blob blob) {
         return this.write.mount(blob);
     }
 

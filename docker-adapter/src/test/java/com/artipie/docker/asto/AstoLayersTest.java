@@ -10,7 +10,7 @@ import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,30 +43,28 @@ final class AstoLayersTest {
     @Test
     void shouldAddLayer() {
         final byte[] data = "data".getBytes();
-        final Digest digest = this.layers.put(new TrustedBlobSource(data))
-            .toCompletableFuture().join().digest();
+        final Digest digest = this.layers.put(new TrustedBlobSource(data)).join().digest();
         final Optional<Blob> found = this.blobs.blob(digest).join();
-        MatcherAssert.assertThat(found.isPresent(), new IsEqual<>(true));
-        MatcherAssert.assertThat(bytes(found.orElseThrow()), new IsEqual<>(data));
+        MatcherAssert.assertThat(found.isPresent(), Matchers.is(true));
+        MatcherAssert.assertThat(bytes(found.orElseThrow()), Matchers.is(data));
     }
 
     @Test
     void shouldReadExistingLayer() {
         final byte[] data = "content".getBytes();
-        final Digest digest = this.blobs.put(new TrustedBlobSource(data))
-            .toCompletableFuture().join().digest();
-        final Optional<Blob> found = this.layers.get(digest).toCompletableFuture().join();
-        MatcherAssert.assertThat(found.isPresent(), new IsEqual<>(true));
-        MatcherAssert.assertThat(found.orElseThrow().digest(), new IsEqual<>(digest));
-        MatcherAssert.assertThat(bytes(found.get()), new IsEqual<>(data));
+        final Digest digest = this.blobs.put(new TrustedBlobSource(data)).join().digest();
+        final Optional<Blob> found = this.layers.get(digest).join();
+        MatcherAssert.assertThat(found.isPresent(), Matchers.is(true));
+        MatcherAssert.assertThat(found.orElseThrow().digest(), Matchers.is(digest));
+        MatcherAssert.assertThat(bytes(found.get()), Matchers.is(data));
     }
 
     @Test
     void shouldReadAbsentLayer() {
         final Optional<Blob> found = this.layers.get(
             new Digest.Sha256("0123456789012345678901234567890123456789012345678901234567890123")
-        ).toCompletableFuture().join();
-        MatcherAssert.assertThat(found.isPresent(), new IsEqual<>(false));
+        ).join();
+        MatcherAssert.assertThat(found.isPresent(), Matchers.is(false));
     }
 
     @Test
@@ -75,7 +73,7 @@ final class AstoLayersTest {
         final Digest digest = new Digest.Sha256(
             "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
         );
-        final Blob blob = this.layers.mount(
+        this.layers.mount(
             new Blob() {
                 @Override
                 public Digest digest() {
@@ -92,25 +90,15 @@ final class AstoLayersTest {
                     return CompletableFuture.completedFuture(new Content.From(data));
                 }
             }
-        ).toCompletableFuture().join();
-        MatcherAssert.assertThat(
-            "Mounted blob has expected digest",
-            blob.digest(),
-            new IsEqual<>(digest)
-        );
-        MatcherAssert.assertThat(
-            "Mounted blob has expected content",
-            bytes(blob),
-            new IsEqual<>(data)
-        );
+        ).join();
         MatcherAssert.assertThat(
             "Mounted blob is in storage",
             this.layers.get(digest).toCompletableFuture().join().isPresent(),
-            new IsEqual<>(true)
+            Matchers.is(true)
         );
     }
 
     private static byte[] bytes(final Blob blob) {
-        return blob.content().toCompletableFuture().join().asBytes();
+        return blob.content().join().asBytes();
     }
 }

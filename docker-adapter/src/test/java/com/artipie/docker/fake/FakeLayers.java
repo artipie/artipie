@@ -37,7 +37,7 @@ public final class FakeLayers implements Layers {
     }
 
     @Override
-    public CompletableFuture<Blob> mount(final Blob blob) {
+    public CompletableFuture<Void> mount(final Blob blob) {
         return this.layers.mount(blob);
     }
 

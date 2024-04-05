@@ -47,7 +47,7 @@ public final class CacheLayers implements Layers {
     }
 
     @Override
-    public CompletableFuture<Blob> mount(final Blob blob) {
+    public CompletableFuture<Void> mount(final Blob blob) {
         throw new UnsupportedOperationException();
     }
 

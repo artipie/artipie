@@ -57,7 +57,7 @@ public class PostUploadSlice extends UploadSlice {
                     src -> this.docker.repo(target)
                         .layers()
                         .mount(src)
-                        .thenCompose(blob -> createdResponse(target, blob.digest()))
+                        .thenCompose(blob -> createdResponse(target, digest))
                 ).orElseGet(
                     () -> this.startUpload(target)
                 )
