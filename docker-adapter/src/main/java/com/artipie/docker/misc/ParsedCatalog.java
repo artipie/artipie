@@ -12,7 +12,6 @@ import javax.json.JsonString;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 /**
  * Parsed {@link Catalog} that is capable of extracting repository names list
