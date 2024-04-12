@@ -12,6 +12,7 @@ import com.artipie.http.rq.RequestLine;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 /**
  * Rule-based route path.
@@ -21,6 +22,13 @@ import java.util.concurrent.CompletableFuture;
  * underlying {@link Slice}.
  */
 public final class RtRulePath implements RtPath {
+
+    public static RtPath route(RtRule method, Pattern pathPattern, Slice action) {
+        return new RtRulePath(
+            new RtRule.All(new RtRule.ByPath(pathPattern), method),
+            action
+        );
+    }
 
     /**
      * Routing rule.

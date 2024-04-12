@@ -10,8 +10,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -41,7 +40,7 @@ public final class HexSlice extends Slice.Wrap {
         super(new SliceRoute(
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET),
+                        MethodRule.GET,
                         new RtRule.Any(
                             new RtRule.ByPath(DownloadSlice.PACKAGES_PTRN),
                             new RtRule.ByPath(DownloadSlice.TARBALLS_PTRN)
@@ -57,7 +56,7 @@ public final class HexSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET),
+                        MethodRule.GET,
                         new RtRule.ByPath(UserSlice.USERS)
                     ),
                     new BasicAuthzSlice(
@@ -70,7 +69,7 @@ public final class HexSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.POST),
+                        MethodRule.POST,
                         new RtRule.ByPath(UploadSlice.PUBLISH)
                     ),
                     new BasicAuthzSlice(
@@ -83,7 +82,7 @@ public final class HexSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.POST),
+                        MethodRule.POST,
                         new RtRule.ByPath(DocsSlice.DOCS_PTRN)
                     ),
                     new BasicAuthzSlice(

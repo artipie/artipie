@@ -10,8 +10,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -66,7 +65,7 @@ public final class RpmSlice extends Slice.Wrap {
         super(
             new SliceRoute(
                 new RtRulePath(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new BasicAuthzSlice(
                         new SliceDownload(storage),
                         auth,
@@ -76,7 +75,7 @@ public final class RpmSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    new ByMethodsRule(RqMethod.PUT),
+                    MethodRule.PUT,
                     new BasicAuthzSlice(
                         new RpmUpload(storage, config, events),
                         auth,
@@ -86,7 +85,7 @@ public final class RpmSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    new ByMethodsRule(RqMethod.DELETE),
+                    MethodRule.DELETE,
                     new BasicAuthzSlice(
                         new RpmRemove(storage, config, events),
                         auth,

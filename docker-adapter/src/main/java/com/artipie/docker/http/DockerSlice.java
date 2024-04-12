@@ -19,9 +19,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthScheme;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
-import com.artipie.http.rt.RtRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.scheduling.ArtifactEvent;
@@ -75,98 +73,44 @@ public final class DockerSlice extends Slice.Wrap {
         super(
             new ErrorHandlingSlice(
                 new SliceRoute(
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.BASE),
-                            ByMethodsRule.Standard.GET
-                        ),
+                    RtRulePath.route(MethodRule.GET, PathPatterns.BASE,
                         auth(new BaseSlice(docker), policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.MANIFESTS),
-                            new ByMethodsRule(RqMethod.HEAD)
-                        ),
+                    RtRulePath.route(MethodRule.HEAD, PathPatterns.MANIFESTS,
                         auth(new HeadManifestSlice(docker), policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.MANIFESTS),
-                            ByMethodsRule.Standard.GET
-                        ),
+                    RtRulePath.route(MethodRule.GET, PathPatterns.MANIFESTS,
                         auth(new GetManifestSlice(docker), policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.MANIFESTS),
-                            ByMethodsRule.Standard.PUT
-                        ),
+                    RtRulePath.route(MethodRule.PUT, PathPatterns.MANIFESTS,
                         auth(new PushManifestSlice(docker, events.orElse(null)),
                             policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.TAGS),
-                            ByMethodsRule.Standard.GET
-                        ),
+                    RtRulePath.route(MethodRule.GET, PathPatterns.TAGS,
                         auth(new TagsSlice(docker), policy, auth)
                     ),
-
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.BLOBS),
-                            new ByMethodsRule(RqMethod.HEAD)
-                        ),
+                    RtRulePath.route(MethodRule.HEAD, PathPatterns.BLOBS,
                         auth(new HeadBlobsSlice(docker), policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.BLOBS),
-                            ByMethodsRule.Standard.GET
-                        ),
+                    RtRulePath.route(MethodRule.GET, PathPatterns.BLOBS,
                         auth(new GetBlobsSlice(docker), policy, auth)
                     ),
-
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.UPLOADS),
-                            ByMethodsRule.Standard.POST
-                        ),
+                    RtRulePath.route(MethodRule.POST, PathPatterns.UPLOADS,
                         auth(new PostUploadSlice(docker), policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.UPLOADS),
-                            new ByMethodsRule(RqMethod.PATCH)
-                        ),
+                    RtRulePath.route(MethodRule.PATCH, PathPatterns.UPLOADS,
                         auth(new PatchUploadSlice(docker), policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.UPLOADS),
-                            ByMethodsRule.Standard.PUT
-                        ),
+                    RtRulePath.route(MethodRule.PUT, PathPatterns.UPLOADS,
                         auth(new PutUploadSlice(docker), policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.UPLOADS),
-                            ByMethodsRule.Standard.GET
-                        ),
+                    RtRulePath.route(MethodRule.GET, PathPatterns.UPLOADS,
                         auth(new GetUploadSlice(docker), policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.UPLOADS),
-                            ByMethodsRule.Standard.DELETE
-                        ),
+                    RtRulePath.route(MethodRule.DELETE, PathPatterns.UPLOADS,
                         auth(new DeleteUploadSlice(docker), policy, auth)
                     ),
-                    new RtRulePath(
-                        new RtRule.All(
-                            new RtRule.ByPath(PathPatterns.CATALOG),
-                            ByMethodsRule.Standard.GET
-                        ),
+                    RtRulePath.route(MethodRule.GET, PathPatterns.CATALOG,
                         auth(new CatalogSlice(docker), policy, auth)
                     )
                 )

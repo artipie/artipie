@@ -10,8 +10,7 @@ import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -47,7 +46,7 @@ public final class NpmProxySlice implements Slice {
         this.route = new SliceRoute(
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new RtRule.ByPath(ppath.pattern())
                 ),
                 new LoggingSlice(
@@ -56,7 +55,7 @@ public final class NpmProxySlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new RtRule.ByPath(apath.pattern())
                 ),
                 new LoggingSlice(

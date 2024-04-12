@@ -7,7 +7,6 @@ package com.artipie.http.rt;
 import com.artipie.http.Headers;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqHeaders;
-import com.artipie.http.rq.RqMethod;
 
 import java.util.Arrays;
 import java.util.regex.Pattern;
@@ -137,25 +136,7 @@ public interface RtRule {
     }
 
     /**
-     * Route by method.
-     * @since 0.5
-     * @deprecated Use {@link ByMethodsRule} instead.
-     */
-    @Deprecated
-    final class ByMethod extends Wrap {
-
-        /**
-         * Route by method.
-         * @param method Method name
-         */
-        public ByMethod(final RqMethod method) {
-            super(new ByMethodsRule(method));
-        }
-    }
-
-    /**
      * Route by path.
-     * @since 0.5
      */
     final class ByPath implements RtRule {
 

@@ -9,15 +9,14 @@ import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.BearerAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.auth.TokenAuthentication;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -107,7 +106,7 @@ public final class NpmSlice implements Slice {
         this.route = new SliceRoute(
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new RtRule.ByPath("/npm")
                 ),
                 new BearerAuthzSlice(
@@ -120,7 +119,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.PUT),
+                    MethodRule.PUT,
                     new RtRule.ByPath(AddDistTagsSlice.PTRN)
                 ),
                 new BearerAuthzSlice(
@@ -133,7 +132,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.DELETE),
+                    MethodRule.DELETE,
                     new RtRule.ByPath(AddDistTagsSlice.PTRN)
                 ),
                 new BearerAuthzSlice(
@@ -146,7 +145,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.PUT),
+                    MethodRule.PUT,
                     new RtRule.Any(
                         new RtRule.ByHeader(NpmSlice.NPM_COMMAND, CliPublish.HEADER),
                         new RtRule.ByHeader(NpmSlice.REFERER, CliPublish.HEADER)
@@ -162,7 +161,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.PUT),
+                    MethodRule.PUT,
                     new RtRule.Any(
                         new RtRule.ByHeader(NpmSlice.NPM_COMMAND, DeprecateSlice.HEADER),
                         new RtRule.ByHeader(NpmSlice.REFERER, DeprecateSlice.HEADER)
@@ -178,7 +177,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.PUT),
+                    MethodRule.PUT,
                     new RtRule.Any(
                         new RtRule.ByHeader(NpmSlice.NPM_COMMAND, UnpublishPutSlice.HEADER),
                         new RtRule.ByHeader(NpmSlice.REFERER, UnpublishPutSlice.HEADER)
@@ -194,7 +193,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.PUT),
+                    MethodRule.PUT,
                     new RtRule.ByPath(CurlPublish.PTRN)
                 ),
                 new BearerAuthzSlice(
@@ -207,7 +206,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new RtRule.ByPath(".*/dist-tags$")
                 ),
                 new BearerAuthzSlice(
@@ -220,7 +219,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new RtRule.ByPath(".*(?<!\\.tgz)$")
                 ),
                 new BearerAuthzSlice(
@@ -233,7 +232,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new RtRule.ByPath(".*\\.tgz$")
                 ),
                 new BearerAuthzSlice(
@@ -246,7 +245,7 @@ public final class NpmSlice implements Slice {
             ),
             new RtRulePath(
                 new RtRule.All(
-                    new ByMethodsRule(RqMethod.DELETE),
+                    MethodRule.DELETE,
                     new RtRule.ByPath(UnpublishForceSlice.PTRN)
                 ),
                 new BearerAuthzSlice(

@@ -10,6 +10,10 @@ import com.artipie.docker.misc.ImageRepositoryName;
 import com.artipie.docker.misc.RqByRegex;
 import com.artipie.http.rq.RequestLine;
 
+/**
+ * @param name The name of the image.
+ * @param reference The reference may include a tag or digest.
+ */
 public record ManifestRequest(String name, ManifestReference reference) {
 
     public static ManifestRequest from(RequestLine line) {

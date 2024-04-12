@@ -6,14 +6,13 @@ package com.artipie.pypi.http;
 
 import com.artipie.asto.Storage;
 import com.artipie.asto.cache.FromStorageCache;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.UriClientSlice;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -61,7 +60,7 @@ public final class PyProxySlice extends Slice.Wrap {
         super(
             new SliceRoute(
                 new RtRulePath(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new ProxySlice(
                         new AuthClientSlice(new UriClientSlice(clients, remote), auth),
                         new FromStorageCache(cache), events, rname

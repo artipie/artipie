@@ -10,8 +10,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -78,8 +77,7 @@ public final class MavenSlice extends Slice.Wrap {
             new SliceRoute(
                 new RtRulePath(
                     new RtRule.Any(
-                        new ByMethodsRule(RqMethod.GET),
-                        new ByMethodsRule(RqMethod.HEAD)
+                        MethodRule.GET, MethodRule.HEAD
                     ),
                     new BasicAuthzSlice(
                         new LocalMavenSlice(storage),
@@ -91,7 +89,7 @@ public final class MavenSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.PUT),
+                        MethodRule.PUT,
                         new RtRule.ByPath(".*SNAPSHOT.*")
                     ),
                     new BasicAuthzSlice(
@@ -104,7 +102,7 @@ public final class MavenSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.PUT),
+                        MethodRule.PUT,
                         new RtRule.ByPath(PutMetadataSlice.PTN_META)
                     ),
                     new BasicAuthzSlice(
@@ -117,7 +115,7 @@ public final class MavenSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.PUT),
+                        MethodRule.PUT,
                         new RtRule.ByPath(PutMetadataChecksumSlice.PTN)
                     ),
                     new BasicAuthzSlice(
@@ -134,7 +132,7 @@ public final class MavenSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    new ByMethodsRule(RqMethod.PUT),
+                    MethodRule.PUT,
                     new BasicAuthzSlice(
                         new UploadSlice(storage),
                         users,
