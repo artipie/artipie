@@ -1,6 +1,5 @@
 FROM openjdk:21-oracle
 ARG JAR_FILE
-ENV JVM_OPTS=""
 
 LABEL description="Artipie binary repository management tool"
 LABEL maintainer="g4s8.public@gmail.com"
@@ -15,8 +14,10 @@ USER 2021:2020
 COPY target/dependency  /usr/lib/artipie/lib
 COPY target/${JAR_FILE} /usr/lib/artipie/artipie.jar
 
+RUN timeout 10s java -XX:ArchiveClassesAtExit=/usr/lib/artipie/artipie-d.jsa $JVM_ARGS --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -cp /usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/* com.artipie.VertxMain --config-file=/etc/artipie/artipie.yml --port=8080 --api-port=8086 || :
+
 VOLUME /var/artipie /etc/artipie
 WORKDIR /var/artipie
-EXPOSE 8080 8086
-CMD [ "sh", "-c", "java $JVM_ARGS --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -cp /usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/* com.artipie.VertxMain --config-file=/etc/artipie/artipie.yml --port=8080 --api-port=8086" ]
 
+EXPOSE 8080 8086
+CMD [ "sh", "-c", "java -XX:SharedArchiveFile=/usr/lib/artipie/artipie-d.jsa $JVM_ARGS --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -cp /usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/* com.artipie.VertxMain --config-file=/etc/artipie/artipie.yml --port=8080 --api-port=8086" ]
