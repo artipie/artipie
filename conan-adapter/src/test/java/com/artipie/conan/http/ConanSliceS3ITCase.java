@@ -2,11 +2,15 @@
  * The MIT License (MIT) Copyright (c) 2020-2023 artipie.com
  * https://github.com/artipie/artipie/blob/master/LICENSE.txt
  */
-package  com.artipie.conan.http;
+package com.artipie.conan.http;
 
+import com.adobe.testing.s3mock.junit5.S3MockExtension;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
-import com.artipie.asto.memory.InMemoryStorage;
+import com.artipie.asto.factory.Config;
+import com.artipie.asto.factory.StoragesLoader;
 import com.artipie.asto.test.TestResource;
 import com.artipie.conan.ItemTokenizer;
 import com.artipie.http.auth.Authentication;
@@ -14,19 +18,22 @@ import com.artipie.http.slice.LoggingSlice;
 import com.artipie.security.policy.PolicyByUsername;
 import com.artipie.vertx.VertxSliceServer;
 import io.vertx.core.Vertx;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.Testcontainers;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.images.builder.Transferable;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 /**
  * Tests for {@link ConanSlice}.
@@ -34,7 +41,12 @@ import org.testcontainers.images.builder.Transferable;
  * @since 0.1
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
-class ConanSliceITCase {
+class ConanSliceS3ITCase {
+
+    @RegisterExtension
+    static final S3MockExtension MOCK = S3MockExtension.builder()
+        .withSecureConnection(false)
+        .build();
 
     /**
      * Artipie conan username for basic auth.
@@ -82,6 +94,11 @@ class ConanSliceITCase {
     private static ImageFromDockerfile base;
 
     /**
+     * Bucket to use in tests.
+     */
+    private String bucket;
+
+    /**
      * Artipie Storage instance for tests.
      */
     private Storage storage;
@@ -97,7 +114,9 @@ class ConanSliceITCase {
     private GenericContainer<?> cntn;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp(final AmazonS3 client) throws Exception {
+        this.bucket = UUID.randomUUID().toString();
+        client.createBucket(this.bucket);
         this.start();
     }
 
@@ -171,8 +190,8 @@ class ConanSliceITCase {
 
     @Test
     void conanDownloadPkg() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult result = this.cntn.execInContainer(
@@ -185,8 +204,8 @@ class ConanSliceITCase {
 
     @Test
     void conanDownloadPkgEnvAuthCheck() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult user = this.cntn.execInContainer(
@@ -197,7 +216,7 @@ class ConanSliceITCase {
                 "bash", "-c",
                     String.format(
                     "CONAN_LOGIN_USERNAME=%s CONAN_PASSWORD=%s conan download -r conan-test zlib/1.2.11@",
-                    ConanSliceITCase.SRV_USERNAME, ConanSliceITCase.SRV_PASSWORD
+                    ConanSliceS3ITCase.SRV_USERNAME, ConanSliceS3ITCase.SRV_PASSWORD
                 )
             );
         MatcherAssert.assertThat(
@@ -210,18 +229,18 @@ class ConanSliceITCase {
 
     @Test
     void conanDownloadPkgEnvAuthFail() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult user = this.cntn.execInContainer(
             "conan", "user", "-c"
         );
-        final String login = ConanSliceITCase.SRV_USERNAME.substring(
-            0, ConanSliceITCase.SRV_USERNAME.length() - 1
+        final String login = ConanSliceS3ITCase.SRV_USERNAME.substring(
+            0, ConanSliceS3ITCase.SRV_USERNAME.length() - 1
         );
-        final String password = ConanSliceITCase.SRV_PASSWORD.substring(
-            0, ConanSliceITCase.SRV_PASSWORD.length() - 1
+        final String password = ConanSliceS3ITCase.SRV_PASSWORD.substring(
+            0, ConanSliceS3ITCase.SRV_PASSWORD.length() - 1
         );
         final Container.ExecResult result = this.cntn
             .execInContainer(
@@ -241,22 +260,22 @@ class ConanSliceITCase {
 
     @Test
     void conanDownloadPkgEnvInvalidLogin() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult user = this.cntn.execInContainer(
             "conan", "user", "-c"
         );
-        final String login = ConanSliceITCase.SRV_USERNAME.substring(
-            0, ConanSliceITCase.SRV_USERNAME.length() - 1
+        final String login = ConanSliceS3ITCase.SRV_USERNAME.substring(
+            0, ConanSliceS3ITCase.SRV_USERNAME.length() - 1
         );
         final Container.ExecResult result = this.cntn
             .execInContainer(
                 "bash", "-c",
                     String.format(
                     "CONAN_LOGIN_USERNAME=%s CONAN_PASSWORD=%s conan download -r conan-test zlib/1.2.11@",
-                    login, ConanSliceITCase.SRV_PASSWORD
+                    login, ConanSliceS3ITCase.SRV_PASSWORD
                 )
             );
         MatcherAssert.assertThat(
@@ -269,22 +288,22 @@ class ConanSliceITCase {
 
     @Test
     void conanDownloadPkgEnvInvalidPassword() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult user = this.cntn.execInContainer(
             "conan", "user", "-c"
         );
-        final String password = ConanSliceITCase.SRV_PASSWORD.substring(
-            0, ConanSliceITCase.SRV_PASSWORD.length() - 1
+        final String password = ConanSliceS3ITCase.SRV_PASSWORD.substring(
+            0, ConanSliceS3ITCase.SRV_PASSWORD.length() - 1
         );
         final Container.ExecResult result = this.cntn
             .execInContainer(
                 "bash", "-c",
                     String.format(
                     "CONAN_LOGIN_USERNAME=%s CONAN_PASSWORD=%s conan download -r conan-test zlib/1.2.11@",
-                    ConanSliceITCase.SRV_USERNAME, password
+                    ConanSliceS3ITCase.SRV_USERNAME, password
                 )
             );
         MatcherAssert.assertThat(
@@ -297,8 +316,8 @@ class ConanSliceITCase {
 
     @Test
     void conanDownloadPkgAsAnonFail() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult user = this.cntn.execInContainer(
@@ -322,8 +341,8 @@ class ConanSliceITCase {
 
     @Test
     void conanDownloadWrongPkgName() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult result = this.cntn.execInContainer(
@@ -336,8 +355,8 @@ class ConanSliceITCase {
 
     @Test
     void conanDownloadWrongPkgVersion() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult result = this.cntn.execInContainer(
@@ -350,8 +369,8 @@ class ConanSliceITCase {
 
     @Test
     void conanSearchPkg() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult result = this.cntn.execInContainer(
@@ -364,8 +383,8 @@ class ConanSliceITCase {
 
     @Test
     void conanSearchWrongPkgVersion() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult result = this.cntn.execInContainer(
@@ -380,14 +399,13 @@ class ConanSliceITCase {
     void conanInstallRecipe() throws IOException, InterruptedException {
         final String arch = this.cntn.execInContainer("uname", "-m").getStdout();
         Assumptions.assumeTrue(arch.startsWith("x86_64"));
-        new TestResource(ConanSliceITCase.SRV_PREFIX).addFilesTo(this.storage, Key.ROOT);
+        new TestResource(ConanSliceS3ITCase.SRV_PREFIX).addFilesTo(this.storage, Key.ROOT);
         this.cntn.copyFileToContainer(
             Transferable.of(
                 Files.readAllBytes(Paths.get("src/test/resources/conan-test/conanfile.txt"))
             ),
             "/w/conanfile.txt"
         );
-        this.cntn.execInContainer("rm -rf /root/.conan/data".split(" "));
         final Container.ExecResult result = this.cntn.execInContainer("conan", "install", ".");
         MatcherAssert.assertThat(
             "conan install must succeed", result.getExitCode() == 0
@@ -396,8 +414,8 @@ class ConanSliceITCase {
 
     @Test
     void testPackageUpload() throws IOException, InterruptedException {
-        for (final String file : ConanSliceITCase.CONAN_TEST_PKG) {
-            new TestResource(String.join("/", ConanSliceITCase.SRV_PREFIX, file))
+        for (final String file : ConanSliceS3ITCase.CONAN_TEST_PKG) {
+            new TestResource(String.join("/", ConanSliceS3ITCase.SRV_PREFIX, file))
                 .saveTo(this.storage, new Key.From(file));
         }
         final Container.ExecResult install = this.cntn.execInContainer(
@@ -459,20 +477,38 @@ class ConanSliceITCase {
      * @throws Exception On error
      */
     private void start() throws Exception {
-        this.storage = new InMemoryStorage();
+        this.storage = StoragesLoader.STORAGES
+            .newObject(
+                "s3",
+                new Config.YamlStorageConfig(
+                    Yaml.createYamlMappingBuilder()
+                        .add("region", "us-east-1")
+                        .add("bucket", this.bucket)
+                        .add("endpoint", String.format("http://localhost:%d", MOCK.getHttpPort()))
+                        .add(
+                            "credentials",
+                            Yaml.createYamlMappingBuilder()
+                                .add("type", "basic")
+                                .add("accessKeyId", "foo")
+                                .add("secretAccessKey", "bar")
+                                .build()
+                        )
+                        .build()
+                )
+            );
         this.server = new VertxSliceServer(
             new LoggingSlice(
                 new ConanSlice(
                     this.storage,
-                    new PolicyByUsername(ConanSliceITCase.SRV_USERNAME),
+                    new PolicyByUsername(ConanSliceS3ITCase.SRV_USERNAME),
                     new Authentication.Single(
-                        ConanSliceITCase.SRV_USERNAME, ConanSliceITCase.SRV_PASSWORD
+                        ConanSliceS3ITCase.SRV_USERNAME, ConanSliceS3ITCase.SRV_PASSWORD
                     ),
-                    new ConanSlice.FakeAuthTokens(ConanSliceITCase.TOKEN, ConanSliceITCase.SRV_USERNAME),
+                    new ConanSlice.FakeAuthTokens(ConanSliceS3ITCase.TOKEN, ConanSliceS3ITCase.SRV_USERNAME),
                     new ItemTokenizer(Vertx.vertx()),
                     "test"
             )),
-            ConanSliceITCase.CONAN_PORT
+            ConanSliceS3ITCase.CONAN_PORT
         );
         final int port = this.server.start();
         Testcontainers.exposeHostPorts(port);
@@ -485,7 +521,7 @@ class ConanSliceITCase {
         this.cntn.execInContainer("conan remote disable conan-center".split(" "));
         this.cntn.execInContainer("bash", "-c", "pwd;ls -lah;env>>/tmp/conan_trace.log");
         this.cntn.execInContainer(
-            "conan", "user", "-r", "conan-test", ConanSliceITCase.SRV_USERNAME, "-p", ConanSliceITCase.SRV_PASSWORD
+            "conan", "user", "-r", "conan-test", ConanSliceS3ITCase.SRV_USERNAME, "-p", ConanSliceS3ITCase.SRV_PASSWORD
         );
         this.cntn.execInContainer("bash", "-c", "echo 'STARTED'>>/tmp/conan_trace.log");
     }

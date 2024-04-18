@@ -10,6 +10,7 @@ import com.artipie.test.TestDeployment;
 import java.io.IOException;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -49,6 +50,11 @@ public final class ConanITCase {
     };
 
     /**
+     * Conan client test container.
+     */
+    private TestDeployment.ClientContainer client;
+
+    /**
      * Test deployments.
      */
     @RegisterExtension
@@ -57,8 +63,19 @@ public final class ConanITCase {
             .withUser("security/users/alice.yaml", "alice")
             .withRepoConfig("conan/conan.yml", "my-conan")
             .withExposedPorts(9301),
-        ConanITCase::prepareClientContainer
+        () -> {
+            this.client = ConanITCase.prepareClientContainer();
+            return this.client;
+        }
+
     );
+
+    @BeforeEach
+    void init() throws IOException, InterruptedException {
+        this.client.execInContainer(
+            "conan remote add conan-test http://artipie:9301 False --force".split(" ")
+        );
+    }
 
     @Test
     public void incorrectPortFailTest() throws IOException {
@@ -68,6 +85,10 @@ public final class ConanITCase {
                 String.join("/", ConanITCase.SRV_REPO_PREFIX, file)
             );
         }
+        this.containers.assertExec(
+            "rm cache failed", new ContainerResultMatcher(),
+            "rm -rf /root/.conan/data".split(" ")
+        );
         this.containers.assertExec(
             "Conan remote add failed", new ContainerResultMatcher(),
             "conan remote add -f conan-test http://artipie:9300 False".split(" ")
@@ -89,7 +110,7 @@ public final class ConanITCase {
             );
         }
         this.containers.assertExec(
-            "Conan remote add failed", new ContainerResultMatcher(
+            "Conan install must fail", new ContainerResultMatcher(
                 new IsNot<>(new IsEqual<>(ContainerResultMatcher.SUCCESS))
             ),
             "conan install zlib/1.2.11@ -r conan-test -b -pr:b=default".split(" ")
@@ -125,7 +146,11 @@ public final class ConanITCase {
     @Test
     public void uploadFailtest() throws IOException {
         this.containers.assertExec(
-            "Conan upload failed", new ContainerResultMatcher(
+            "rm cache failed", new ContainerResultMatcher(),
+            "rm -rf /root/.conan/data".split(" ")
+        );
+        this.containers.assertExec(
+            "Conan upload must fail", new ContainerResultMatcher(
                 new IsNot<>(new IsEqual<>(ContainerResultMatcher.SUCCESS))
             ),
             "conan upload zlib/1.2.13@ -r conan-test --all".split(" ")
@@ -159,26 +184,7 @@ public final class ConanITCase {
      */
     @SuppressWarnings("PMD.LineLengthCheck")
     private static TestDeployment.ClientContainer prepareClientContainer() {
-        final ImageFromDockerfile image = new ImageFromDockerfile("local/artipie-main/conan_itcase", false).withDockerfileFromBuilder(
-            builder -> builder
-                .from("ubuntu:22.04")
-                .env("CONAN_TRACE_FILE", "/tmp/conan_trace.log")
-                .env("DEBIAN_FRONTEND", "noninteractive")
-                .env("CONAN_VERBOSE_TRACEBACK", "1")
-                .env("CONAN_NON_INTERACTIVE", "1")
-                .env("no_proxy", "host.docker.internal,host.testcontainers.internal,localhost,127.0.0.1")
-                .workDir("/home")
-                .run("apt clean -y && apt update -y -o APT::Update::Error-Mode=any")
-                .run("apt install --no-install-recommends -y python3-pip curl g++ git make cmake")
-                .run("pip3 install -U pip setuptools")
-                .run("pip3 install -U conan==1.60.2")
-                .run("conan profile new --detect default")
-                .run("conan profile update settings.compiler.libcxx=libstdc++11 default")
-                .run("conan remote add conancenter https://center.conan.io False --force")
-                .run("conan remote add conan-center https://conan.bintray.com False --force")
-                .run("conan remote add conan-test http://artipie:9301 False --force")
-        );
-        return new TestDeployment.ClientContainer(image)
+        return new TestDeployment.ClientContainer("artipie/conan-tests:1.0")
             .withCommand("tail", "-f", "/dev/null")
             .withReuse(true);
     }
