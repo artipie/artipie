@@ -236,7 +236,7 @@ public final class MavenITCase {
         );
         this.port = this.server.start();
         Testcontainers.exposeHostPorts(this.port);
-        this.cntn = new GenericContainer<>("maven:3.6.3-jdk-11")
+        this.cntn = new GenericContainer<>("artipie/maven-tests:1.0")
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
             .withFileSystemBind(this.tmp.toString(), "/home");

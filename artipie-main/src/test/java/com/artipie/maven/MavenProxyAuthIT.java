@@ -44,7 +44,7 @@ final class MavenProxyAuthIT {
                     .withRepoConfig("maven/maven-proxy-artipie.yml", "my-maven-proxy")
             )
         ),
-        () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
+        () -> new TestDeployment.ClientContainer("artipie/maven-tests:1.0")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
                 "maven/maven-settings-proxy.xml", "/w/settings.xml", BindMode.READ_ONLY
