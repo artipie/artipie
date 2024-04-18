@@ -17,7 +17,6 @@ import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
  * Debian integration test.
@@ -55,31 +54,7 @@ public final class DebianS3ITCase {
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withRepoConfig("debian/debian-s3.yml", "my-debian")
             .withExposedPorts(DebianS3ITCase.SRV_PORT),
-        () -> new TestDeployment.ClientContainer(
-            new ImageFromDockerfile(
-                "local/artipie-main/debian_s3_itcase", false
-            ).withDockerfileFromBuilder(
-                builder -> builder
-                    .from("debian:10.8-slim")
-                    .env("DEBIAN_FRONTEND", "noninteractive")
-                    .run("apt update -y -o APT::Update::Error-Mode=any")
-                    .run("apt dist-upgrade -y && apt install -y curl xz-utils netcat")
-                    .run("apt autoremove -y && apt clean -y && rm -rfv /var/lib/apt/lists")
-                    .copy("minio-bin-20231120.txz", "/w/minio-bin-20231120.txz")
-                    .run("tar xf /w/minio-bin-20231120.txz -C /root")
-                    .run(
-                        String.join(
-                            ";",
-                            "sh -c '/root/bin/minio server /var/minio > /tmp/minio.log 2>&1 &'",
-                            "timeout 30 sh -c 'until nc -z localhost 9000; do sleep 0.1; done'",
-                            "/root/bin/mc alias set srv1 http://localhost:9000 minioadmin minioadmin 2>&1 |tee /tmp/mc.log",
-                            "/root/bin/mc mb srv1/buck1 --region s3test 2>&1|tee -a /tmp/mc.log",
-                            "/root/bin/mc anonymous set public srv1/buck1 2>&1|tee -a /tmp/mc.log"
-                        )
-                    )
-                    .run("rm -fv /w/minio-bin-20231120.txz /tmp/*.log")
-            ).withFileFromClasspath("minio-bin-20231120.txz", "minio-bin-20231120.txz")
-        )
+        () -> new TestDeployment.ClientContainer("artipie/deb-tests:1.0")
         .withWorkingDirectory("/w")
         .withNetworkAliases("minioc")
         .withExposedPorts(DebianS3ITCase.S3_PORT)

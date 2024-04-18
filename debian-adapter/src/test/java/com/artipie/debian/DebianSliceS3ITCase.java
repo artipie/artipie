@@ -153,7 +153,7 @@ public final class DebianSliceS3ITCase {
                 "deb [trusted=yes] http://host.testcontainers.internal:%d/ artipie main", this.port
             ).getBytes()
         );
-        this.cntn = new GenericContainer<>("debian:11")
+        this.cntn = new GenericContainer<>("artipie/deb-tests:1.0")
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
             .withFileSystemBind(this.tmp.toString(), "/home");
