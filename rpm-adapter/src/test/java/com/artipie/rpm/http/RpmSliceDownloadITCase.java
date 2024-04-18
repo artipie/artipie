@@ -36,6 +36,7 @@ import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.Testcontainers;
+import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
 /**
@@ -143,6 +144,7 @@ final class RpmSliceDownloadITCase {
             )
         );
         this.cntn.execInContainer("mv", "/home/example.repo", "/etc/yum.repos.d/");
+        final Container.ExecResult res = this.cntn.execInContainer("dnf", "-y", "update");
         MatcherAssert.assertThat(
             this.cntn.execInContainer(
                 "dnf", "-y", "repository-packages", "example", "install"
@@ -180,7 +182,7 @@ final class RpmSliceDownloadITCase {
         );
         this.port = this.server.start();
         Testcontainers.exposeHostPorts(this.port);
-        this.cntn = new GenericContainer<>("fedora:36")
+        this.cntn = new GenericContainer<>("artipie/rpm-tests-fedora:1.0")
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
             .withFileSystemBind(this.tmp.toString(), "/home");
