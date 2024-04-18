@@ -13,13 +13,11 @@ import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.testcontainers.containers.BindMode;
 
 /**
  * Conda IT case.
@@ -39,20 +37,8 @@ public final class CondaITCase {
             .withRepoConfig("conda/conda.yml", "my-conda")
             .withRepoConfig("conda/conda-port.yml", "my-conda-port")
             .withExposedPorts(8081),
-        () -> new TestDeployment.ClientContainer("continuumio/miniconda3:4.10.3")
-            .withWorkingDirectory("/w")
-            .withClasspathResourceMapping(
-                "conda/example-project", "/w/example-project", BindMode.READ_ONLY
-            )
+        () -> new TestDeployment.ClientContainer("artipie/conda-tests:1.0")
     );
-
-    @BeforeEach
-    void init() throws IOException {
-        this.containers.assertExec(
-            "Conda dependencies installation failed", new ContainerResultMatcher(),
-            "conda", "install", "-y", "conda-build", "conda-verify", "anaconda-client"
-        );
-    }
 
     @ParameterizedTest
     @CsvSource({

@@ -19,7 +19,6 @@ import com.artipie.security.policy.PolicyByUsername;
 import com.artipie.vertx.VertxSliceServer;
 import com.jcabi.log.Logger;
 import io.vertx.reactivex.core.Vertx;
-import org.apache.commons.io.FileUtils;
 import org.cactoos.list.ListOf;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.text.StringContainsInOrder;
@@ -137,18 +136,11 @@ public final class CondaSliceAuthITCase {
             this.tmp.resolve(CondaSliceAuthITCase.ANONIM),
             String.format("channels:\n  - %s", url).getBytes()
         );
-        FileUtils.copyFile(
-            new TestResource("CondaSliceITCase/snappy-1.1.3-0.tar.bz2").asPath().toFile(),
-            this.tmp.resolve("snappy-1.1.3-0.tar.bz2").toFile()
-        );
-        this.cntn = new GenericContainer<>("continuumio/miniconda3:22.11.1")
+        this.cntn = new GenericContainer<>("artipie/conda-tests:1.0")
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
             .withFileSystemBind(this.tmp.toString(), "/home");
         this.cntn.start();
-        this.exec("conda", "install", "-y", "conda-build");
-        this.exec("conda", "install", "-y", "conda-verify");
-        this.exec("conda", "install", "-y", "anaconda-client");
     }
 
     @Test
@@ -172,7 +164,7 @@ public final class CondaSliceAuthITCase {
         MatcherAssert.assertThat(
             "Anaconda upload was not successful",
             this.exec(
-                "anaconda", "upload", "./snappy-1.1.3-0.tar.bz2"
+                "anaconda", "upload", "/w/snappy-1.1.3-0.tar.bz2"
             ),
             new StringContainsInOrder(
                 new ListOf<>(

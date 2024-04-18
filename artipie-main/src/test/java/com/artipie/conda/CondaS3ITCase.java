@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
  * Conda IT case with S3 storage.
@@ -56,45 +55,7 @@ public final class CondaS3ITCase {
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withUser("security/users/alice.yaml", "alice")
             .withRepoConfig("conda/conda-s3.yml", "my-conda"),
-        () -> new TestDeployment.ClientContainer(
-            new ImageFromDockerfile(
-                "local/artipie-main/conda_s3_itcase", false
-            ).withDockerfileFromBuilder(
-                builder -> builder
-                    .from("continuumio/miniconda3:4.10.3")
-                    .env("DEBIAN_FRONTEND", "noninteractive")
-                    .run("apt update -y -o APT::Update::Error-Mode=any")
-                    .run("apt dist-upgrade -y && apt install -y curl netcat")
-                    .run("apt autoremove -y && apt clean -y && rm -rfv /var/lib/apt/lists")
-                    .run("conda install -vv -y conda-build==3.27.0 conda-verify==3.4.2 anaconda-client==1.10.0 2>&1|tee /tmp/conda.log")
-                    .run("conda clean -a")
-                    .copy("condarc", "/root/.condarc")
-                    .run("anaconda config --set url http://artipie:%d/%s/ -s".formatted(CondaS3ITCase.PORT, CondaS3ITCase.REPO))
-                    .run("conda config --set anaconda_upload yes")
-                    .copy("minio-bin-20231120.txz", "/w/minio-bin-20231120.txz")
-                    .run("tar xf /w/minio-bin-20231120.txz -C /root")
-                    .run(
-                        String.join(
-                            ";",
-                            "sh -c '/root/bin/minio server /var/minio > /tmp/minio.log 2>&1 &'",
-                            "timeout 30 sh -c 'until nc -z localhost 9000; do sleep 0.1; done'",
-                            "/root/bin/mc alias set srv1 http://localhost:9000 minioadmin minioadmin 2>&1 |tee /tmp/mc.log",
-                            "/root/bin/mc mb srv1/buck1 --region s3test 2>&1|tee -a /tmp/mc.log",
-                            "/root/bin/mc anonymous set public srv1/buck1 2>&1|tee -a /tmp/mc.log"
-                        )
-                    )
-                    .run("rm -fv /w/minio-bin-20231120.txz /tmp/*.log")
-                    .copy("snappy-1.1.3-0.tar.bz2", "/w/snappy-1.1.3-0.tar.bz2")
-                    .copy("noarch_glom-22.1.0.tar.bz2", "/w/noarch_glom-22.1.0.tar.bz2")
-                    .copy("linux-64_nng-1.4.0.tar.bz2", "/w/linux-64_nng-1.4.0.tar.bz2")
-                )
-                .withFileFromClasspath("condarc", "conda/condarc")
-                .withFileFromClasspath("snappy-1.1.3-0.tar.bz2", "conda/snappy-1.1.3-0.tar.bz2")
-                .withFileFromClasspath("noarch_glom-22.1.0.tar.bz2", "conda/noarch_glom-22.1.0.tar.bz2")
-                .withFileFromClasspath("linux-64_nng-1.4.0.tar.bz2", "conda/linux-64_nng-1.4.0.tar.bz2")
-                .withFileFromClasspath("minio-bin-20231120.txz", "minio-bin-20231120.txz")
-            )
-            .withWorkingDirectory("/w")
+        () -> new TestDeployment.ClientContainer("artipie/conda-tests:1.0")
             .withNetworkAliases("minic")
             .withExposedPorts(CondaS3ITCase.S3_PORT)
             .waitingFor(

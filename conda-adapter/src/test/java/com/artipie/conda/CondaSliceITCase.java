@@ -108,18 +108,11 @@ public final class CondaSliceITCase {
         Files.write(
             this.tmp.resolve(".condarc"), String.format("channels:\n  - %s", url).getBytes()
         );
-        FileUtils.copyDirectory(
-            new TestResource("example-project").asPath().toFile(),
-            this.tmp.toFile()
-        );
-        this.cntn = new GenericContainer<>("continuumio/miniconda3:4.10.3-alpine")
+        this.cntn = new GenericContainer<>("artipie/conda-tests:1.0")
             .withCommand("tail", "-f", "/dev/null")
-            .withWorkingDirectory("/home/")
+            .withWorkingDirectory("/w/adapter/example-project")
             .withFileSystemBind(this.tmp.toString(), "/home");
         this.cntn.start();
-        this.exec("conda", "install", "-y", "conda-build");
-        this.exec("conda", "install", "-y", "conda-verify");
-        this.exec("conda", "install", "-y", "anaconda-client");
     }
 
     @Test
