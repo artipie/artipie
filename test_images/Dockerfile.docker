@@ -1,0 +1,14 @@
+FROM alpine:3.19
+# See ../artipie-main/src/test/resources/docker/Dockerfile
+
+RUN apk add --update --no-cache openrc docker xz curl
+RUN rc-status
+RUN touch /run/openrc/softlevel
+# Insecure registry ports 52001, 52002, 52003
+RUN sed -i \
+    s/DOCKER_OPTS=/"DOCKER_OPTS=\"--insecure-registry=host.testcontainers.internal:52001 --insecure-registry=host.testcontainers.internal:52002 --insecure-registry=host.testcontainers.internal:52003 \""/g  \
+    /etc/conf.d/docker
+COPY prepMinio.sh minio-bin-20231120.txz /w/
+RUN /w/prepMinio.sh
+
+RUN rm -rf /w/minio-bin-20231120.txz

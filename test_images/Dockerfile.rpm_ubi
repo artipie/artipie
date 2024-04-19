@@ -1,0 +1,13 @@
+FROM redhat/ubi9:9.0.0
+ENV REV=2
+RUN yum -y upgrade
+RUN yum --allowerasing -y install curl xz nc
+
+COPY adapter /w/adapter
+COPY prepMinio.sh minio-bin-20231120.txz /w/
+RUN /w/prepMinio.sh
+
+WORKDIR "/w"
+
+RUN rm -rf /w/minio-bin-20231120.txz
+RUN du -hs /w/

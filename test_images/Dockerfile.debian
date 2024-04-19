@@ -1,0 +1,16 @@
+FROM debian:11
+ENV REV=0
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt update -y -o APT::Update::Error-Mode=any && apt dist-upgrade -y
+RUN apt install -y curl xz-utils netcat gnupg
+
+COPY adapter /w/adapter
+
+COPY prepMinio.sh minio-bin-20231120.txz /w/
+RUN /w/prepMinio.sh
+
+WORKDIR "/w"
+
+RUN rm -rf /w/minio-bin-20231120.txz
+RUN apt -y autoremove -y --purge && apt clean -y
+RUN du -hs /w/

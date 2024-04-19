@@ -1,0 +1,13 @@
+FROM fedora:36
+ENV REV=1
+RUN dnf -y upgrade
+RUN dnf -y install curl xz netcat
+
+COPY adapter /w/adapter
+COPY prepMinio.sh minio-bin-20231120.txz /w/
+RUN /w/prepMinio.sh
+
+WORKDIR "/w"
+
+RUN rm -rf /w/minio-bin-20231120.txz
+RUN du -hs /w/
