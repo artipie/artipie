@@ -6,9 +6,9 @@ package com.artipie.docker.cache;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
@@ -31,11 +31,11 @@ final class CacheDockerTest {
     @Test
     void createsCacheRepo() {
         final CacheDocker docker = new CacheDocker(
-            new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().completedFuture()),
-            new AstoDocker(new InMemoryStorage()), Optional.empty(), "*"
+            new ProxyDocker("registry", (line, headers, body) -> ResponseBuilder.ok().completedFuture()),
+            new AstoDocker("registry", new InMemoryStorage()), Optional.empty()
         );
         MatcherAssert.assertThat(
-            docker.repo(new RepoName.Simple("test")),
+            docker.repo("test"),
             new IsInstanceOf(CacheRepo.class)
         );
     }
@@ -46,10 +46,9 @@ final class CacheDockerTest {
         MatcherAssert.assertThat(
             new CacheDocker(
                 fake("{\"repositories\":[\"one\",\"three\",\"four\"]}"),
-                fake("{\"repositories\":[\"one\",\"two\"]}"), Optional.empty(), "*"
-            ).catalog(Optional.of(new RepoName.Simple("four")), limit).thenCompose(
-                catalog -> catalog.json().asStringFuture()
-            ).toCompletableFuture().join(),
+                fake("{\"repositories\":[\"one\",\"two\"]}"), Optional.empty()
+            ).catalog(Pagination.from("four", limit))
+                .thenCompose(catalog -> catalog.json().asStringFuture()).join(),
             new StringIsJson.Object(
                 new JsonHas(
                     "repositories",

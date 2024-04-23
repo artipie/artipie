@@ -6,7 +6,6 @@ package com.artipie.docker.composite;
 
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.DigestFromContent;
 import com.artipie.docker.proxy.ProxyLayers;
 import com.artipie.http.client.HttpClientSettings;
@@ -14,14 +13,15 @@ import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.GenericAuthenticator;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import com.artipie.http.slice.LoggingSlice;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Integration test for {@link MultiReadLayers}.
@@ -50,7 +50,6 @@ class MultiReadLayersIT {
 
     @Test
     void shouldGetBlob() {
-        final RepoName name = new RepoName.Valid("library/busybox");
         final MultiReadLayers layers = new MultiReadLayers(
             Stream.of(
                 this.slices.https("mcr.microsoft.com"),
@@ -59,7 +58,7 @@ class MultiReadLayersIT {
                     new GenericAuthenticator(this.slices)
                 )
             ).map(LoggingSlice::new).map(
-                slice -> new ProxyLayers(slice, name)
+                slice -> new ProxyLayers(slice, "library/busybox")
             ).collect(Collectors.toList())
         );
         final String digest = String.format(

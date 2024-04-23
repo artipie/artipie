@@ -9,7 +9,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -50,7 +50,7 @@ public final class PhpComposer extends Slice.Wrap {
                             new RtRule.ByPath(PackageMetadataSlice.PACKAGE),
                             new RtRule.ByPath(PackageMetadataSlice.ALL_PACKAGES)
                         ),
-                        ByMethodsRule.Standard.GET
+                        MethodRule.GET
                     ),
                     new BasicAuthzSlice(
                         new PackageMetadataSlice(repository),
@@ -63,7 +63,7 @@ public final class PhpComposer extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(Pattern.compile("^/?artifacts/.*\\.zip$")),
-                        ByMethodsRule.Standard.GET
+                        MethodRule.GET
                     ),
                     new BasicAuthzSlice(
                         new DownloadArchiveSlice(repository),
@@ -76,7 +76,7 @@ public final class PhpComposer extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(AddSlice.PATH_PATTERN),
-                        ByMethodsRule.Standard.PUT
+                        MethodRule.PUT
                     ),
                     new BasicAuthzSlice(
                         new AddSlice(repository),
@@ -89,7 +89,7 @@ public final class PhpComposer extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(AddArchiveSlice.PATH),
-                        ByMethodsRule.Standard.PUT
+                        MethodRule.PUT
                     ),
                     new BasicAuthzSlice(
                         new AddArchiveSlice(repository, events, name),

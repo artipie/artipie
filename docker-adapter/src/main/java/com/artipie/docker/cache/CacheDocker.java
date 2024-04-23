@@ -7,12 +7,13 @@ package com.artipie.docker.cache;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.misc.JoinedCatalogSource;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.scheduling.ArtifactEvent;
+
 import java.util.Optional;
 import java.util.Queue;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Cache {@link Docker} implementation.
@@ -37,35 +38,31 @@ public final class CacheDocker implements Docker {
     private final Optional<Queue<ArtifactEvent>> events;
 
     /**
-     * Artipie repository name.
-     */
-    private final String rname;
-
-    /**
-     * Ctor.
-     *
      * @param origin Origin repository.
      * @param cache Cache repository.
      * @param events Artifact metadata events queue
-     * @param rname Artipie repository name
      */
-    public CacheDocker(final Docker origin, final Docker cache,
-        final Optional<Queue<ArtifactEvent>> events, final String rname) {
+    public CacheDocker(Docker origin,
+                       Docker cache,
+                       Optional<Queue<ArtifactEvent>> events
+    ) {
         this.origin = origin;
         this.cache = cache;
         this.events = events;
-        this.rname = rname;
     }
 
     @Override
-    public Repo repo(final RepoName name) {
-        return new CacheRepo(
-            name, this.origin.repo(name), this.cache.repo(name), this.events, this.rname
-        );
+    public String registryName() {
+        return origin.registryName();
     }
 
     @Override
-    public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
-        return new JoinedCatalogSource(from, limit, this.origin, this.cache).catalog();
+    public Repo repo(final String name) {
+        return new CacheRepo(name, this.origin.repo(name), this.cache.repo(name), this.events, registryName());
+    }
+
+    @Override
+    public CompletableFuture<Catalog> catalog(Pagination pagination) {
+        return new JoinedCatalogSource(pagination, this.origin, this.cache).catalog();
     }
 }

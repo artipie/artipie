@@ -8,14 +8,14 @@ import com.artipie.asto.Content;
 import com.artipie.docker.perms.DockerActions;
 import com.artipie.docker.perms.DockerRepositoryPermission;
 import com.artipie.http.Headers;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Response;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.auth.AuthScheme;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.rq.RequestLine;
 import org.apache.commons.lang3.NotImplementedException;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
 
@@ -38,9 +38,9 @@ class AuthScopeSliceTest {
         new AuthScopeSlice(
             new ScopeSlice() {
                 @Override
-                public DockerRepositoryPermission permission(RequestLine rqline, String name) {
-                    aline.set(rqline);
-                    return new DockerRepositoryPermission(name, "bar", DockerActions.PULL.mask());
+                public DockerRepositoryPermission permission(RequestLine line) {
+                    aline.set(line);
+                    return new DockerRepositoryPermission("registryName", "bar", DockerActions.PULL.mask());
                 }
 
                 @Override
@@ -51,13 +51,12 @@ class AuthScopeSliceTest {
             (headers, rline) -> CompletableFuture.completedFuture(
                 AuthScheme.result(new AuthUser("alice", "test"), "")
             ),
-            authUser -> new TestCollection(perm),
-            "my-repo"
+            authUser -> new TestCollection(perm)
         ).response(line, Headers.EMPTY, Content.EMPTY).join();
         MatcherAssert.assertThat(
             "Request line passed to slice",
             aline.get(),
-            new IsEqual<>(line)
+            Matchers.is(line)
         );
         MatcherAssert.assertThat(
             "Scope passed as action to permissions",

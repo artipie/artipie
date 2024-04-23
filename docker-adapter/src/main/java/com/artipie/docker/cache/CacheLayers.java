@@ -42,17 +42,17 @@ public final class CacheLayers implements Layers {
     }
 
     @Override
-    public CompletionStage<Blob> put(final BlobSource source) {
+    public CompletableFuture<Digest> put(final BlobSource source) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Blob> mount(final Blob blob) {
+    public CompletableFuture<Void> mount(final Blob blob) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Blob>> get(final Digest digest) {
+    public CompletableFuture<Optional<Blob>> get(final Digest digest) {
         return this.cache.get(digest).handle(
             (cached, throwable) -> {
                 final CompletionStage<Optional<Blob>> result;

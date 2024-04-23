@@ -10,11 +10,11 @@ import com.artipie.docker.Docker;
 import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Uploads;
+import com.artipie.docker.asto.Uploads;
 import com.artipie.docker.fake.FakeCatalogDocker;
+import com.artipie.docker.misc.Pagination;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,8 +24,7 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 import wtf.g4s8.hamcrest.json.StringIsJson;
 
-import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Test for {@link TrimmedDocker}.
@@ -37,12 +36,17 @@ class TrimmedDockerTest {
      */
     private static final Docker FAKE = new Docker() {
         @Override
-        public Repo repo(final RepoName name) {
+        public String registryName() {
+            return "test";
+        }
+
+        @Override
+        public Repo repo(String name) {
             return new FakeRepo(name);
         }
 
         @Override
-        public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+        public CompletableFuture<Catalog> catalog(Pagination pagination) {
             throw new UnsupportedOperationException();
         }
     };
@@ -51,8 +55,7 @@ class TrimmedDockerTest {
     void failsIfPrefixNotFound() {
         Assertions.assertThrows(
             IllegalArgumentException.class,
-            () -> new TrimmedDocker(TrimmedDockerTest.FAKE, "abc/123")
-                .repo(new RepoName.Simple("xfe/oiu"))
+            () -> new TrimmedDocker(TrimmedDockerTest.FAKE, "abc/123").repo("xfe/oiu")
         );
     }
 
@@ -65,32 +68,31 @@ class TrimmedDockerTest {
         ",username/11/some_package"
     })
     void cutsIfPrefixStartsWithSlash(final String prefix, final String name) {
-        MatcherAssert.assertThat(
+        Assertions.assertEquals(
+            name,
             ((FakeRepo) new TrimmedDocker(TrimmedDockerTest.FAKE, prefix)
-                .repo(new RepoName.Simple(String.format("%s/%s", prefix, name)))).name(),
-            new IsEqual<>(name)
+                .repo(prefix + '/' + name)).name()
         );
     }
 
     @Test
     void trimsCatalog() {
-        final Optional<RepoName> from = Optional.of(new RepoName.Simple("foo/bar"));
         final int limit = 123;
         final Catalog catalog = () -> new Content.From(
             "{\"repositories\":[\"one\",\"two\"]}".getBytes()
         );
         final FakeCatalogDocker fake = new FakeCatalogDocker(catalog);
         final TrimmedDocker docker = new TrimmedDocker(fake, "foo");
-        final Catalog result = docker.catalog(from, limit).toCompletableFuture().join();
+        final Catalog result = docker.catalog(Pagination.from("foo/bar", limit)).join();
         MatcherAssert.assertThat(
             "Forwards from without prefix",
-            fake.from().map(RepoName::value),
-            new IsEqual<>(Optional.of("bar"))
+            fake.from(),
+            Matchers.is("bar")
         );
         MatcherAssert.assertThat(
             "Forwards limit",
             fake.limit(),
-            new IsEqual<>(limit)
+            Matchers.is(limit)
         );
         MatcherAssert.assertThat(
             "Returns catalog with prefixes",
@@ -115,13 +117,12 @@ class TrimmedDockerTest {
         /**
          * Repo name.
          */
-        private final RepoName rname;
+        private final String rname;
 
         /**
-         * Ctor.
          * @param name Repo name
          */
-        FakeRepo(final RepoName name) {
+        FakeRepo(String name) {
             this.rname = name;
         }
 
@@ -145,7 +146,7 @@ class TrimmedDockerTest {
          * @return Name
          */
         public String name() {
-            return this.rname.value();
+            return this.rname;
         }
     }
 

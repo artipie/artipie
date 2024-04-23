@@ -8,44 +8,43 @@ package com.artipie.docker.asto;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
+
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Asto implementation of {@link Layers}.
- *
- * @since 0.3
  */
 public final class AstoLayers implements Layers {
 
     /**
      * Blobs storage.
      */
-    private final BlobStore blobs;
+    private final Blobs blobs;
 
     /**
-     * Ctor.
-     *
      * @param blobs Blobs storage.
      */
-    public AstoLayers(final BlobStore blobs) {
+    public AstoLayers(Blobs blobs) {
         this.blobs = blobs;
     }
 
     @Override
-    public CompletionStage<Blob> put(final BlobSource source) {
+    public CompletableFuture<Digest> put(final BlobSource source) {
         return this.blobs.put(source);
     }
 
     @Override
-    public CompletionStage<Blob> mount(final Blob blob) {
-        return blob.content().thenCompose(
-            content -> this.blobs.put(new TrustedBlobSource(content, blob.digest()))
-        );
+    public CompletableFuture<Void> mount(Blob blob) {
+        return blob.content()
+            .thenCompose(content -> blobs.put(new TrustedBlobSource(content, blob.digest())))
+            .thenRun(() -> {
+                // No-op
+            });
     }
 
     @Override
-    public CompletionStage<Optional<Blob>> get(final Digest digest) {
+    public CompletableFuture<Optional<Blob>> get(final Digest digest) {
         return this.blobs.blob(digest);
     }
 }

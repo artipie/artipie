@@ -10,12 +10,11 @@ import com.artipie.asto.MetaCommon;
 import com.artipie.asto.Storage;
 import com.artipie.docker.Blob;
 import com.artipie.docker.Digest;
-import java.util.concurrent.CompletionStage;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Asto implementation of {@link Blob}.
- *
- * @since 0.2
  */
 public final class AstoBlob implements Blob {
 
@@ -32,35 +31,32 @@ public final class AstoBlob implements Blob {
     /**
      * Blob digest.
      */
-    private final Digest dig;
+    private final Digest digest;
 
     /**
-     * Ctor.
-     *
      * @param storage Storage.
      * @param key Blob key.
      * @param digest Blob digest.
      */
-    public AstoBlob(final Storage storage, final Key key, final Digest digest) {
+    public AstoBlob(Storage storage, Key key, Digest digest) {
         this.storage = storage;
         this.key = key;
-        this.dig = digest;
+        this.digest = digest;
     }
 
     @Override
     public Digest digest() {
-        return this.dig;
+        return this.digest;
     }
 
     @Override
-    public CompletionStage<Long> size() {
-        return this.storage.metadata(this.key).thenApply(
-            meta -> new MetaCommon(meta).size()
-        );
+    public CompletableFuture<Long> size() {
+        return this.storage.metadata(this.key)
+            .thenApply(meta -> new MetaCommon(meta).size());
     }
 
     @Override
-    public CompletionStage<Content> content() {
+    public CompletableFuture<Content> content() {
         return this.storage.value(this.key);
     }
 }

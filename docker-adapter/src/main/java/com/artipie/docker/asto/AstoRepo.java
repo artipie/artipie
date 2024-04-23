@@ -9,8 +9,6 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.Layers;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Uploads;
 
 /**
  * Asto implementation of {@link Repo}.
@@ -27,23 +25,14 @@ public final class AstoRepo implements Repo {
     /**
      * Repository name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
-     * Storage layout.
-     */
-    private final Layout layout;
-
-    /**
-     * Ctor.
-     *
      * @param asto Asto storage
-     * @param layout Storage layout.
      * @param name Repository name
      */
-    public AstoRepo(final Storage asto, final Layout layout, final RepoName name) {
+    public AstoRepo(Storage asto, String name) {
         this.asto = asto;
-        this.layout = layout;
         this.name = name;
     }
 
@@ -54,12 +43,12 @@ public final class AstoRepo implements Repo {
 
     @Override
     public Manifests manifests() {
-        return new AstoManifests(this.asto, this.blobs(), this.layout, this.name);
+        return new AstoManifests(this.asto, this.blobs(), this.name);
     }
 
     @Override
     public Uploads uploads() {
-        return new AstoUploads(this.asto, this.layout, this.name);
+        return new Uploads(this.asto, this.name);
     }
 
     /**
@@ -67,7 +56,7 @@ public final class AstoRepo implements Repo {
      *
      * @return Blobs storage.
      */
-    private AstoBlobs blobs() {
-        return new AstoBlobs(this.asto, this.layout, this.name);
+    private Blobs blobs() {
+        return new Blobs(this.asto);
     }
 }

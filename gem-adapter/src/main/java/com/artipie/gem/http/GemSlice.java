@@ -11,8 +11,7 @@ import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.AuthzSlice;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -63,7 +62,7 @@ public final class GemSlice extends Slice.Wrap {
             new SliceRoute(
                 new RtRulePath(
                     new RtRule.All(
-                        ByMethodsRule.Standard.POST,
+                        MethodRule.POST,
                         new RtRule.ByPath("/api/v1/gems")
                     ),
                     new AuthzSlice(
@@ -76,27 +75,27 @@ public final class GemSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        ByMethodsRule.Standard.GET,
+                        MethodRule.GET,
                         new RtRule.ByPath("/api/v1/dependencies")
                     ),
                     new DepsGemSlice(storage)
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        ByMethodsRule.Standard.GET,
+                        MethodRule.GET,
                         new RtRule.ByPath("/api/v1/api_key")
                     ),
                     new ApiKeySlice(auth)
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET),
+                        MethodRule.GET,
                         new RtRule.ByPath(ApiGetSlice.PATH_PATTERN)
                     ),
                     new ApiGetSlice(storage)
                 ),
                 new RtRulePath(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new AuthzSlice(
                         new SliceDownload(storage),
                         new GemApiKeyAuth(auth),

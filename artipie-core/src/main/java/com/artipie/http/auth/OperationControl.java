@@ -5,7 +5,9 @@
 package com.artipie.http.auth;
 
 import com.artipie.security.policy.Policy;
-import com.jcabi.log.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.Permission;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,9 +19,10 @@ import java.util.List;
  * <p/>
  * Instances of this class are created in the adapter with users' policies and required
  * permission for the adapter's operation.
- * @since 1.2
  */
 public final class OperationControl {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OperationControl.class);
 
     /**
      * Security policy.
@@ -65,11 +68,10 @@ public final class OperationControl {
      * @return True if authorized
      */
     public boolean allowed(final AuthUser user) {
-        final boolean res = this.perms.stream()
-            .anyMatch(perm -> this.policy.getPermissions(user).implies(perm));
-        Logger.debug(
-            "security",
-            "Authorization operation: [permission=%s, user=%s, result=%s]",
+        final boolean res = perms.stream()
+            .anyMatch(perm -> policy.getPermissions(user).implies(perm));
+        LOGGER.debug(
+            "Authorization operation: [permission={}, user={}, result={}}]",
             this.perms, user.name(), res ? "allowed" : "NOT allowed"
         );
         return res;

@@ -6,11 +6,10 @@ package com.artipie.docker.misc;
 
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
@@ -27,46 +26,23 @@ public final class JoinedCatalogSource {
      */
     private final List<Docker> dockers;
 
-    /**
-     * From which name to start, exclusive.
-     */
-    private final Optional<RepoName> from;
+    private final Pagination pagination;
 
     /**
-     * Maximum number of names returned.
-     */
-    private final int limit;
-
-    /**
-     * Ctor.
-     *
-     * @param from From which tag to start, exclusive.
-     * @param limit Maximum number of tags returned.
+     * @param pagination Pagination parameters.
      * @param dockers Registries to load catalogs from.
      */
-    public JoinedCatalogSource(
-        final Optional<RepoName> from,
-        final int limit,
-        final Docker... dockers
-    ) {
-        this(Arrays.asList(dockers), from, limit);
+    public JoinedCatalogSource(Pagination pagination, Docker... dockers) {
+        this(Arrays.asList(dockers), pagination);
     }
 
     /**
-     * Ctor.
-     *
      * @param dockers Registries to load catalogs from.
-     * @param from From which tag to start, exclusive.
-     * @param limit Maximum number of tags returned.
+     * @param pagination Pagination parameters.
      */
-    public JoinedCatalogSource(
-        final List<Docker> dockers,
-        final Optional<RepoName> from,
-        final int limit
-    ) {
+    public JoinedCatalogSource(List<Docker> dockers, Pagination pagination) {
         this.dockers = dockers;
-        this.from = from;
-        this.limit = limit;
+        this.pagination = pagination;
     }
 
     /**
@@ -74,17 +50,15 @@ public final class JoinedCatalogSource {
      *
      * @return Catalog.
      */
-    public CompletionStage<Catalog> catalog() {
-        final List<CompletionStage<List<RepoName>>> all = this.dockers.stream().map(
-            docker -> docker.catalog(this.from, this.limit)
+    public CompletableFuture<Catalog> catalog() {
+        final List<CompletionStage<List<String>>> all = this.dockers.stream().map(
+            docker -> docker.catalog(pagination)
                 .thenApply(ParsedCatalog::new)
                 .thenCompose(ParsedCatalog::repos)
                 .exceptionally(err -> Collections.emptyList())
         ).collect(Collectors.toList());
-        return CompletableFuture.allOf(all.toArray(new CompletableFuture<?>[0])).thenApply(
-            nothing -> all.stream().flatMap(
-                stage -> stage.toCompletableFuture().join().stream()
-            ).collect(Collectors.toList())
-        ).thenApply(names -> new CatalogPage(names, this.from, this.limit));
+        return CompletableFuture.allOf(all.toArray(new CompletableFuture<?>[0]))
+            .thenApply(nothing -> all.stream().flatMap(stage -> stage.toCompletableFuture().join().stream()).toList())
+            .thenApply(names -> new CatalogPage(names, pagination));
     }
 }

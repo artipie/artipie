@@ -5,15 +5,14 @@
 package com.artipie.docker.fake;
 
 import com.artipie.asto.Content;
-import com.artipie.asto.FailedCompletionStage;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Manifests implementation that fails to get manifest.
@@ -21,17 +20,17 @@ import java.util.concurrent.CompletionStage;
 public final class FaultyGetManifests implements Manifests {
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
-        return new FailedCompletionStage<>(new IllegalStateException());
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
+        return CompletableFuture.failedFuture(new IllegalStateException());
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(Pagination pagination) {
         throw new UnsupportedOperationException();
     }
 }

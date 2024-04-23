@@ -6,8 +6,8 @@ package com.artipie.files;
 
 import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.AuthUser;
 import com.artipie.http.auth.Authentication;
@@ -15,8 +15,7 @@ import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.headers.Accept;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -89,7 +88,7 @@ public final class FilesSlice extends Slice.Wrap {
         super(
             new SliceRoute(
                 new RtRulePath(
-                    new ByMethodsRule(RqMethod.HEAD),
+                    MethodRule.HEAD,
                     new BasicAuthzSlice(
                         new SliceWithHeaders(
                             new FileMetaSlice(new HeadSlice(storage), storage),
@@ -102,7 +101,7 @@ public final class FilesSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    ByMethodsRule.Standard.GET,
+                    MethodRule.GET,
                     new BasicAuthzSlice(
                         new SliceRoute(
                             new RtRulePath(
@@ -156,7 +155,7 @@ public final class FilesSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    ByMethodsRule.Standard.PUT,
+                    MethodRule.PUT,
                     new BasicAuthzSlice(
                         new SliceUpload(
                             storage,
@@ -172,7 +171,7 @@ public final class FilesSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    ByMethodsRule.Standard.DELETE,
+                    MethodRule.DELETE,
                     new BasicAuthzSlice(
                         new SliceDelete(
                             storage,

@@ -4,7 +4,6 @@
  */
 package com.artipie.docker.misc;
 
-import com.artipie.docker.RepoName;
 import com.google.common.base.Splitter;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +13,9 @@ import wtf.g4s8.hamcrest.json.JsonContains;
 import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -28,13 +26,11 @@ final class CatalogPageTest {
     /**
      * Repository names.
      */
-    private Collection<RepoName> names;
+    private Collection<String> names;
 
     @BeforeEach
     void setUp() {
-        this.names = Stream.of("3", "1", "2", "4", "5", "4")
-            .map(RepoName.Simple::new)
-            .collect(Collectors.toList());
+        this.names = Arrays.asList("3", "1", "2", "4", "5", "4");
     }
 
     @ParameterizedTest
@@ -45,12 +41,11 @@ final class CatalogPageTest {
         ",2,1;2",
         "2,2,3;4"
     })
-    void shouldSupportPaging(final String from, final Integer limit, final String result) {
+    void shouldSupportPaging(String from, Integer limit, String result) {
         MatcherAssert.assertThat(
             new CatalogPage(
                 this.names,
-                Optional.ofNullable(from).map(RepoName.Simple::new),
-                Optional.ofNullable(limit).orElse(Integer.MAX_VALUE)
+                Pagination.from(from, limit)
             ).json().asJsonObject(),
             new JsonHas(
                 "repositories",

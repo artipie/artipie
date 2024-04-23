@@ -6,7 +6,6 @@ package com.artipie.docker.asto;
 
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +13,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests for {@link AstoRepo}.
- *
- * @since 0.3
  */
 final class AstoRepoTest {
 
@@ -26,9 +23,7 @@ final class AstoRepoTest {
 
     @BeforeEach
     void setUp() {
-        final InMemoryStorage storage = new InMemoryStorage();
-        final RepoName name = new RepoName.Valid("test");
-        this.repo = new AstoRepo(storage, new DefaultLayout(), name);
+        this.repo = new AstoRepo(new InMemoryStorage(), "test");
     }
 
     @Test

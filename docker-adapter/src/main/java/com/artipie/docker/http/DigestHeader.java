@@ -7,7 +7,6 @@ package com.artipie.docker.http;
 import com.artipie.docker.Digest;
 import com.artipie.http.Headers;
 import com.artipie.http.headers.Header;
-import com.artipie.http.rq.RqHeaders;
 
 /**
  * Docker-Content-Digest header.
@@ -21,26 +20,20 @@ public final class DigestHeader extends Header {
     private static final String NAME = "Docker-Content-Digest";
 
     /**
-     * Ctor.
-     *
      * @param digest Digest value.
      */
-    public DigestHeader(final Digest digest) {
+    public DigestHeader(Digest digest) {
         this(digest.string());
     }
 
     /**
-     * Ctor.
-     *
      * @param headers Headers to extract header from.
      */
-    public DigestHeader(final Headers headers) {
-        this(new RqHeaders.Single(headers, DigestHeader.NAME).asString());
+    public DigestHeader(Headers headers) {
+        this(headers.single(DigestHeader.NAME).getValue());
     }
 
     /**
-     * Ctor.
-     *
      * @param digest Digest value.
      */
     private DigestHeader(final String digest) {

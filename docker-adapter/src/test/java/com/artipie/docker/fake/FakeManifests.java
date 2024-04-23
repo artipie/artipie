@@ -7,12 +7,12 @@ package com.artipie.docker.fake;
 import com.artipie.asto.Content;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Auxiliary class for tests for {@link com.artipie.docker.cache.CacheManifests}.
@@ -30,18 +30,18 @@ public final class FakeManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content content) {
         return this.mnfs.put(ref, content);
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return this.mnfs.get(ref);
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
-        return this.mnfs.tags(from, limit);
+    public CompletableFuture<Tags> tags(Pagination pagination) {
+        return this.mnfs.tags(pagination);
     }
 
     /**

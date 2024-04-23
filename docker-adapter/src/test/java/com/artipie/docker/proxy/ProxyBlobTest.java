@@ -6,10 +6,10 @@ package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Digest;
-import com.artipie.docker.RepoName;
 import com.artipie.http.ResponseBuilder;
 import io.reactivex.Flowable;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,14 +33,14 @@ class ProxyBlobTest {
                 }
                 return ResponseBuilder.ok().body(data).completedFuture();
             },
-            new RepoName.Valid("test"),
+            "test",
             new Digest.FromString("sha256:123"),
             data.length
         ).content().toCompletableFuture().join();
         MatcherAssert.assertThat(content.asBytes(), new IsEqual<>(data));
         MatcherAssert.assertThat(
             content.size(),
-            new IsEqual<>(Optional.of((long) data.length))
+            Matchers.is(Optional.of((long) data.length))
         );
     }
 
@@ -51,14 +51,11 @@ class ProxyBlobTest {
             (line, headers, body) -> {
                 throw new UnsupportedOperationException();
             },
-            new RepoName.Valid("my/test"),
+            "my/test",
             new Digest.FromString("sha256:abc"),
             size
         );
-        MatcherAssert.assertThat(
-            blob.size().toCompletableFuture().join(),
-            new IsEqual<>(size)
-        );
+        MatcherAssert.assertThat(blob.size().join(), Matchers.is(size));
     }
 
     @Test
@@ -72,10 +69,10 @@ class ProxyBlobTest {
         final byte[] data = "content".getBytes();
         final CompletableFuture<Content> content = new ProxyBlob(
             (line, headers, body) -> ResponseBuilder.internalError(new IllegalArgumentException()).completedFuture(),
-            new RepoName.Valid("test-2"),
+            "test-2",
             new Digest.FromString("sha256:567"),
             data.length
-        ).content().toCompletableFuture();
+        ).content();
         Assertions.assertThrows(CompletionException.class, content::join);
     }
 
@@ -85,9 +82,9 @@ class ProxyBlobTest {
             (line, headers, body) -> ResponseBuilder.ok()
                 .body(new Content.From(Flowable.error(new IllegalStateException())))
                 .completedFuture(),
-            new RepoName.Valid("abc"),
+            "abc",
             new Digest.FromString("sha256:987"),
             data.length
-        ).content().toCompletableFuture().join();
+        ).content().join();
     }
 }

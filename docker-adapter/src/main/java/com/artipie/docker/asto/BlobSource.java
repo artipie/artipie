@@ -7,7 +7,8 @@ package com.artipie.docker.asto;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
-import java.util.concurrent.CompletionStage;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Source of blob that could be saved to {@link Storage} at desired location.
@@ -27,8 +28,8 @@ public interface BlobSource {
      * Save blob to storage.
      *
      * @param storage Storage.
-     * @param key Destination for blob content.
+     * @param key     Destination for blob content.
      * @return Completion of save operation.
      */
-    CompletionStage<Void> saveTo(Storage storage, Key key);
+    CompletableFuture<Void> saveTo(Storage storage, Key key);
 }

@@ -4,13 +4,12 @@
  */
 package com.artipie;
 
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.misc.RandomFreePort;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
 import com.artipie.http.slice.SliceSimple;
@@ -46,7 +45,7 @@ public final class SliceITCase {
      */
     private static final Slice TARGET = new SliceRoute(
         new RtRulePath(
-            new ByMethodsRule(RqMethod.GET),
+            MethodRule.GET,
             new BasicAuthzSlice(
                 new SliceSimple(
                     () -> ResponseBuilder.ok()

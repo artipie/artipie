@@ -13,8 +13,7 @@ import com.artipie.http.client.ClientSlices;
 import com.artipie.http.client.UriClientSlice;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.Authenticator;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -24,19 +23,8 @@ import java.net.URI;
 
 /**
  * Composer proxy repository slice.
- * @since 0.4
  */
 public class ComposerProxySlice extends Slice.Wrap {
-    /**
-     * New Composer proxy without cache and without authentication.
-     * @param clients HTTP clients
-     * @param remote Remote URI
-     * @param repo Repository
-     */
-    public ComposerProxySlice(final ClientSlices clients, final URI remote, final Repository repo) {
-        this(clients, remote, repo, Authenticator.ANONYMOUS, Cache.NOP);
-    }
-
     /**
      * New Composer proxy without cache.
      * @param clients HTTP clients
@@ -71,7 +59,7 @@ public class ComposerProxySlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(PackageMetadataSlice.ALL_PACKAGES),
-                        new ByMethodsRule(RqMethod.GET)
+                        MethodRule.GET
                     ),
                     new SliceSimple(
                         ResponseBuilder.ok()
@@ -82,7 +70,7 @@ public class ComposerProxySlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(PackageMetadataSlice.PACKAGE),
-                        new ByMethodsRule(RqMethod.GET)
+                        MethodRule.GET
                     ),
                     new CachedProxySlice(remote(clients, remote, auth), repository, cache)
                 ),

@@ -5,6 +5,7 @@
 package com.artipie.docker.proxy;
 
 import com.artipie.docker.Catalog;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.jetty.JettyClientSlices;
 import org.hamcrest.MatcherAssert;
@@ -14,8 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.StringIsJson;
-
-import java.util.Optional;
 
 /**
  * Integration tests for {@link ProxyDocker}.
@@ -38,7 +37,7 @@ final class ProxyDockerIT {
             new HttpClientSettings().setFollowRedirects(true)
         );
         this.client.start();
-        this.docker = new ProxyDocker(this.client.https("mcr.microsoft.com"));
+        this.docker = new ProxyDocker("test_registry", this.client.https("mcr.microsoft.com"));
     }
 
     @AfterEach
@@ -49,7 +48,7 @@ final class ProxyDockerIT {
     @Test
     void readsCatalog() {
         MatcherAssert.assertThat(
-            this.docker.catalog(Optional.empty(), Integer.MAX_VALUE)
+            this.docker.catalog(Pagination.empty())
                 .thenApply(Catalog::json)
                 .toCompletableFuture().join().asString(),
             new StringIsJson.Object(new JsonHas("repositories", new IsAnything<>()))

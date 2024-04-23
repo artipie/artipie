@@ -6,10 +6,11 @@ package com.artipie.docker.proxy;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
-import com.artipie.docker.RepoName;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.Header;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsInstanceOf;
@@ -17,7 +18,6 @@ import org.hamcrest.core.StringStartsWith;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,10 +28,10 @@ final class ProxyDockerTest {
 
     @Test
     void createsProxyRepo() {
-        final ProxyDocker docker = new ProxyDocker((line, headers, body) ->
+        final ProxyDocker docker = new ProxyDocker("test_registry", (line, headers, body) ->
             ResponseBuilder.ok().completedFuture());
         MatcherAssert.assertThat(
-            docker.repo(new RepoName.Simple("test")),
+            docker.repo("test"),
             new IsInstanceOf(ProxyRepo.class)
         );
     }
@@ -45,6 +45,7 @@ final class ProxyDockerTest {
         cheaders = new AtomicReference<>();
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
         new ProxyDocker(
+            "test_registry",
             (line, headers, body) -> {
                 cline.set(line.toString());
                 cheaders.set(headers);
@@ -55,7 +56,7 @@ final class ProxyDockerTest {
                     }
                 );
             }
-        ).catalog(Optional.of(new RepoName.Simple(name)), limit).toCompletableFuture().join();
+        ).catalog(Pagination.from(name, limit)).join();
         MatcherAssert.assertThat(
             "Sends expected line to remote",
             cline.get(),
@@ -69,7 +70,7 @@ final class ProxyDockerTest {
         MatcherAssert.assertThat(
             "Sends no body to remote",
             cbody.get().length,
-            new IsEqual<>(0)
+            Matchers.is(0)
         );
     }
 
@@ -78,10 +79,11 @@ final class ProxyDockerTest {
         final byte[] bytes = "{\"repositories\":[\"one\",\"two\"]}".getBytes();
         MatcherAssert.assertThat(
             new ProxyDocker(
+                "test_registry",
                 (line, headers, body) -> ResponseBuilder.ok().body(bytes).completedFuture()
-            ).catalog(Optional.empty(), Integer.MAX_VALUE).thenCompose(
+            ).catalog(Pagination.empty()).thenCompose(
                 catalog -> catalog.json().asBytesFuture()
-            ).toCompletableFuture().join(),
+            ).join(),
             new IsEqual<>(bytes)
         );
     }
@@ -89,8 +91,9 @@ final class ProxyDockerTest {
     @Test
     void shouldFailReturnCatalogWhenRemoteRespondsWithNotOk() {
         final CompletionStage<Catalog> stage = new ProxyDocker(
+            "test_registry",
             (line, headers, body) -> ResponseBuilder.notFound().completedFuture()
-        ).catalog(Optional.empty(), Integer.MAX_VALUE);
+        ).catalog(Pagination.empty());
         Assertions.assertThrows(
             Exception.class,
             () -> stage.toCompletableFuture().join()

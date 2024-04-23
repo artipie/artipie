@@ -10,13 +10,11 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.error.InvalidManifestException;
-import com.artipie.docker.manifest.JsonManifest;
-import com.artipie.docker.manifest.Layer;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.manifest.ManifestLayer;
+import com.artipie.docker.misc.Pagination;
 import com.google.common.base.Strings;
 
 import javax.json.JsonException;
@@ -34,56 +32,45 @@ public final class AstoManifests implements Manifests {
     /**
      * Asto storage.
      */
-    private final Storage asto;
+    private final Storage storage;
 
     /**
      * Blobs storage.
      */
-    private final BlobStore blobs;
-
-    /**
-     * Manifests layout.
-     */
-    private final ManifestsLayout layout;
+    private final Blobs blobs;
 
     /**
      * Repository name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
      * @param asto Asto storage
      * @param blobs Blobs storage.
-     * @param layout Manifests layout.
      * @param name Repository name
      */
-    public AstoManifests(
-        final Storage asto,
-        final BlobStore blobs,
-        final ManifestsLayout layout,
-        final RepoName name
-    ) {
-        this.asto = asto;
+    public AstoManifests(Storage asto, Blobs blobs, String name) {
+        this.storage = asto;
         this.blobs = blobs;
-        this.layout = layout;
         this.name = name;
     }
 
     @Override
-    public CompletionStage<Manifest> put(ManifestReference ref, Content content) {
+    public CompletableFuture<Manifest> put(ManifestReference ref, Content content) {
         return content.asBytesFuture()
-            .thenCompose(bytes -> this.blobs.put(new TrustedBlobSource(bytes))
-                .thenApply(blob -> new JsonManifest(blob.digest(), bytes))
-                .thenCompose(
-                    manifest -> this.validate(manifest)
-                        .thenCompose(nothing -> this.addManifestLinks(ref, manifest.digest()))
-                        .thenApply(nothing -> manifest)
-                )
+            .thenCompose(
+                bytes -> this.blobs.put(new TrustedBlobSource(bytes))
+                    .thenApply(digest -> new Manifest(digest, bytes))
+                    .thenCompose(
+                        manifest -> this.validate(manifest)
+                            .thenCompose(nothing -> this.addManifestLinks(ref, manifest.digest()))
+                            .thenApply(nothing -> manifest)
+                    )
             );
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return this.readLink(ref).thenCompose(
             digestOpt -> digestOpt.map(
                 digest -> this.blobs.blob(digest)
@@ -92,8 +79,8 @@ public final class AstoManifests implements Manifests {
                             .map(
                                 blob -> blob.content()
                                     .thenCompose(Content::asBytesFuture)
-                                    .thenApply(bytes -> Optional.<Manifest>of(
-                                        new JsonManifest(blob.digest(), bytes))
+                                    .thenApply(bytes -> Optional.of(
+                                        new Manifest(blob.digest(), bytes))
                                     )
                             )
                             .orElseGet(() -> CompletableFuture.completedFuture(Optional.empty()))
@@ -103,10 +90,10 @@ public final class AstoManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
-        final Key root = this.layout.tags(this.name);
-        return this.asto.list(root).thenApply(
-            keys -> new AstoTags(this.name, root, keys, from, limit)
+    public CompletableFuture<Tags> tags(Pagination pagination) {
+        final Key root = Layout.tags(this.name);
+        return this.storage.list(root).thenApply(
+            keys -> new AstoTags(this.name, root, keys, pagination)
         );
     }
 
@@ -123,7 +110,7 @@ public final class AstoManifests implements Manifests {
                 Stream.of(manifest.config()),
                 manifest.layers().stream()
                     .filter(layer -> layer.urls().isEmpty())
-                    .map(Layer::digest)
+                    .map(ManifestLayer::digest)
             );
         } catch (final JsonException ex) {
             throw new InvalidManifestException(
@@ -179,8 +166,8 @@ public final class AstoManifests implements Manifests {
      * @return Link key.
      */
     private CompletableFuture<Void> addLink(final ManifestReference ref, final Digest digest) {
-        return this.asto.save(
-            this.layout.manifest(this.name, ref),
+        return this.storage.save(
+            Layout.manifest(this.name, ref),
             new Content.From(digest.string().getBytes(StandardCharsets.US_ASCII))
         ).toCompletableFuture();
     }
@@ -192,11 +179,11 @@ public final class AstoManifests implements Manifests {
      * @return Blob digest, empty if no link found.
      */
     private CompletableFuture<Optional<Digest>> readLink(final ManifestReference ref) {
-        final Key key = this.layout.manifest(this.name, ref);
-        return this.asto.exists(key).thenCompose(
+        final Key key = Layout.manifest(this.name, ref);
+        return this.storage.exists(key).thenCompose(
             exists -> {
                 if (exists) {
-                    return this.asto.value(key)
+                    return this.storage.value(key)
                         .thenCompose(Content::asStringFuture)
                         .thenApply(val -> Optional.of(new Digest.FromString(val)));
                 }

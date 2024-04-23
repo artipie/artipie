@@ -5,13 +5,12 @@
 package com.artipie.helm.http;
 
 import com.artipie.asto.Storage;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -53,8 +52,7 @@ public final class HelmSlice extends Slice.Wrap {
             new SliceRoute(
                 new RtRulePath(
                     new RtRule.Any(
-                        new ByMethodsRule(RqMethod.PUT),
-                        new ByMethodsRule(RqMethod.POST)
+                        MethodRule.PUT, MethodRule.POST
                     ),
                     new BasicAuthzSlice(
                         new PushChartSlice(storage, events, name),
@@ -66,7 +64,7 @@ public final class HelmSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET),
+                        MethodRule.GET,
                         new RtRule.ByPath(DownloadIndexSlice.PTRN)
                     ),
                     new BasicAuthzSlice(
@@ -78,7 +76,7 @@ public final class HelmSlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
-                    new ByMethodsRule(RqMethod.GET),
+                    MethodRule.GET,
                     new BasicAuthzSlice(
                         new SliceDownload(storage),
                         auth,
@@ -90,7 +88,7 @@ public final class HelmSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(DeleteChartSlice.PTRN_DEL_CHART),
-                        new ByMethodsRule(RqMethod.DELETE)
+                        MethodRule.DELETE
                     ),
                     new BasicAuthzSlice(
                         new DeleteChartSlice(storage, events, name),

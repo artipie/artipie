@@ -9,13 +9,12 @@ import com.artipie.docker.Digest;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.asto.CheckedBlobSource;
-import com.artipie.docker.manifest.Layer;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.manifest.ManifestLayer;
 import com.artipie.docker.misc.JoinedTagsSource;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.scheduling.ArtifactEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,7 @@ public final class CacheManifests implements Manifests {
     /**
      * Repository (image) name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
      * Origin repository.
@@ -64,30 +63,28 @@ public final class CacheManifests implements Manifests {
     private final String rname;
 
     /**
-     * Ctor.
-     *
      * @param name Repository name.
      * @param origin Origin repository.
      * @param cache Cache repository.
      * @param events Artifact metadata events
-     * @param rname Artipie repository name
+     * @param registryName Artipie repository name
      */
-    public CacheManifests(final RepoName name, final Repo origin, final Repo cache,
-        final Optional<Queue<ArtifactEvent>> events, final String rname) {
+    public CacheManifests(String name, Repo origin, Repo cache,
+        Optional<Queue<ArtifactEvent>> events, String registryName) {
         this.name = name;
         this.origin = origin;
         this.cache = cache;
         this.events = events;
-        this.rname = rname;
+        this.rname = registryName;
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content content) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return this.origin.manifests().get(ref).handle(
             (original, throwable) -> {
                 final CompletionStage<Optional<Manifest>> result;
@@ -95,18 +92,18 @@ public final class CacheManifests implements Manifests {
                     if (original.isPresent()) {
                         Manifest manifest = original.get();
                         if (Manifest.MANIFEST_SCHEMA2.equals(manifest.mediaType()) ||
-                                Manifest.MANIFEST_OCI_V1.equals(manifest.mediaType())) {
+                            Manifest.MANIFEST_OCI_V1.equals(manifest.mediaType())) {
                             result = this.copy(ref).thenApply(unused -> original);
                         } else {
                             LOGGER.warn("Cannot add manifest to cache: [manifest={}, mediaType={}]",
-                                    ref.reference(), manifest.mediaType());
+                                    ref.digest(), manifest.mediaType());
                             result = CompletableFuture.completedFuture(original);
                         }
                     } else {
                         result = this.cache.manifests().get(ref).exceptionally(ignored -> original);
                     }
                 } else {
-                    LOGGER.error("Failed getting manifest ref=" + ref.reference(), throwable);
+                    LOGGER.error("Failed getting manifest ref=" + ref.digest(), throwable);
                     result = this.cache.manifests().get(ref);
                 }
                 return result;
@@ -115,9 +112,9 @@ public final class CacheManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
+    public CompletableFuture<Tags> tags(Pagination pagination) {
         return new JoinedTagsSource(
-            this.name, from, limit, this.origin.manifests(), this.cache.manifests()
+            this.name, pagination, this.origin.manifests(), this.cache.manifests()
         ).tags();
     }
 
@@ -144,9 +141,12 @@ public final class CacheManifests implements Manifests {
                     this.events.ifPresent(
                         queue -> queue.add(
                             new ArtifactEvent(
-                                CacheManifests.REPO_TYPE, this.rname,
-                                ArtifactEvent.DEF_OWNER, this.name.value(), ref.reference(),
-                                manifest.layers().stream().mapToLong(Layer::size).sum()
+                                CacheManifests.REPO_TYPE,
+                                this.rname,
+                                ArtifactEvent.DEF_OWNER,
+                                this.name,
+                                ref.digest(),
+                                manifest.layers().stream().mapToLong(ManifestLayer::size).sum()
                             )
                         )
                     );
@@ -156,7 +156,7 @@ public final class CacheManifests implements Manifests {
         ).handle(
             (ignored, ex) -> {
                 if (ex != null) {
-                    LOGGER.error("Failed to cache manifest " + ref.reference(), ex);
+                    LOGGER.error("Failed to cache manifest " + ref.digest(), ex);
                 }
                 return null;
             }

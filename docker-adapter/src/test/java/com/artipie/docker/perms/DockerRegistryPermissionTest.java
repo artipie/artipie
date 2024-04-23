@@ -12,45 +12,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 /**
  * Test for {@link DockerRegistryPermission}.
- * @since 0.18
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DockerRegistryPermissionTest {
 
     @Test
-    void permissionWithAnyCategoryIsNotImplied() {
-        MatcherAssert.assertThat(
-            new DockerRegistryPermission("my-docker", RegistryCategory.BASE.mask()).implies(
-                new DockerRegistryPermission("my-docker", RegistryCategory.ANY.mask())
-            ),
-            new IsEqual<>(false)
-        );
-        MatcherAssert.assertThat(
-            new DockerRegistryPermission("my-docker", RegistryCategory.CATALOG.mask()).implies(
-                new DockerRegistryPermission("my-docker", RegistryCategory.ANY.mask())
-            ),
-            new IsEqual<>(false)
-        );
-    }
-
-    @Test
-    void permissionWithWildcardIsNotImplied() {
-        MatcherAssert.assertThat(
-            new DockerRegistryPermission("my-docker", RegistryCategory.BASE.mask()).implies(
-                new DockerRegistryPermission("*", RegistryCategory.BASE.mask())
-            ),
-            new IsEqual<>(false)
-        );
-    }
-
-    @Test
     void permissionsWithWildCardNameImpliesAnyName() {
-        MatcherAssert.assertThat(
-            new DockerRegistryPermission("*", RegistryCategory.BASE.mask()).implies(
-                new DockerRegistryPermission("my-docker", RegistryCategory.BASE.mask())
-            ),
-            new IsEqual<>(true)
-        );
         MatcherAssert.assertThat(
             new DockerRegistryPermission("*", RegistryCategory.CATALOG.mask()).implies(
                 new DockerRegistryPermission("docker-local", RegistryCategory.CATALOG.mask())
@@ -67,16 +33,6 @@ class DockerRegistryPermissionTest {
                 new DockerRegistryPermission("docker-global", item.mask())
             ),
             new IsEqual<>(true)
-        );
-    }
-
-    @Test
-    void permissionsWithCategoriesNamesAreNotImplied() {
-        MatcherAssert.assertThat(
-            new DockerRegistryPermission("my-docker", RegistryCategory.BASE.mask()).implies(
-                new DockerRegistryPermission("my-docker", RegistryCategory.CATALOG.mask())
-            ),
-            new IsEqual<>(false)
         );
     }
 

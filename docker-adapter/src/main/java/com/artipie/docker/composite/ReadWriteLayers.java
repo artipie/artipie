@@ -9,7 +9,7 @@ import com.artipie.docker.Digest;
 import com.artipie.docker.Layers;
 import com.artipie.docker.asto.BlobSource;
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Read-write {@link Layers} implementation.
@@ -40,17 +40,17 @@ public final class ReadWriteLayers implements Layers {
     }
 
     @Override
-    public CompletionStage<Blob> put(final BlobSource source) {
+    public CompletableFuture<Digest> put(final BlobSource source) {
         return this.write.put(source);
     }
 
     @Override
-    public CompletionStage<Blob> mount(final Blob blob) {
+    public CompletableFuture<Void> mount(final Blob blob) {
         return this.write.mount(blob);
     }
 
     @Override
-    public CompletionStage<Optional<Blob>> get(final Digest digest) {
+    public CompletableFuture<Optional<Blob>> get(final Digest digest) {
         return this.read.get(digest);
     }
 }

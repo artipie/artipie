@@ -6,14 +6,11 @@ package com.artipie.docker.asto;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Key;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
+import com.artipie.docker.misc.Pagination;
 
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * Asto implementation of {@link Tags}. Tags created from list of keys.
@@ -25,7 +22,7 @@ final class AstoTags implements Tags {
     /**
      * Repository name.
      */
-    private final RepoName name;
+    private final String name;
 
     /**
      * Tags root key.
@@ -37,51 +34,27 @@ final class AstoTags implements Tags {
      */
     private final Collection<Key> keys;
 
-    /**
-     * From which tag to start, exclusive.
-     */
-    private final Optional<Tag> from;
+    private final Pagination pagination;
 
     /**
-     * Maximum number of tags returned.
-     */
-    private final int limit;
-
-    /**
-     * Ctor.
-     *
-     * @param name Repository name.
+     * @param name Image repository name.
      * @param root Tags root key.
      * @param keys List of keys inside tags root.
-     * @param from From which tag to start, exclusive.
-     * @param limit Maximum number of tags returned.
+     * @param pagination Pagination parameters.
      */
-    AstoTags(
-        final RepoName name,
-        final Key root,
-        final Collection<Key> keys,
-        final Optional<Tag> from,
-        final int limit
-    ) {
+    AstoTags(String name, Key root, Collection<Key> keys, Pagination pagination) {
         this.name = name;
         this.root = root;
         this.keys = keys;
-        this.from = from;
-        this.limit = limit;
+        this.pagination = pagination;
     }
 
     @Override
     public Content json() {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-        new Children(this.root, this.keys).names()
-            .stream()
-            .filter(tag -> this.from.map(last -> tag.compareTo(last.value()) > 0).orElse(true))
-            .limit(this.limit)
-            .forEach(builder::add);
         return new Content.From(
             Json.createObjectBuilder()
-                .add("name", this.name.value())
-                .add("tags", builder)
+                .add("name", this.name)
+                .add("tags", pagination.apply(new Children(root, keys).names().stream()))
                 .build()
                 .toString()
                 .getBytes()

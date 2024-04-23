@@ -8,46 +8,49 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.Headers;
+import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Proxy {@link Docker} implementation.
  */
 public final class ProxyDocker implements Docker {
 
+    private final String registryName;
     /**
      * Remote repository.
      */
     private final Slice remote;
 
     /**
-     * Ctor.
-     *
      * @param remote Remote repository.
      */
-    public ProxyDocker(final Slice remote) {
+    public ProxyDocker(String registryName, Slice remote) {
+        this.registryName = registryName;
         this.remote = remote;
     }
 
     @Override
-    public Repo repo(final RepoName name) {
+    public String registryName() {
+        return registryName;
+    }
+
+    @Override
+    public Repo repo(String name) {
         return new ProxyRepo(this.remote, name);
     }
 
     @Override
-    public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
+    public CompletableFuture<Catalog> catalog(Pagination pagination) {
         return new ResponseSink<>(
             this.remote.response(
-                new RequestLine(RqMethod.GET, new CatalogUri(from, limit).string()),
+                new RequestLine(RqMethod.GET, pagination.uriWithPagination("/v2/_catalog")),
                 Headers.EMPTY,
                 Content.EMPTY
             ),

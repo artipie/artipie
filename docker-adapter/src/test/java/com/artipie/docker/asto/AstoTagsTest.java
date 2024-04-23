@@ -5,8 +5,7 @@
 package com.artipie.docker.asto;
 
 import com.artipie.asto.Key;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Tag;
+import com.artipie.docker.misc.Pagination;
 import com.google.common.base.Splitter;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +16,6 @@ import wtf.g4s8.hamcrest.json.JsonHas;
 import wtf.g4s8.hamcrest.json.JsonValueIs;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -30,7 +28,7 @@ final class AstoTagsTest {
     /**
      * Repository name used in tests.
      */
-    private RepoName name;
+    private String name;
 
     /**
      * Tag keys.
@@ -39,7 +37,7 @@ final class AstoTagsTest {
 
     @BeforeEach
     void setUp() {
-        this.name = new RepoName.Simple("test");
+        this.name = "test";
         this.keys = Stream.of("foo/1.0", "foo/0.1-rc", "foo/latest", "foo/0.1")
             .map(Key.From::new)
             .collect(Collectors.toList());
@@ -59,8 +57,7 @@ final class AstoTagsTest {
                 this.name,
                 new Key.From("foo"),
                 this.keys,
-                Optional.ofNullable(from).map(Tag.Valid::new),
-                Optional.ofNullable(limit).orElse(Integer.MAX_VALUE)
+                Pagination.from(from, limit)
             ).json().asJsonObject(),
             new JsonHas(
                 "tags",

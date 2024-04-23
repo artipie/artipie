@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.condition.OS;
  */
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
 @DisabledOnOs(OS.WINDOWS)
+@Disabled("FOR_REMOVING")
 public final class EtcdStorageVerificationTest extends StorageWhiteboxVerification {
     /**
      * Etcd cluster.

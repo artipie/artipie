@@ -7,8 +7,8 @@ package com.artipie.docker.http;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Docker;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.cache.CacheDocker;
 import com.artipie.docker.composite.MultiReadDocker;
@@ -17,7 +17,6 @@ import com.artipie.docker.junit.DockerClient;
 import com.artipie.docker.junit.DockerClientSupport;
 import com.artipie.docker.junit.DockerRepository;
 import com.artipie.docker.proxy.ProxyDocker;
-import com.artipie.docker.ManifestReference;
 import com.artipie.http.client.HttpClientSettings;
 import com.artipie.http.client.auth.AuthClientSlice;
 import com.artipie.http.client.auth.GenericAuthenticator;
@@ -74,23 +73,23 @@ final class CachingProxyITCase {
             new HttpClientSettings().setFollowRedirects(true)
         );
         this.client.start();
-        this.cache = new AstoDocker(new InMemoryStorage());
-        final Docker local = new AstoDocker(new InMemoryStorage());
+        this.cache = new AstoDocker("test_registry", new InMemoryStorage());
+        final Docker local = new AstoDocker("test_registry", new InMemoryStorage());
         this.repo = new DockerRepository(
             new ReadWriteDocker(
                 new MultiReadDocker(
                     local,
                     new CacheDocker(
                         new MultiReadDocker(
-                            new ProxyDocker(this.client.https("mcr.microsoft.com")),
-                            new ProxyDocker(
+                            new ProxyDocker("test_registry", this.client.https("mcr.microsoft.com")),
+                            new ProxyDocker("test_registry",
                                 new AuthClientSlice(
                                     this.client.https("registry-1.docker.io"),
                                     new GenericAuthenticator(this.client)
                                 )
                             )
                         ),
-                        this.cache, Optional.empty(), "*"
+                        this.cache, Optional.empty()
                     )
                 ),
                 local
@@ -146,9 +145,7 @@ final class CachingProxyITCase {
     }
 
     private void awaitManifestCached() throws Exception {
-        final Manifests manifests = this.cache.repo(
-            new RepoName.Simple(this.img.name())
-        ).manifests();
+        final Manifests manifests = this.cache.repo(img.name()).manifests();
         final ManifestReference ref = ManifestReference.from(
             new Digest.FromString(this.img.digest())
         );

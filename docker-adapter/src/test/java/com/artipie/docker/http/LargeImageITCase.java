@@ -22,12 +22,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Integration test for large file pushing scenario of {@link DockerSlice}.
- *
- * @since 0.3
 */
 @DockerClientSupport
 @DisabledOnOs(OS.WINDOWS)
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class LargeImageITCase {
     /**
      * Docker image name.
@@ -47,7 +44,7 @@ public final class LargeImageITCase {
     @BeforeEach
     void setUp(final @TempDir Path storage) {
         this.repository = new DockerRepository(
-            new AstoDocker(new FileStorage(storage))
+            new AstoDocker("test_registry", new FileStorage(storage))
         );
         this.repository.start();
     }

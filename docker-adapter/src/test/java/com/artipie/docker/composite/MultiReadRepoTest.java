@@ -4,11 +4,11 @@
  */
 package com.artipie.docker.composite;
 
-import com.artipie.docker.RepoName;
-import java.util.ArrayList;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 /**
  * Tests for {@link MultiReadRepo}.
@@ -20,7 +20,7 @@ final class MultiReadRepoTest {
     @Test
     void createsMultiReadLayers() {
         MatcherAssert.assertThat(
-            new MultiReadRepo(new RepoName.Simple("one"), new ArrayList<>(0)).layers(),
+            new MultiReadRepo("one", new ArrayList<>()).layers(),
             new IsInstanceOf(MultiReadLayers.class)
         );
     }
@@ -28,7 +28,7 @@ final class MultiReadRepoTest {
     @Test
     void createsMultiReadManifests() {
         MatcherAssert.assertThat(
-            new MultiReadRepo(new RepoName.Simple("two"), new ArrayList<>(0)).manifests(),
+            new MultiReadRepo("two", new ArrayList<>()).manifests(),
             new IsInstanceOf(MultiReadManifests.class)
         );
     }

@@ -7,17 +7,15 @@ package com.artipie.docker.composite;
 import com.artipie.asto.Content;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Catalog;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.fake.FakeCatalogDocker;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.docker.proxy.ProxyDocker;
 import com.artipie.http.ResponseBuilder;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.core.IsEqual;
+import org.hamcrest.Matchers;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 /**
  * Tests for {@link ReadWriteDocker}.
@@ -29,40 +27,33 @@ final class ReadWriteDockerTest {
     @Test
     void createsReadWriteRepo() {
         final ReadWriteDocker docker = new ReadWriteDocker(
-            new ProxyDocker((line, headers, body) -> ResponseBuilder.ok().completedFuture()),
-            new AstoDocker(new InMemoryStorage())
+            new ProxyDocker("test_registry", (line, headers, body) -> ResponseBuilder.ok().completedFuture()),
+            new AstoDocker("test_registry", new InMemoryStorage())
         );
         MatcherAssert.assertThat(
-            docker.repo(new RepoName.Simple("test")),
+            docker.repo("test"),
             new IsInstanceOf(ReadWriteRepo.class)
         );
     }
 
     @Test
     void delegatesCatalog() {
-        final Optional<RepoName> from = Optional.of(new RepoName.Simple("foo"));
         final int limit = 123;
         final Catalog catalog = () -> new Content.From("{...}".getBytes());
         final FakeCatalogDocker fake = new FakeCatalogDocker(catalog);
         final ReadWriteDocker docker = new ReadWriteDocker(
             fake,
-            new AstoDocker(new InMemoryStorage())
+            new AstoDocker("test_registry", new InMemoryStorage())
         );
-        final Catalog result = docker.catalog(from, limit).toCompletableFuture().join();
+        final Catalog result = docker.catalog(Pagination.from("foo", limit)).join();
         MatcherAssert.assertThat(
-            "Forwards from",
-            fake.from(),
-            new IsEqual<>(from)
+            "Forwards from", fake.from(), Matchers.is("foo")
         );
         MatcherAssert.assertThat(
-            "Forwards limit",
-            fake.limit(),
-            new IsEqual<>(limit)
+            "Forwards limit", fake.limit(), Matchers.is(limit)
         );
         MatcherAssert.assertThat(
-            "Returns catalog",
-            result,
-            new IsEqual<>(catalog)
+            "Returns catalog", result, Matchers.is(catalog)
         );
     }
 

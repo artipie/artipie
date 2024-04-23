@@ -7,13 +7,13 @@ package com.artipie.docker.asto;
 
 import com.artipie.asto.Content;
 import com.artipie.asto.Storage;
-import com.artipie.docker.Blob;
+import com.artipie.docker.Digest;
 import com.artipie.docker.ExampleStorage;
-import com.artipie.docker.RepoName;
+import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Tags;
 import com.artipie.docker.error.InvalidManifestException;
 import com.artipie.docker.manifest.Manifest;
-import com.artipie.docker.ManifestReference;
+import com.artipie.docker.misc.Pagination;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
@@ -37,7 +37,7 @@ final class AstoManifestsTest {
     /**
      * Blobs used in tests.
      */
-    private AstoBlobs blobs;
+    private Blobs blobs;
 
     /**
      * Repository manifests being tested.
@@ -47,10 +47,8 @@ final class AstoManifestsTest {
     @BeforeEach
     void setUp() {
         final Storage storage = new ExampleStorage();
-        final Layout layout = new DefaultLayout();
-        final RepoName name = new RepoName.Simple("my-alpine");
-        this.blobs = new AstoBlobs(storage, layout, name);
-        this.manifests = new AstoManifests(storage, this.blobs, layout, name);
+        this.blobs = new Blobs(storage);
+        this.manifests = new AstoManifests(storage, this.blobs, "my-alpine");
     }
 
     @Test
@@ -63,37 +61,30 @@ final class AstoManifestsTest {
     @Test
     @Timeout(5)
     void shouldReadNoManifestIfAbsent() throws Exception {
-        final Optional<Manifest> manifest = this.manifests.get(
-            ManifestReference.from("2")
-        ).toCompletableFuture().get();
+        final Optional<Manifest> manifest = this.manifests.get(ManifestReference.from("2")).get();
         MatcherAssert.assertThat(manifest.isPresent(), new IsEqual<>(false));
     }
 
     @Test
     @Timeout(5)
     void shouldReadAddedManifest() {
-        final Blob config = this.blobs.put(new TrustedBlobSource("config".getBytes()))
-            .toCompletableFuture().join();
-        final Blob layer = this.blobs.put(new TrustedBlobSource("layer".getBytes()))
-            .toCompletableFuture().join();
+        final Digest config = this.blobs.put(new TrustedBlobSource("config".getBytes())).join();
+        final Digest layer = this.blobs.put(new TrustedBlobSource("layer".getBytes())).join();
         final byte[] data = this.getJsonBytes(config, layer, "my-type");
         final ManifestReference ref = ManifestReference.fromTag("some-tag");
-        final Manifest manifest = this.manifests.put(ref, new Content.From(data))
-            .toCompletableFuture().join();
+        final Manifest manifest = this.manifests.put(ref, new Content.From(data)).join();
         MatcherAssert.assertThat(this.manifest(ref), new IsEqual<>(data));
         MatcherAssert.assertThat(
             this.manifest(ManifestReference.from(manifest.digest())),
-            new IsEqual<>(data)
+            Matchers.is(data)
         );
     }
 
     @Test
     @Timeout(5)
     void shouldFailPutManifestIfMediaTypeIsEmpty() {
-        final Blob config = this.blobs.put(new TrustedBlobSource("config".getBytes()))
-            .toCompletableFuture().join();
-        final Blob layer = this.blobs.put(new TrustedBlobSource("layer".getBytes()))
-            .toCompletableFuture().join();
+        final Digest config = this.blobs.put(new TrustedBlobSource("config".getBytes())).join();
+        final Digest layer = this.blobs.put(new TrustedBlobSource("layer".getBytes())).join();
         final byte[] data = this.getJsonBytes(config, layer, "");
         final CompletionStage<Manifest> future = this.manifests.put(
             ManifestReference.fromTag("ddd"),
@@ -135,11 +126,11 @@ final class AstoManifestsTest {
     @Test
     @Timeout(5)
     void shouldReadTags() {
-        final Tags tags = this.manifests.tags(Optional.empty(), Integer.MAX_VALUE)
+        final Tags tags = this.manifests.tags(Pagination.empty())
             .toCompletableFuture().join();
         MatcherAssert.assertThat(
             tags.json().asString(),
-            new IsEqual<>("{\"name\":\"my-alpine\",\"tags\":[\"1\",\"latest\"]}")
+            Matchers.is("{\"name\":\"my-alpine\",\"tags\":[\"1\",\"latest\"]}")
         );
     }
 
@@ -147,21 +138,21 @@ final class AstoManifestsTest {
         return this.manifests.get(ref)
             .thenApply(res -> res.orElseThrow().content())
             .thenCompose(Content::asBytesFuture)
-            .toCompletableFuture().join();
+            .join();
     }
 
-    private byte[] getJsonBytes(final Blob config, final Blob layer, final String mtype) {
+    private byte[] getJsonBytes(Digest config, Digest layer, String mtype) {
         return Json.createObjectBuilder()
             .add(
                 "config",
-                Json.createObjectBuilder().add("digest", config.digest().string())
+                Json.createObjectBuilder().add("digest", config.string())
             )
             .add("mediaType", mtype)
             .add(
                 "layers",
                 Json.createArrayBuilder()
                     .add(
-                        Json.createObjectBuilder().add("digest", layer.digest().string())
+                        Json.createObjectBuilder().add("digest", layer.string())
                     )
                     .add(
                         Json.createObjectBuilder()

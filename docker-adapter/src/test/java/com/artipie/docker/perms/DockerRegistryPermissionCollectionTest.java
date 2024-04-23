@@ -31,18 +31,9 @@ class DockerRegistryPermissionCollectionTest {
         this.collection.add(
             new DockerRegistryPermission("my-repo", RegistryCategory.CATALOG.mask())
         );
-        this.collection.add(
-            new DockerRegistryPermission("docker-local", RegistryCategory.BASE.mask())
-        );
         MatcherAssert.assertThat(
             this.collection.implies(
                 new DockerRegistryPermission("my-repo", RegistryCategory.CATALOG.mask())
-            ),
-            new IsEqual<>(true)
-        );
-        MatcherAssert.assertThat(
-            this.collection.implies(
-                new DockerRegistryPermission("docker-local", RegistryCategory.BASE.mask())
             ),
             new IsEqual<>(true)
         );
@@ -51,12 +42,6 @@ class DockerRegistryPermissionCollectionTest {
     @Test
     void impliesWhenAllPermissionIsPresent() {
         this.collection.add(new DockerRegistryPermission("*", RegistryCategory.ANY.mask()));
-        MatcherAssert.assertThat(
-            this.collection.implies(
-                new DockerRegistryPermission("docker-local", RegistryCategory.BASE.mask())
-            ),
-            new IsEqual<>(true)
-        );
         MatcherAssert.assertThat(
             this.collection.implies(
                 new DockerRegistryPermission("my-repo", RegistryCategory.CATALOG.mask())
@@ -96,22 +81,5 @@ class DockerRegistryPermissionCollectionTest {
         this.collection.add(
             new DockerRegistryPermission("docker-local", RegistryCategory.CATALOG.mask())
         );
-        MatcherAssert.assertThat(
-            this.collection.implies(
-                new DockerRegistryPermission("docker-local", RegistryCategory.BASE.mask())
-            ),
-            new IsEqual<>(false)
-        );
     }
-
-    @Test
-    void emptyCollectionDoesNotImply() {
-        MatcherAssert.assertThat(
-            this.collection.implies(
-                new DockerRegistryPermission("my-repo", RegistryCategory.BASE.mask())
-            ),
-            new IsEqual<>(false)
-        );
-    }
-
 }

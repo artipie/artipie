@@ -5,19 +5,43 @@
 package com.artipie.docker.asto;
 
 import com.artipie.asto.Key;
+import com.artipie.docker.Digest;
+import com.artipie.docker.ManifestReference;
 
 /**
- * Storage layout.
- * Provides location for all repository elements such as blobs, manifests and uploads.
- *
- * @since 0.7
+ * Original storage layout that is compatible with reference Docker Registry implementation.
  */
-public interface Layout extends BlobsLayout, ManifestsLayout, UploadsLayout {
+public final class Layout {
+
+    public static Key repositories() {
+        return new Key.From("repositories");
+    }
+
+    public static Key blob(Digest digest) {
+        return new Key.From(
+            "blobs", digest.alg(), digest.hex().substring(0, 2), digest.hex(), "data"
+        );
+    }
+
+    public static Key manifest(String repo, final ManifestReference ref) {
+        return new Key.From(manifests(repo), ref.link().string());
+    }
+
+    public static Key tags(String repo) {
+        return new Key.From(manifests(repo), "tags");
+    }
+
+    public static Key upload(String name, final String uuid) {
+        return new Key.From(repositories(), name, "_uploads", uuid);
+    }
 
     /**
-     * Create repositories key.
+     * Create manifests root key.
      *
-     * @return Key for storing repositories.
+     * @param repo Repository name.
+     * @return Manifests key.
      */
-    Key repositories();
+    private static Key manifests(String repo) {
+        return new Key.From(repositories(), repo, "_manifests");
+    }
 }

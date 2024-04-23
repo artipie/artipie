@@ -26,8 +26,6 @@ public class Children {
     private final Collection<Key> keys;
 
     /**
-     * Ctor.
-     *
      * @param root Root key.
      * @param keys List of keys inside root.
      */

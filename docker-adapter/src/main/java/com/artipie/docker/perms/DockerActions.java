@@ -5,12 +5,12 @@
 package com.artipie.docker.perms;
 
 import com.artipie.security.perms.Action;
+
 import java.util.Collections;
 import java.util.Set;
 
 /**
  * Docker actions.
- * @since 0.18
  */
 public enum DockerActions implements Action {
 
@@ -30,11 +30,10 @@ public enum DockerActions implements Action {
     private final String name;
 
     /**
-     * Ctor.
      * @param mask Action mask
      * @param name Action name
      */
-    DockerActions(final int mask, final String name) {
+    DockerActions(int mask, String name) {
         this.mask = mask;
         this.name = name;
     }
@@ -55,15 +54,12 @@ public enum DockerActions implements Action {
      * @return The mask
      * @throws IllegalArgumentException is the action not valid
      */
-    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
-    public static int maskByAction(final String name) {
-        for (final Action item : values()) {
+    public static int maskByAction(String name) {
+        for (Action item : values()) {
             if (item.names().contains(name)) {
                 return item.mask();
             }
         }
-        throw new IllegalArgumentException(
-            String.format("Unknown permission action %s", name)
-        );
+        throw new IllegalArgumentException("Unknown permission action " + name);
     }
 }

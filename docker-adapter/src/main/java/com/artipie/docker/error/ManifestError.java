@@ -40,6 +40,6 @@ public final class ManifestError implements DockerError {
 
     @Override
     public Optional<String> detail() {
-        return Optional.of(this.ref.reference());
+        return Optional.of(this.ref.digest());
     }
 }

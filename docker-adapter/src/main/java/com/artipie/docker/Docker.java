@@ -5,29 +5,36 @@
 
 package com.artipie.docker;
 
-import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import com.artipie.docker.misc.Pagination;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Docker registry storage main object.
  * @see com.artipie.docker.asto.AstoDocker
- * @since 0.1
  */
 public interface Docker {
 
     /**
+     * Gets registry name.
+     *
+     * @return Registry name.
+     */
+    String registryName();
+
+    /**
      * Docker repo by name.
+     *
      * @param name Repository name
      * @return Repository object
      */
-    Repo repo(RepoName name);
+    Repo repo(String name);
 
     /**
      * Docker repositories catalog.
      *
-     * @param from From which tag to start, exclusive.
-     * @param limit Maximum number of tags returned.
+     * @param pagination  Pagination parameters.
      * @return Catalog.
      */
-    CompletionStage<Catalog> catalog(Optional<RepoName> from, int limit);
+    CompletableFuture<Catalog> catalog(Pagination pagination);
 }

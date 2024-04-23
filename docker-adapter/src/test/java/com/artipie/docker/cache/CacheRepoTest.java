@@ -5,7 +5,6 @@
 package com.artipie.docker.cache;
 
 import com.artipie.asto.memory.InMemoryStorage;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.asto.AstoDocker;
 import com.artipie.docker.proxy.ProxyRepo;
 import com.artipie.http.ResponseBuilder;
@@ -31,13 +30,13 @@ final class CacheRepoTest {
     @BeforeEach
     void setUp() {
         this.repo = new CacheRepo(
-            new RepoName.Simple("test"),
+            "test",
             new ProxyRepo(
                 (line, headers, body) -> ResponseBuilder.ok().completedFuture(),
-                new RepoName.Simple("test-origin")
+                "test-origin"
             ),
-            new AstoDocker(new InMemoryStorage())
-                .repo(new RepoName.Simple("test-cache")), Optional.empty(), "*"
+            new AstoDocker("registry", new InMemoryStorage())
+                .repo("test-cache"), Optional.empty(), "*"
         );
     }
 

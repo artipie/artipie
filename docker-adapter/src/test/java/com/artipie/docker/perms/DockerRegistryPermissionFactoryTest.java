@@ -6,20 +6,18 @@ package com.artipie.docker.perms;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.security.perms.PermissionConfig;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.IsEqual;
-import org.junit.jupiter.api.Test;
 
 /**
  * Test for {@link DockerRegistryPermissionFactory}.
- * @since 0.18
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 class DockerRegistryPermissionFactoryTest {
 
     @Test
@@ -34,7 +32,8 @@ class DockerRegistryPermissionFactoryTest {
                                 "docker-local:",
                                 "  - *",
                                 "www.boo.docker:",
-                                "  - base"
+                                "  - base",
+                                "  - *"
                             )
                         ).readYamlMapping()
                     )
@@ -64,8 +63,8 @@ class DockerRegistryPermissionFactoryTest {
             list, Matchers.hasSize(1)
         );
         MatcherAssert.assertThat(
-            list.get(0),
-            new IsEqual<>(
+            list.getFirst(),
+            Matchers.is(
                 new DockerRegistryPermission("my-docker", RegistryCategory.ANY.mask())
             )
         );

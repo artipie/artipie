@@ -12,8 +12,7 @@ import com.artipie.http.auth.OperationControl;
 import com.artipie.http.headers.ContentType;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -116,7 +115,7 @@ public final class GoSlice implements Slice {
         return new RtRulePath(
             new RtRule.All(
                 new RtRule.ByPath(Pattern.compile(pattern)),
-                new ByMethodsRule(RqMethod.GET)
+                MethodRule.GET
             ),
             new LoggingSlice(slice)
         );

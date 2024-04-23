@@ -15,8 +15,7 @@ import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.auth.Tokens;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -73,7 +72,7 @@ public final class CondaSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath("/t/.*repodata\\.json$"),
-                        new ByMethodsRule(RqMethod.GET)
+                        MethodRule.GET
                     ),
                     new TokenAuthSlice(
                         new DownloadRepodataSlice(storage),
@@ -86,7 +85,7 @@ public final class CondaSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(".*repodata\\.json$"),
-                        new ByMethodsRule(RqMethod.GET)
+                        MethodRule.GET
                     ),
                     new BasicAuthzSlice(
                         new DownloadRepodataSlice(storage), users,
@@ -98,7 +97,7 @@ public final class CondaSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(".*(/dist/|/t/).*(\\.tar\\.bz2|\\.conda)$"),
-                        new ByMethodsRule(RqMethod.GET)
+                        MethodRule.GET
                     ),
                     new TokenAuthSlice(
                         new SliceDownload(storage, CondaSlice.transform()),
@@ -110,7 +109,7 @@ public final class CondaSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(".*(\\.tar\\.bz2|\\.conda)$"),
-                        new ByMethodsRule(RqMethod.GET)
+                        MethodRule.GET
                     ),
                     new BasicAuthzSlice(
                         new SliceDownload(storage, CondaSlice.transform()), users,
@@ -122,7 +121,7 @@ public final class CondaSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(".*/(stage|commit).*(\\.tar\\.bz2|\\.conda)$"),
-                        new ByMethodsRule(RqMethod.POST)
+                        MethodRule.POST
                     ),
                     new TokenAuthSlice(
                         new PostStageCommitSlice(url),
@@ -134,7 +133,7 @@ public final class CondaSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(".*/(package|release)/.*"),
-                        new ByMethodsRule(RqMethod.GET)
+                        MethodRule.GET
                     ),
                     new TokenAuthSlice(
                         new GetPackageSlice(),
@@ -146,7 +145,7 @@ public final class CondaSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(".*/(package|release)/.*"),
-                        new ByMethodsRule(RqMethod.POST)
+                        MethodRule.POST
                     ),
                     new TokenAuthSlice(
                         new PostPackageReleaseSlice(),
@@ -158,13 +157,13 @@ public final class CondaSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath("/?[a-z0-9-._]*/[a-z0-9-._]*/[a-z0-9-._]*(\\.tar\\.bz2|\\.conda)$"),
-                        new ByMethodsRule(RqMethod.POST)
+                        MethodRule.POST
                     ),
                     new UpdateSlice(storage, events, repo)
                 ),
-                new RtRulePath(new ByMethodsRule(RqMethod.HEAD), new SliceSimple(ResponseBuilder.ok().build())),
+                new RtRulePath(MethodRule.HEAD, new SliceSimple(ResponseBuilder.ok().build())),
                 new RtRulePath(
-                    new RtRule.All(new RtRule.ByPath(".*user$"), new ByMethodsRule(RqMethod.GET)),
+                    new RtRule.All(new RtRule.ByPath(".*user$"), MethodRule.GET),
                     new TokenAuthSlice(
                         new GetUserSlice(new TokenAuthScheme(new TokenAuth(tokens.auth()))),
                         new OperationControl(
@@ -176,13 +175,13 @@ public final class CondaSlice extends Slice.Wrap {
                 new RtRulePath(
                     new RtRule.All(
                         new RtRule.ByPath(".*authentication-type$"),
-                        new ByMethodsRule(RqMethod.GET)
+                        MethodRule.GET
                     ),
                     new AuthTypeSlice()
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new RtRule.ByPath(".*authentications$"), new ByMethodsRule(RqMethod.POST)
+                        new RtRule.ByPath(".*authentications$"), MethodRule.POST
                     ),
                     new BasicAuthzSlice(
                         new GenerateTokenSlice(users, tokens), users,
@@ -193,7 +192,7 @@ public final class CondaSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new RtRule.ByPath(".*authentications$"), new ByMethodsRule(RqMethod.DELETE)
+                        new RtRule.ByPath(".*authentications$"), MethodRule.DELETE
                     ),
                     new BasicAuthzSlice(
                         new DeleteTokenSlice(tokens), users,

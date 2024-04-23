@@ -10,8 +10,6 @@ import com.artipie.docker.junit.DockerClient;
 import com.artipie.docker.junit.DockerClientSupport;
 import com.artipie.docker.junit.DockerRepository;
 import com.artipie.scheduling.ArtifactEvent;
-import java.util.LinkedList;
-import java.util.Queue;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -20,12 +18,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 /**
  * Integration test for {@link DockerSlice}.
- *
- * @since 0.2
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DockerClientSupport
 final class DockerSliceITCase {
     /**
@@ -52,7 +50,7 @@ final class DockerSliceITCase {
     void setUp() throws Exception {
         this.events = new LinkedList<>();
         this.repository = new DockerRepository(
-            new DockerSlice(new AstoDocker(new InMemoryStorage()), this.events)
+            new DockerSlice(new AstoDocker("test_registry", new InMemoryStorage()), this.events)
         );
         this.repository.start();
         this.image = this.prepareImage();

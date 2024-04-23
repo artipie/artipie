@@ -7,14 +7,13 @@ package com.artipie.pypi.http;
 
 import com.artipie.asto.Storage;
 import com.artipie.http.Headers;
+import com.artipie.http.ResponseBuilder;
 import com.artipie.http.Slice;
 import com.artipie.http.auth.Authentication;
 import com.artipie.http.auth.BasicAuthzSlice;
 import com.artipie.http.auth.OperationControl;
 import com.artipie.http.headers.ContentType;
-import com.artipie.http.rq.RqMethod;
-import com.artipie.http.ResponseBuilder;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
@@ -54,7 +53,7 @@ public final class PySlice extends Slice.Wrap {
             new SliceRoute(
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET),
+                        MethodRule.GET,
                         new RtRule.ByPath(".*\\.(whl|tar\\.gz|zip|tar\\.bz2|tar\\.Z|tar|egg)")
                     ),
                     new BasicAuthzSlice(
@@ -70,7 +69,7 @@ public final class PySlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.POST),
+                        MethodRule.POST,
                         new RtRule.ByHeader(
                             "content-type", Pattern.compile("multipart.*", Pattern.CASE_INSENSITIVE)
                         )
@@ -85,7 +84,7 @@ public final class PySlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.POST),
+                        MethodRule.POST,
                         new RtRule.ByHeader(
                             "content-type", Pattern.compile("text.*", Pattern.CASE_INSENSITIVE)
                         )
@@ -100,7 +99,7 @@ public final class PySlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET),
+                        MethodRule.GET,
                         new RtRule.ByPath("(^\\/)|(.*(\\/[a-z0-9\\-]+?\\/?$))")
                     ),
                     new BasicAuthzSlice(
@@ -113,7 +112,7 @@ public final class PySlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET)
+                        MethodRule.GET
                     ),
                     new BasicAuthzSlice(
                         new RedirectSlice(),

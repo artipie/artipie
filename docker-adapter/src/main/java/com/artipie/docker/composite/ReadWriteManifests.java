@@ -7,12 +7,12 @@ package com.artipie.docker.composite;
 import com.artipie.asto.Content;
 import com.artipie.docker.ManifestReference;
 import com.artipie.docker.Manifests;
-import com.artipie.docker.Tag;
 import com.artipie.docker.Tags;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 
 import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Read-write {@link Manifests} implementation.
@@ -30,8 +30,6 @@ public final class ReadWriteManifests implements Manifests {
     private final Manifests write;
 
     /**
-     * Ctor.
-     *
      * @param read Manifests for reading.
      * @param write Manifests for writing.
      */
@@ -41,17 +39,17 @@ public final class ReadWriteManifests implements Manifests {
     }
 
     @Override
-    public CompletionStage<Manifest> put(final ManifestReference ref, final Content content) {
+    public CompletableFuture<Manifest> put(final ManifestReference ref, final Content content) {
         return this.write.put(ref, content);
     }
 
     @Override
-    public CompletionStage<Optional<Manifest>> get(final ManifestReference ref) {
+    public CompletableFuture<Optional<Manifest>> get(final ManifestReference ref) {
         return this.read.get(ref);
     }
 
     @Override
-    public CompletionStage<Tags> tags(final Optional<Tag> from, final int limit) {
-        return this.read.tags(from, limit);
+    public CompletableFuture<Tags> tags(Pagination pagination) {
+        return this.read.tags(pagination);
     }
 }

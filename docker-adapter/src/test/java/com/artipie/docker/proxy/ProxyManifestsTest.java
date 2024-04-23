@@ -8,9 +8,9 @@ import com.artipie.asto.Content;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Digest;
 import com.artipie.docker.ManifestReference;
-import com.artipie.docker.RepoName;
 import com.artipie.docker.http.DigestHeader;
 import com.artipie.docker.manifest.Manifest;
+import com.artipie.docker.misc.Pagination;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.headers.Header;
 import com.artipie.http.rq.RequestLine;
@@ -42,8 +42,7 @@ class ProxyManifestsTest {
                     .header(new DigestHeader(new Digest.FromString(digest)))
                     .body(data)
                     .completedFuture();
-            },
-            new RepoName.Valid("test")
+            }, "test"
         ).get(ManifestReference.from("abc")).toCompletableFuture().join();
         Assertions.assertTrue(found.isPresent());
         final Manifest manifest = found.orElseThrow();
@@ -62,8 +61,7 @@ class ProxyManifestsTest {
                     throw new IllegalArgumentException();
                 }
                 return ResponseBuilder.notFound().completedFuture();
-            },
-            new RepoName.Valid("my-test")
+            }, "my-test"
         ).get(ManifestReference.from("latest")).toCompletableFuture().join();
         Assertions.assertFalse(found.isPresent());
     }
@@ -77,6 +75,7 @@ class ProxyManifestsTest {
         cheaders = new AtomicReference<>();
         final AtomicReference<byte[]> cbody = new AtomicReference<>();
         new ProxyDocker(
+            "test_registry",
             (line, headers, body) -> {
                 cline.set(line);
                 cheaders.set(headers);
@@ -87,7 +86,7 @@ class ProxyManifestsTest {
                     }
                 );
             }
-        ).catalog(Optional.of(new RepoName.Simple(name)), limit).toCompletableFuture().join();
+        ).catalog(Pagination.from(name, limit)).join();
         MatcherAssert.assertThat(
             "Sends expected line to remote",
             cline.get().toString(),
@@ -107,18 +106,20 @@ class ProxyManifestsTest {
         Assertions.assertArrayEquals(
             bytes,
             new ProxyDocker(
+                "test_registry",
                 (line, headers, body) -> ResponseBuilder.ok().body(bytes).completedFuture()
-            ).catalog(Optional.empty(), Integer.MAX_VALUE).thenCompose(
+            ).catalog(Pagination.empty()).thenCompose(
                 catalog -> catalog.json().asBytesFuture()
-            ).toCompletableFuture().join()
+            ).join()
         );
     }
 
     @Test
     void shouldFailReturnCatalogWhenRemoteRespondsWithNotOk() {
         final CompletionStage<Catalog> stage = new ProxyDocker(
+            "test_registry",
             (line, headers, body) -> ResponseBuilder.notFound().completedFuture()
-        ).catalog(Optional.empty(), Integer.MAX_VALUE);
+        ).catalog(Pagination.empty());
         Assertions.assertThrows(
             Exception.class,
             () -> stage.toCompletableFuture().join()

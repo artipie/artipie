@@ -6,7 +6,7 @@ package com.artipie.http;
 
 import com.artipie.RepositorySlices;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.rt.ByMethodsRule;
+import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtPath;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
@@ -57,7 +57,7 @@ public final class MainSlice extends Slice.Wrap {
                 ),
                 new RtRulePath(
                     new RtRule.All(
-                        new ByMethodsRule(RqMethod.GET),
+                        MethodRule.GET,
                         new RtRule.ByPath("/.version")
                     ),
                     new VersionSlice(new ArtipieProperties())

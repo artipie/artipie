@@ -4,7 +4,6 @@
  */
 package com.artipie.docker.perms;
 
-import com.artipie.docker.http.Scope;
 import com.artipie.security.perms.Action;
 
 import java.io.Serial;
@@ -49,16 +48,6 @@ public final class DockerRegistryPermission extends Permission {
     }
 
     /**
-     * Constructs a permission with the specified name and scope.
-     *
-     * @param name Name of the Permission object being created.
-     * @param scope Permission scope, see {@link Scope.Registry}
-     */
-    public DockerRegistryPermission(final String name, final Scope scope) {
-        this(name, scope.action().mask());
-    }
-
-    /**
      * Constructs a permission with the specified name.
      *
      * @param name Name of the Permission object being created.
@@ -96,9 +85,6 @@ public final class DockerRegistryPermission extends Permission {
     public String getActions() {
         if (this.actions == null) {
             final StringJoiner joiner = new StringJoiner(",");
-            if ((this.mask & RegistryCategory.BASE.mask()) == RegistryCategory.BASE.mask()) {
-                joiner.add(RegistryCategory.BASE.name().toLowerCase(Locale.ROOT));
-            }
             if ((this.mask & RegistryCategory.CATALOG.mask()) == RegistryCategory.CATALOG.mask()) {
                 joiner.add(RegistryCategory.CATALOG.name().toLowerCase(Locale.ROOT));
             }

@@ -9,17 +9,16 @@ import com.artipie.asto.Storage;
 import com.artipie.asto.memory.InMemoryStorage;
 import com.artipie.docker.Digest;
 import com.artipie.docker.Docker;
-import com.artipie.docker.RepoName;
-import com.artipie.docker.Upload;
 import com.artipie.docker.asto.AstoDocker;
+import com.artipie.docker.asto.Upload;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
+import com.artipie.http.RsStatus;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.SliceHasResponse;
 import com.artipie.http.rq.RequestLine;
 import com.artipie.http.rq.RqMethod;
-import com.artipie.http.RsStatus;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,14 +39,14 @@ class UploadEntityPutTest {
     @BeforeEach
     void setUp() {
         final Storage storage = new InMemoryStorage();
-        this.docker = new AstoDocker(storage);
+        this.docker = new AstoDocker("test_registry", storage);
         this.slice = new DockerSlice(this.docker);
     }
 
     @Test
     void shouldFinishUpload() {
         final String name = "test";
-        final Upload upload = this.docker.repo(new RepoName.Valid(name)).uploads()
+        final Upload upload = this.docker.repo(name).uploads()
             .start()
             .toCompletableFuture().join();
         upload.append(new Content.From("data".getBytes()))
@@ -74,7 +73,7 @@ class UploadEntityPutTest {
         );
         MatcherAssert.assertThat(
             "Puts blob into storage",
-            this.docker.repo(new RepoName.Simple(name)).layers().get(new Digest.FromString(digest))
+            this.docker.repo(name).layers().get(new Digest.FromString(digest))
                 .thenApply(Optional::isPresent)
                 .toCompletableFuture().join(),
             new IsEqual<>(true)
@@ -85,7 +84,7 @@ class UploadEntityPutTest {
     void returnsBadRequestWhenDigestsDoNotMatch() {
         final String name = "repo";
         final byte[] content = "something".getBytes();
-        final Upload upload = this.docker.repo(new RepoName.Valid(name)).uploads().start()
+        final Upload upload = this.docker.repo(name).uploads().start()
             .toCompletableFuture().join();
         upload.append(new Content.From(content)).toCompletableFuture().join();
         MatcherAssert.assertThat(
@@ -98,7 +97,7 @@ class UploadEntityPutTest {
         );
         MatcherAssert.assertThat(
             "Does not put blob into storage",
-            this.docker.repo(new RepoName.Simple(name)).layers().get(new Digest.Sha256(content))
+            this.docker.repo(name).layers().get(new Digest.Sha256(content))
                 .thenApply(Optional::isPresent)
                 .toCompletableFuture().join(),
             new IsEqual<>(false)
@@ -107,11 +106,10 @@ class UploadEntityPutTest {
 
     @Test
     void shouldReturnNotFoundWhenUploadNotExists() {
-        final Response response = this.slice.response(
-            new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345"),
-            Headers.EMPTY,
-            Content.EMPTY
-        ).join();
+        final Response response = this.slice
+            .response(new RequestLine(RqMethod.PUT, "/v2/test/blobs/uploads/12345"),
+                Headers.EMPTY, Content.EMPTY)
+            .join();
         MatcherAssert.assertThat(
             response,
             new IsErrorsResponse(RsStatus.NOT_FOUND, "BLOB_UPLOAD_UNKNOWN")

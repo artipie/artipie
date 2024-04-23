@@ -10,53 +10,37 @@ import com.artipie.asto.Storage;
 import com.artipie.docker.Catalog;
 import com.artipie.docker.Docker;
 import com.artipie.docker.Repo;
-import com.artipie.docker.RepoName;
-import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import com.artipie.docker.misc.Pagination;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Asto {@link Docker} implementation.
- * @since 0.1
  */
 public final class AstoDocker implements Docker {
 
-    /**
-     * Asto storage.
-     */
-    private final Storage asto;
+    private final String registryName;
 
-    /**
-     * Storage layout.
-     */
-    private final Layout layout;
+    private final Storage storage;
 
-    /**
-     * Ctor.
-     * @param asto Asto storage
-     */
-    public AstoDocker(final Storage asto) {
-        this(asto, new DefaultLayout());
-    }
-
-    /**
-     * Ctor.
-     *
-     * @param asto Storage.
-     * @param layout Storage layout.
-     */
-    public AstoDocker(final Storage asto, final Layout layout) {
-        this.asto = asto;
-        this.layout = layout;
+    public AstoDocker(String registryName, Storage storage) {
+        this.registryName = registryName;
+        this.storage = storage;
     }
 
     @Override
-    public Repo repo(final RepoName name) {
-        return new AstoRepo(this.asto, this.layout, name);
+    public String registryName() {
+        return registryName;
     }
 
     @Override
-    public CompletionStage<Catalog> catalog(final Optional<RepoName> from, final int limit) {
-        final Key root = this.layout.repositories();
-        return this.asto.list(root).thenApply(keys -> new AstoCatalog(root, keys, from, limit));
+    public Repo repo(String name) {
+        return new AstoRepo(this.storage, name);
+    }
+
+    @Override
+    public CompletableFuture<Catalog> catalog(Pagination pagination) {
+        final Key root = Layout.repositories();
+        return this.storage.list(root).thenApply(keys -> new AstoCatalog(root, keys, pagination));
     }
 }

@@ -10,8 +10,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 /**
  * Content Digest.
  * <p></>See <a href="https://docs.docker.com/registry/spec/api/#content-digests">Content Digests</a>
- *
- * @since 0.1
  */
 public interface Digest {
 
@@ -32,7 +30,7 @@ public interface Digest {
      * @return Digest string representation
      */
     default String string() {
-        return String.format("%s:%s", this.alg(), this.hex());
+        return this.alg() + ':' + this.hex();
     }
 
     /**
@@ -87,7 +85,6 @@ public interface Digest {
      * by joining algorithm name with hex string using {@code :} as separator.
      * E.g. if algorithm is {@code sha256} and the digest is {@code 0000}, the link will be
      * {@code sha256:0000}.
-     * @since 0.1
      */
     final class FromString implements Digest {
 
@@ -97,8 +94,6 @@ public interface Digest {
         private final String original;
 
         /**
-         * Ctor.
-         *
          * @param original Digest string.
          */
         public FromString(final String original) {

@@ -273,16 +273,17 @@ public class RepositorySlices {
                 break;
             case "docker":
                 final Docker docker = new AstoDocker(
+                    cfg.name(),
                     new SubStorage(RegistryRoot.V2, cfg.storage())
                 );
                 if (cfg.port().isPresent()) {
                     slice = new DockerSlice(docker, securityPolicy(),
-                        new BasicAuthScheme(authentication()), artifactEvents(), cfg.name());
+                        new BasicAuthScheme(authentication()), artifactEvents());
                 } else {
                     slice = new DockerRoutingSlice.Reverted(
                         new DockerSlice(new TrimmedDocker(docker, cfg.name()),
                             securityPolicy(), new BasicAuthScheme(authentication()),
-                            artifactEvents(), cfg.name())
+                            artifactEvents())
                     );
                 }
                 break;
