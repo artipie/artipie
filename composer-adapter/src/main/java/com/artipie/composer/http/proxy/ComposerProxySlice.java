@@ -23,19 +23,8 @@ import java.net.URI;
 
 /**
  * Composer proxy repository slice.
- * @since 0.4
  */
 public class ComposerProxySlice extends Slice.Wrap {
-    /**
-     * New Composer proxy without cache and without authentication.
-     * @param clients HTTP clients
-     * @param remote Remote URI
-     * @param repo Repository
-     */
-    public ComposerProxySlice(final ClientSlices clients, final URI remote, final Repository repo) {
-        this(clients, remote, repo, Authenticator.ANONYMOUS, Cache.NOP);
-    }
-
     /**
      * New Composer proxy without cache.
      * @param clients HTTP clients
