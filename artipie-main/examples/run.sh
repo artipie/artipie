@@ -10,7 +10,7 @@ workdir=$PWD
 #  - DEBUG - show debug messages
 #  - CI - enable CI mode (debug and `set -x`)
 #  - ARTIPIE_IMAGE - docker image name for artipie
-#       (default artipie/artipie:1.0-SNAPSHOT)
+#       (default artipie/artipie-tests:1.0-SNAPSHOT)
 
 # print error message and exist with error code
 function die {
@@ -59,7 +59,7 @@ function start_artipie {
     image=$ARTIPIE_IMAGE
   fi
   if [[ -z "$image" ]]; then
-    image="artipie/artipie:1.0-SNAPSHOT"
+    image="artipie/artipie-tests:1.0-SNAPSHOT"
   fi
   local port="$2"
   if [[ -z "$port" ]]; then

@@ -376,7 +376,7 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
          * New default artipie container.
          */
         public ArtipieContainer() {
-            this(DockerImageName.parse("artipie/artipie:1.0-SNAPSHOT"));
+            this(DockerImageName.parse("artipie/artipie-tests:1.0-SNAPSHOT"));
         }
 
         /**
