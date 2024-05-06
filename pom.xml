@@ -85,6 +85,8 @@ SOFTWARE.
     <maven.compiler.release>17</maven.compiler.release>
     <header.license>LICENSE.header</header.license>
     <httpclient.version>5.3.1</httpclient.version>
+    <httpcore5.version>5.2.4</httpcore5.version>
+    <httpcore5-h2.version>5.2.4</httpcore5-h2.version>
   </properties>
   <distributionManagement>
     <repository>
