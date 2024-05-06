@@ -30,18 +30,9 @@ public final class RolesITCase {
             .withUser("security/users/john.yaml", "john")
             .withRole("security/roles/admin.yaml", "admin")
             .withRole("security/roles/readers.yaml", "readers"),
-        () -> new TestDeployment.ClientContainer("alpine:3.11")
+        () -> new TestDeployment.ClientContainer("artipie/file-tests:1.0")
             .withWorkingDirectory("/w")
     );
-
-    @BeforeEach
-    void setUp() throws Exception {
-        this.deployment.assertExec(
-            "Failed to install deps",
-            new ContainerResultMatcher(),
-            "apk", "add", "--no-cache", "curl"
-        );
-    }
 
     @Test
     void readersAndAdminsCanDownload() throws Exception {

@@ -42,7 +42,7 @@ final class HelmITCase {
             .withRepoConfig("helm/my-helm.yml", "my-helm")
             .withRepoConfig("helm/my-helm-port.yml", "my-helm-port")
             .withExposedPorts(8081),
-        () -> new TestDeployment.ClientContainer("alpine/helm:2.16.9")
+        () -> new TestDeployment.ClientContainer("artipie/helm-tests:1.0")
             .withWorkingDirectory("/w")
             .withCreateContainerCmdModifier(
                 cmd -> cmd.withEntrypoint("/bin/sh")
@@ -53,11 +53,6 @@ final class HelmITCase {
                 BindMode.READ_ONLY
             )
     );
-
-    @BeforeEach
-    void setUp() throws Exception {
-        this.containers.clientExec("apk", "add", "--no-cache", "curl");
-    }
 
     @ParameterizedTest
     @ValueSource(strings = {"http://artipie:8080/my-helm", "http://artipie:8081/my-helm-port"})

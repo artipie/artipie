@@ -17,14 +17,11 @@ import com.artipie.test.vertxmain.TestVertxMainBuilder;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.wait.strategy.AbstractWaitStrategy;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 import java.nio.file.Path;
-import java.util.Collection;
 
 /**
  * Integration test for local Docker repositories with S3 storage.
@@ -108,30 +105,7 @@ final class DockerLocalS3ITCase {
         }
 
         private static TestDeployment.ClientContainer prepareClientContainer(int port) {
-            final ImageFromDockerfile image = new ImageFromDockerfile(
-                "local/artipie-main/docker_s3_itcase", false
-            ).withDockerfileFromBuilder(
-                builder -> builder
-                    .from(TestDockerClient.DOCKER_CLIENT.toString())
-                    .env("DEBIAN_FRONTEND", "noninteractive")
-                    .env("no_proxy", "host.docker.internal,host.testcontainers.internal,localhost,127.0.0.1")
-                    .workDir("/home")
-                    .run("apk add xz curl")
-                    .copy("minio-bin-20231120.txz", "/w/minio-bin-20231120.txz")
-                    .run("tar xf /w/minio-bin-20231120.txz -C /root")
-                    .run(
-                        String.join(
-                            ";",
-                            "sh -c '/root/bin/minio server /var/minio > /tmp/minio.log 2>&1 &'",
-                            "timeout 30 sh -c 'until nc -z localhost 9000; do sleep 0.1; done'",
-                            "/root/bin/mc alias set srv1 http://localhost:9000 minioadmin minioadmin 2>&1 |tee /tmp/mc.log",
-                            "/root/bin/mc mb srv1/buck1 --region s3test 2>&1|tee -a /tmp/mc.log",
-                            "/root/bin/mc anonymous set public srv1/buck1 2>&1|tee -a /tmp/mc.log"
-                        )
-                    )
-                    .run("rm -fv /w/minio-bin-20231120.txz /tmp/*.log")
-            ).withFileFromClasspath("minio-bin-20231120.txz", "minio-bin-20231120.txz");
-            return new TestDeployment.ClientContainer(image)
+            return new TestDeployment.ClientContainer(TestDockerClient.DOCKER_CLIENT.toString())
                 .withEnv("PORT", String.valueOf(port))
                 .withPrivilegedMode(true)
                 .withCommand("tail", "-f", "/dev/null")

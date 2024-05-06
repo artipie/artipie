@@ -39,7 +39,7 @@ public final class MavenITCase {
             .withRepoConfig("maven/maven.yml", "my-maven")
             .withRepoConfig("maven/maven-port.yml", "my-maven-port")
             .withExposedPorts(8081),
-        () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
+        () -> new TestDeployment.ClientContainer("artipie/maven-tests:1.0")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
                 "maven/maven-settings.xml", "/w/settings.xml", BindMode.READ_ONLY
@@ -135,5 +135,4 @@ public final class MavenITCase {
             )
         );
     }
-
 }

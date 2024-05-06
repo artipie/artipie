@@ -1,0 +1,22 @@
+FROM openjdk:21-oracle
+ARG JAR_FILE
+
+LABEL description="Artipie binary repository management tool"
+
+RUN groupadd -r -g 2020 artipie && \
+    adduser -M -r -g artipie -u 2021 -s /sbin/nologin artipie && \
+    mkdir -p /etc/artipie /usr/lib/artipie /var/artipie && \
+    chown artipie:artipie -R /etc/artipie /usr/lib/artipie /var/artipie
+USER 2021:2020
+
+COPY target/dependency  /usr/lib/artipie/lib
+COPY target/${JAR_FILE} /usr/lib/artipie/artipie.jar
+
+# Run Artipie server for 10sec. on build-time to prepare JVM AppCDS cache data (artipie-d.jsa), which will be used to speed-up startup of the container
+RUN timeout 10s java -XX:ArchiveClassesAtExit=/usr/lib/artipie/artipie-d.jsa $JVM_ARGS --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -cp /usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/* com.artipie.VertxMain --config-file=/etc/artipie/artipie.yml --port=8080 --api-port=8086 || :
+
+VOLUME /var/artipie /etc/artipie
+WORKDIR /var/artipie
+
+EXPOSE 8080 8086
+CMD [ "sh", "-c", "java -XX:SharedArchiveFile=/usr/lib/artipie/artipie-d.jsa $JVM_ARGS --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -cp /usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/* com.artipie.VertxMain --config-file=/etc/artipie/artipie.yml --port=8080 --api-port=8086" ]

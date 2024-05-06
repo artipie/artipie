@@ -33,18 +33,9 @@ final class FileITCase {
             .withRepoConfig("binary/bin.yml", "bin")
             .withRepoConfig("binary/bin-port.yml", "bin-port")
             .withExposedPorts(8081),
-        () -> new TestDeployment.ClientContainer("alpine:3.11")
+        () -> new TestDeployment.ClientContainer("artipie/file-tests:1.0")
             .withWorkingDirectory("/w")
     );
-
-    @BeforeEach
-    void setUp() throws Exception {
-        this.deployment.assertExec(
-            "Failed to install deps",
-            new ContainerResultMatcher(),
-            "apk", "add", "--no-cache", "curl"
-        );
-    }
 
     @ParameterizedTest
     @CsvSource({

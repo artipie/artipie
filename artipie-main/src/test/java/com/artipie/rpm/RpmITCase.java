@@ -6,11 +6,9 @@ package com.artipie.rpm;
 
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
-import java.io.IOException;
 import org.cactoos.list.ListOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -35,19 +33,12 @@ public final class RpmITCase {
             .withRepoConfig("rpm/my-rpm.yml", "my-rpm")
             .withRepoConfig("rpm/my-rpm-port.yml", "my-rpm-port")
             .withExposedPorts(8081),
-        () -> new TestDeployment.ClientContainer("fedora:35")
+        () -> new TestDeployment.ClientContainer("artipie/rpm-tests-fedora:1.0")
             .withClasspathResourceMapping(
                 "rpm/time-1.7-45.el7.x86_64.rpm", "/w/time-1.7-45.el7.x86_64.rpm",
                 BindMode.READ_ONLY
             )
     );
-
-    @BeforeEach
-    void setUp() throws IOException {
-        this.containers.assertExec(
-            "Dnf install curl failed", new ContainerResultMatcher(), "dnf", "-y", "install", "curl"
-        );
-    }
 
     @ParameterizedTest
     @CsvSource({
@@ -82,5 +73,4 @@ public final class RpmITCase {
             "dnf", "-y", "repository-packages", "example", "install"
         );
     }
-
 }

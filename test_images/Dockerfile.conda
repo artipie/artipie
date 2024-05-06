@@ -1,0 +1,24 @@
+FROM continuumio/miniconda3:22.11.1
+ENV REV=1
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt update -y -o APT::Update::Error-Mode=any && apt dist-upgrade -y
+RUN apt install -y curl xz-utils netcat
+COPY conda/example-project /w/example-project
+COPY adapter /w/adapter
+COPY conda/condarc /w/condarc
+COPY conda/snappy-1.1.3-0.tar.bz2 /w/snappy-1.1.3-0.tar.bz2
+COPY conda/noarch_glom-22.1.0.tar.bz2 /w/noarch_glom-22.1.0.tar.bz2
+COPY conda/linux-64_nng-1.4.0.tar.bz2 /w/linux-64_nng-1.4.0.tar.bz2
+COPY prepMinio.sh minio-bin-20231120.txz /w/
+RUN /w/prepMinio.sh
+RUN conda install -vv -y conda-build==3.27.0 conda-verify==3.4.2 anaconda-client==1.10.0 2>&1|tee /tmp/conda.log
+RUN conda clean -ay
+WORKDIR "/w"
+
+RUN mv -fv /w/condarc /root/.condarc
+RUN anaconda config --set url http://artipie:8080/my-conda/ -s
+RUN conda config --set anaconda_upload yes
+
+RUN rm -rf /w/minio-bin-20231120.txz
+RUN apt -y autoremove -y --purge && apt clean -y && rm -rf /var/cache/apt/archives /var/lib/apt/lists
+RUN du -hs /w/example-project

@@ -49,18 +49,9 @@ final class FileProxyAuthIT {
                     .withExposedPorts(8081)
             )
         ),
-        () -> new TestDeployment.ClientContainer("alpine:3.11")
+        () -> new TestDeployment.ClientContainer("artipie/file-tests:1.0")
             .withWorkingDirectory("/w")
     );
-
-    @BeforeEach
-    void setUp() throws Exception {
-        this.containers.assertExec(
-            "Failed to install deps",
-            new ContainerResultMatcher(),
-            "apk", "add", "--no-cache", "curl"
-        );
-    }
 
     @ParameterizedTest
     @ValueSource(strings = {"8080/my-bin-proxy", "8081/my-bin-proxy-port"})

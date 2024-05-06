@@ -44,7 +44,7 @@ public final class PypiProxyITCase {
                     .withRepoConfig("pypi-proxy/pypi-proxy.yml", "my-pypi-proxy")
             )
         ),
-        () -> new TestDeployment.ClientContainer("python:3")
+        () -> new TestDeployment.ClientContainer("artipie/pypi-tests:1.0")
             .withWorkingDirectory("/w")
     );
 

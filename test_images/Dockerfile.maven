@@ -1,0 +1,40 @@
+FROM maven:3.6.3-jdk-11
+ENV REV=19
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt update -y -o APT::Update::Error-Mode=any && apt dist-upgrade -y
+RUN apt install -y libxml2-utils # for xmllint
+
+# install artpie test dependencies to maven cache
+COPY artipie /opt/artipie
+RUN find /opt/artipie -name "*.jar" -type f|xargs -n1 sh -c \
+   'mvn install:install-file -Dfile="$0" -DpomFile="${0%.jar}.pom"'
+RUN ls -lah $HOME/.m2/repository/com/artipie
+
+# prefetch all dependencies
+COPY projects /opt/projects
+COPY fetchPomDeps.sh /opt/
+RUN ls -lah /opt/projects/
+RUN find /opt/projects -name pom.xml -type f|xargs -n1 /opt/fetchPomDeps.sh
+RUN find /opt/projects -name pom.xml -type f|xargs -n1 ls -lah
+RUN ls -lah /opt $HOME/.m2/repository/
+
+# generate AppCDS cache for maven
+RUN sh -c ' \
+    echo "<settings></settings>" > /opt/settings.xml ;\
+    find /opt/projects -name pom.xml -type f|head -n1|xargs -i -n1 cp -fv {} /opt/pom.xml ;\
+    MAVEN_OPTS="-Xshare:off -XX:DumpLoadedClassList=/opt/mvn.classlist -XX:+TieredCompilation -XX:TieredStopAtLevel=1" timeout 5s mvn -B -q -s /opt/settings.xml -f /opt/pom.xml dependency:go-offline || : ;\
+    MAVEN_OPTS="-Xshare:dump -XX:SharedArchiveFile=/opt/mvn-s.jsa -XX:SharedClassListFile=/opt/mvn.classlist -XX:+TieredCompilation -XX:TieredStopAtLevel=1" timeout 5s mvn -B -q -s /opt/settings.xml -f /opt/pom.xml dependency:go-offline || : ;\
+    '
+
+RUN ls -lah /opt/mvn-s.jsa
+RUN rm -fv /opt/mvn.classlist /opt/*.xml
+ENV MAVEN_OPTS="-XX:SharedArchiveFile=/opt/mvn-s.jsa -XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+WORKDIR "/w"
+
+# ensure that artipie test deps were in cache but remove before finishing
+RUN ls -lah $HOME/.m2/repository/com/artipie
+RUN rm -rf  $HOME/.m2/repository/com/artipie
+
+RUN rm -rf /opt/artipie /opt/projects /opt/target /opt/fetchPomDeps.sh
+RUN apt purge -y libxml2-utils && apt -y autoremove -y --purge && apt clean -y && rm -rf /var/cache/apt/archives /var/lib/apt/lists
+RUN du -hs /root/.m2

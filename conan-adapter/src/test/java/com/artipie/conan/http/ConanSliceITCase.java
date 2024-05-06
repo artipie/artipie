@@ -96,10 +96,6 @@ class ConanSliceITCase {
      */
     private GenericContainer<?> cntn;
 
-    static {
-        ConanSliceITCase.base = getBaseImage();
-    }
-
     @BeforeEach
     void setUp() throws Exception {
         this.start();
@@ -389,8 +385,9 @@ class ConanSliceITCase {
             Transferable.of(
                 Files.readAllBytes(Paths.get("src/test/resources/conan-test/conanfile.txt"))
             ),
-            "/home/conanfile.txt"
+            "/w/conanfile.txt"
         );
+        this.cntn.execInContainer("rm -rf /root/.conan/data".split(" "));
         final Container.ExecResult result = this.cntn.execInContainer("conan", "install", ".");
         MatcherAssert.assertThat(
             "conan install must succeed", result.getExitCode() == 0
@@ -479,47 +476,17 @@ class ConanSliceITCase {
         );
         final int port = this.server.start();
         Testcontainers.exposeHostPorts(port);
-        this.cntn = new GenericContainer<>(ConanSliceITCase.base)
+        this.cntn = new GenericContainer<>("artipie/conan-tests:1.0")
             .withCommand("tail", "-f", "/dev/null")
             .withReuse(true)
             .withAccessToHost(true);
         this.cntn.start();
+        this.cntn.execInContainer("conan remote disable conancenter".split(" "));
+        this.cntn.execInContainer("conan remote disable conan-center".split(" "));
         this.cntn.execInContainer("bash", "-c", "pwd;ls -lah;env>>/tmp/conan_trace.log");
         this.cntn.execInContainer(
             "conan", "user", "-r", "conan-test", ConanSliceITCase.SRV_USERNAME, "-p", ConanSliceITCase.SRV_PASSWORD
         );
         this.cntn.execInContainer("bash", "-c", "echo 'STARTED'>>/tmp/conan_trace.log");
-    }
-
-    /**
-     * Prepares base docker image instance for tests.
-     *
-     * @return ImageFromDockerfile of testcontainers.
-     */
-    @SuppressWarnings("PMD.LineLengthCheck")
-    private static ImageFromDockerfile getBaseImage() {
-        return new ImageFromDockerfile("local/conan-adapter/conan_slice_itcase", false).withDockerfileFromBuilder(
-            builder -> builder
-                .from("ubuntu:22.04")
-                .env("CONAN_TRACE_FILE", "/tmp/conan_trace.log")
-                .env("DEBIAN_FRONTEND", "noninteractive")
-                .env("CONAN_VERBOSE_TRACEBACK", "1")
-                .env("CONAN_NON_INTERACTIVE", "1")
-                .env("CONAN_LOGIN_USERNAME", ConanSliceITCase.SRV_USERNAME)
-                .env("CONAN_PASSWORD", ConanSliceITCase.SRV_PASSWORD)
-                .env("no_proxy", "host.docker.internal,host.testcontainers.internal,localhost,127.0.0.1")
-                .workDir("/home")
-                .run("apt clean -y && apt update -y -o APT::Update::Error-Mode=any")
-                .run("apt install --no-install-recommends -y python3-pip curl g++ git make cmake")
-                .run("pip3 install -U pip setuptools")
-                .run("pip3 install -U conan==1.60.2")
-                .run("conan profile new --detect default")
-                .run("conan profile update settings.compiler.libcxx=libstdc++11 default")
-                .run("conan remote add conancenter https://center.conan.io False --force")
-                .run("conan remote add conan-center https://conan.bintray.com False --force")
-                .run("conan remote add conan-test http://host.testcontainers.internal:9300 False --force")
-                .run("conan remote disable conancenter")
-                .run("conan remote disable conan-center")
-        );
     }
 }

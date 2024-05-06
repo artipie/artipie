@@ -76,7 +76,7 @@ final class DockerLocalAuthIT {
         client.login("bob", "qwerty")
                 .pull("alpine:3.11")
                 .tag("alpine:3.11", image)
-                .executeAssertFail("docker", "push", image);
+                .executeAssertFail("timeout", "20s", "docker", "push", image);
     }
 
     @Test
