@@ -86,6 +86,8 @@ SOFTWARE.
     <s3mock.version>3.4.0</s3mock.version>
     <bouncycastle-lts.version>2.73.5</bouncycastle-lts.version>
     <httpclient.version>5.3.1</httpclient.version>
+    <httpcore5.version>5.2.4</httpcore5.version>
+    <httpcore5-h2.version>5.2.4</httpcore5-h2.version>
   </properties>
   <developers>
     <!-- Required for publishing to central -->
