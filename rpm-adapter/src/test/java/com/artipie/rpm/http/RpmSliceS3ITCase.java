@@ -128,8 +128,8 @@ public final class RpmSliceS3ITCase {
 
     @ParameterizedTest
     @CsvSource({
-        "redhat/ubi9:9.0.0,yum,repo-pkgs",
-        "fedora:36,dnf,repository-packages"
+        "artipie/rpm-tests-ubi:1.0,yum,repo-pkgs",
+        "artipie/rpm-tests-fedora:1.0,dnf,repository-packages"
     })
     void canListAndInstallFromArtipieRepo(final String linux,
         final String mngr, final String rey) throws Exception {
@@ -148,8 +148,8 @@ public final class RpmSliceS3ITCase {
 
     @ParameterizedTest
     @CsvSource({
-        "redhat/ubi9:9.0.0,yum,repo-pkgs",
-        "fedora:36,dnf,repository-packages"
+        "artipie/rpm-tests-ubi:1.0,yum,repo-pkgs",
+        "artipie/rpm-tests-fedora:1.0,dnf,repository-packages"
     })
     void canListAndInstallFromArtipieRepoWithAuth(final String linux,
         final String mngr, final String key) throws Exception {

@@ -38,16 +38,6 @@ final class HealthSliceTest {
             ).join(),
             RsStatus.OK, "[{\"storage\":\"ok\"}]".getBytes()
         );
-        /*MatcherAssert.assertThat(
-            new HealthSlice(new TestSettings()),
-            new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.OK),
-                    new RsHasBody("[{\"storage\":\"ok\"}]", StandardCharsets.UTF_8)
-                ),
-                HealthSliceTest.REQ_LINE
-            )
-        );*/
     }
 
     @Test
@@ -58,16 +48,6 @@ final class HealthSliceTest {
             ).join(),
             RsStatus.SERVICE_UNAVAILABLE, "[{\"storage\":\"failure\"}]".getBytes()
         );
-        /*MatcherAssert.assertThat(
-            new HealthSlice(new TestSettings(new FakeStorage())),
-            new SliceHasResponse(
-                Matchers.allOf(
-                    new RsHasStatus(RsStatus.SERVICE_UNAVAILABLE),
-                    new RsHasBody("[{\"storage\":\"failure\"}]", StandardCharsets.UTF_8)
-                ),
-                HealthSliceTest.REQ_LINE
-            )
-        );*/
     }
 
     /**

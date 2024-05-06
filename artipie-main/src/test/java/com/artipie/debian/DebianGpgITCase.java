@@ -39,7 +39,7 @@ public final class DebianGpgITCase {
             .withClasspathResourceMapping(
                 "debian/secret-keys.gpg", "/var/artipie/repo/secret-keys.gpg", BindMode.READ_ONLY
             ),
-        () -> new TestDeployment.ClientContainer("debian:10.8")
+        () -> new TestDeployment.ClientContainer("artipie/deb-tests:1.0")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
                 "debian/aglfn_1.7-3_amd64.deb", "/w/aglfn_1.7-3_amd64.deb", BindMode.READ_ONLY
@@ -51,21 +51,6 @@ public final class DebianGpgITCase {
 
     @BeforeEach
     void setUp() throws IOException {
-        this.containers.assertExec(
-            "Apt-get update failed",
-            new ContainerResultMatcher(),
-            "apt-get", "update"
-        );
-        this.containers.assertExec(
-            "Failed to install curl",
-            new ContainerResultMatcher(),
-            "apt-get", "install", "-y", "curl"
-        );
-        this.containers.assertExec(
-            "Failed to install gnupg",
-            new ContainerResultMatcher(),
-            "apt-get", "install", "-y", "gnupg"
-        );
         this.containers.assertExec(
             "Failed to add public key to apt-get",
             new ContainerResultMatcher(),

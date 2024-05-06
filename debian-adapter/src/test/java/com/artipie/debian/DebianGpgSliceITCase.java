@@ -116,13 +116,11 @@ public final class DebianGpgSliceITCase {
                 "deb http://host.testcontainers.internal:%d/ artipie main", this.port
             ).getBytes()
         );
-        this.cntn = new GenericContainer<>("debian:11")
+        this.cntn = new GenericContainer<>("artipie/deb-tests:1.0")
             .withCommand("tail", "-f", "/dev/null")
             .withWorkingDirectory("/home/")
             .withFileSystemBind(this.tmp.toString(), "/home");
         this.cntn.start();
-        this.exec("apt-get", "update");
-        this.exec("apt-get", "install", "-y", "gnupg");
         this.exec("apt-key", "add", "/home/public-key.asc");
         this.exec("mv", "/home/sources.list", "/etc/apt/");
     }

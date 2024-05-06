@@ -39,7 +39,7 @@ public final class MetadataMavenITCase {
         () -> new TestDeployment.ArtipieContainer().withConfig("artipie-db.yaml")
             .withRepoConfig("maven/maven.yml", "my-maven")
             .withRepoConfig("maven/maven-proxy.yml", "my-maven-proxy"),
-        () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
+        () -> new TestDeployment.ClientContainer("artipie/maven-tests:1.0")
             .withWorkingDirectory("/w")
     );
 
@@ -75,6 +75,7 @@ public final class MetadataMavenITCase {
         this.containers.putBinaryToClient(
             new TestResource("maven/pom-with-deps/pom.xml").asBytes(), "/w/pom.xml"
         );
+        this.containers.exec("rm", "-rf", "/root/.m2");
         this.containers.assertExec(
             "Uploading dependencies failed",
             new ContainerResultMatcher(ContainerResultMatcher.SUCCESS),

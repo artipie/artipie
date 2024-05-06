@@ -13,12 +13,10 @@ import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.IsNull;
 import org.hamcrest.core.StringContains;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.testcontainers.containers.BindMode;
 
 /**
  * Conda IT case.
@@ -36,28 +34,8 @@ public final class CondaAuthITCase {
         () -> TestDeployment.ArtipieContainer.defaultDefinition()
             .withUser("security/users/alice.yaml", "alice")
             .withRepoConfig("conda/conda-auth.yml", "my-conda"),
-        () -> new TestDeployment.ClientContainer("continuumio/miniconda3:22.11.1")
-            .withWorkingDirectory("/w")
-            .withClasspathResourceMapping(
-                "conda/example-project", "/w/example-project", BindMode.READ_ONLY
-            )
+        () -> new TestDeployment.ClientContainer("artipie/conda-tests:1.0")
     );
-
-    @BeforeEach
-    void init() throws IOException {
-        this.containers.assertExec(
-            "Conda-build install failed", new ContainerResultMatcher(),
-            "conda", "install", "-y", "conda-build"
-        );
-        this.containers.assertExec(
-            "Conda-verify install failed", new ContainerResultMatcher(),
-            "conda", "install", "-y", "conda-verify"
-        );
-        this.containers.assertExec(
-            "Conda-client install failed", new ContainerResultMatcher(),
-            "conda", "install", "-y", "anaconda-client"
-        );
-    }
 
     @Test
     void canUploadToArtipie() throws IOException {

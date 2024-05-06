@@ -6,11 +6,9 @@ package com.artipie.debian;
 
 import com.artipie.test.ContainerResultMatcher;
 import com.artipie.test.TestDeployment;
-import java.io.IOException;
 import org.cactoos.list.ListOf;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -35,26 +33,12 @@ public final class DebianITCase {
             .withRepoConfig("debian/debian.yml", "my-debian")
             .withRepoConfig("debian/debian-port.yml", "my-debian-port")
             .withExposedPorts(8081),
-        () -> new TestDeployment.ClientContainer("debian:10.8-slim")
+        () -> new TestDeployment.ClientContainer("artipie/deb-tests:1.0")
             .withWorkingDirectory("/w")
             .withClasspathResourceMapping(
                 "debian/aglfn_1.7-3_amd64.deb", "/w/aglfn_1.7-3_amd64.deb", BindMode.READ_ONLY
             )
     );
-
-    @BeforeEach
-    void setUp() throws IOException {
-        this.containers.assertExec(
-            "Apt-get update failed",
-            new ContainerResultMatcher(),
-            "apt-get", "update"
-        );
-        this.containers.assertExec(
-            "Failed to install curl",
-            new ContainerResultMatcher(),
-            "apt-get", "install", "-y", "curl"
-        );
-    }
 
     @ParameterizedTest
     @CsvSource({

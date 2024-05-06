@@ -20,7 +20,7 @@ jobs:
           key: ${{ runner.os }}-jdk-21-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-jdk-21-maven-
       - run: mvn install -DskipTests
-      - run: mvn -B package -Pdocker-build -DskipTests
+      - run: mvn -B package -Pdocker-tests-build -DskipTests
         working-directory: artipie-main
       - run: examples/run.sh
         working-directory: artipie-main

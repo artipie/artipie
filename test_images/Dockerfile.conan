@@ -1,0 +1,27 @@
+FROM ubuntu:22.04
+ENV REV=1
+ENV CONAN_TRACE_FILE /tmp/conan_trace.log
+ENV DEBIAN_FRONTEND noninteractive
+ENV CONAN_VERBOSE_TRACEBACK 1
+ENV CONAN_NON_INTERACTIVE 1
+ENV CONAN_LOGIN_USERNAME demo_login
+ENV CONAN_PASSWORD demo_pass
+ENV no_proxy host.docker.internal,host.testcontainers.internal,localhost,127.0.0.1
+RUN apt update -y -o APT::Update::Error-Mode=any && apt dist-upgrade -y
+RUN apt install --no-install-recommends -y python3-pip curl g++ git make cmake curl xz-utils netcat
+RUN pip3 install -U pip setuptools
+RUN pip3 install -U conan==1.60.2
+RUN conan profile new --detect default
+RUN conan profile update settings.compiler.libcxx=libstdc++11 default
+RUN conan remote add conancenter https://center.conan.io False --force
+RUN conan remote add conan-center https://conan.bintray.com False --force
+RUN conan remote add conan-test http://host.testcontainers.internal:9300 False --force
+RUN conan install zlib/1.2.13@ -r conancenter
+COPY prepMinio.sh minio-bin-20231120.txz /w/
+RUN /w/prepMinio.sh
+
+WORKDIR "/w"
+
+RUN rm -rf /w/minio-bin-20231120.txz
+RUN apt -y autoremove -y --purge && apt clean -y && rm -rf /var/cache/apt/archives /var/lib/apt/lists
+RUN du -hs /w/*

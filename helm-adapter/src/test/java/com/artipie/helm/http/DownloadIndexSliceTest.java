@@ -50,8 +50,6 @@ final class DownloadIndexSliceTest {
     @ParameterizedTest
     @ValueSource(strings = {"http://central.artipie.com/", "http://central.artipie.com"})
     void returnsOkAndUpdateEntriesUrlsForBaseWithOrWithoutTrailingSlash(final String base) {
-//        final AtomicReference<String> cbody = new AtomicReference<>();
-//        final AtomicReference<RsStatus> cstatus = new AtomicReference<>();
         new TestResource("index.yaml").saveTo(this.storage);
 
         Response resp = new DownloadIndexSlice(base, this.storage)

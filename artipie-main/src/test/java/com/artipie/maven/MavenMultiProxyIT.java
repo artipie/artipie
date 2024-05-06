@@ -49,7 +49,7 @@ final class MavenMultiProxyIT {
                     .withRepoConfig("maven/maven.yml", "origin-maven")
             )
         ),
-        () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
+        () -> new TestDeployment.ClientContainer("artipie/maven-tests:1.0")
             .withWorkingDirectory("/w")
     );
 

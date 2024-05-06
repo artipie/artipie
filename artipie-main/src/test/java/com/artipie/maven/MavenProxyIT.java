@@ -33,7 +33,7 @@ final class MavenProxyIT {
             .withRepoConfig("maven/maven-proxy.yml", "my-maven")
             .withRepoConfig("maven/maven-proxy-port.yml", "my-maven-port")
             .withExposedPorts(8081),
-        () -> new TestDeployment.ClientContainer("maven:3.6.3-jdk-11")
+        () -> new TestDeployment.ClientContainer("artipie/maven-tests:1.0")
             .withWorkingDirectory("/w")
     );
 

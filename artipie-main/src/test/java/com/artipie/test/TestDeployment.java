@@ -139,9 +139,9 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
             .withCommand("tail", "-f", "/dev/null");
         this.artipie.values().forEach(GenericContainer::start);
         this.client.start();
-        this.client.execInContainer("sleep", "3");
+        this.client.execInContainer("sleep", "1");
         this.artipie.values().forEach(
-            new UncheckedConsumer<>(cnt -> cnt.execInContainer("sleep", "3"))
+            new UncheckedConsumer<>(cnt -> cnt.execInContainer("sleep", "1"))
         );
     }
 
@@ -376,16 +376,18 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
          * New default artipie container.
          */
         public ArtipieContainer() {
-            this(DockerImageName.parse("artipie/artipie:1.0-SNAPSHOT"));
+            this(DockerImageName.parse("artipie/artipie-tests:1.0-SNAPSHOT"));
         }
 
         /**
          * New artipie container with image name.
+         * TieredStopAtLevel=1 reduces startup time, which is important for tests.
          *
          * @param name Image name
          */
         public ArtipieContainer(final DockerImageName name) {
             super(name);
+            this.withEnv("JVM_ARGS", "-XX:+TieredCompilation -XX:TieredStopAtLevel=1");
         }
 
         /**

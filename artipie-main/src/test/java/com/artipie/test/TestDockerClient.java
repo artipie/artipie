@@ -7,6 +7,7 @@ package com.artipie.test;
 import org.awaitility.Awaitility;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.core.AnyOf;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class TestDockerClient {
     /**
      * Built from {@link src/test/resources/docker/Dockerfile}.
      */
-    protected static final DockerImageName DOCKER_CLIENT = DockerImageName.parse("artipie/test-docker-client:1.0");
+    protected static final DockerImageName DOCKER_CLIENT = DockerImageName.parse("artipie/docker-tests:1.0");
 
     private final int port;
     private final GenericContainer<?> client;
@@ -89,8 +90,11 @@ public class TestDockerClient {
 
     public TestDockerClient pull(String image) throws IOException {
         return executeAssert(
+            new AnyOf<>(
                 new StringContains("Status: Downloaded newer image for " + image),
-                "docker", "pull", image
+                new StringContains("Status: Image is up to date for " + image)
+            ),
+            "docker", "pull", image
         );
     }
 
@@ -116,8 +120,13 @@ public class TestDockerClient {
         return executeAssert("docker", "tag", source, target);
     }
 
-    public int getMappedPort(int port) {
-        return this.client.getMappedPort(port);
+    /**
+     * Get the actual mapped client port for a given port exposed by the container.
+     * @param originalPort Originally exposed port number
+     * @return The port that the exposed port is mapped to
+     */
+    public int getMappedPort(int originalPort) {
+        return this.client.getMappedPort(originalPort);
     }
 
     public TestDockerClient executeAssert(String... cmd) throws IOException {

@@ -10,13 +10,11 @@ import java.io.IOException;
 import org.cactoos.list.ListOf;
 import org.hamcrest.Matchers;
 import org.hamcrest.text.StringContainsInOrder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.testcontainers.containers.BindMode;
 
 /**
  * Integration tests for Pypi repository.
@@ -39,33 +37,9 @@ final class PypiITCase {
             .withRole("security/roles/readers.yaml", "readers")
             .withExposedPorts(8081),
 
-        () -> new TestDeployment.ClientContainer("python:3.7")
+        () -> new TestDeployment.ClientContainer("artipie/pypi-tests:1.0")
             .withWorkingDirectory("/var/artipie")
-            .withClasspathResourceMapping(
-                "pypi-repo/example-pckg",
-                "/var/artipie/data/artipie/pypi/example-pckg",
-                BindMode.READ_ONLY
-            )
     );
-
-    @BeforeEach
-    void setUp() throws IOException {
-        this.containers.assertExec(
-            "Apt-get update failed",
-            new ContainerResultMatcher(),
-            "apt-get", "update"
-        );
-        this.containers.assertExec(
-            "Failed to install twine",
-            new ContainerResultMatcher(),
-            "python", "-m", "pip", "install", "twine"
-        );
-        this.containers.assertExec(
-            "Failed to upgrade pip",
-            new ContainerResultMatcher(),
-            "python", "-m", "pip", "install", "--upgrade", "pip"
-        );
-    }
 
     @ParameterizedTest
     @CsvSource("8080,my-python")
@@ -123,7 +97,7 @@ final class PypiITCase {
             "python3", "-m", "twine", "upload", "--repository-url",
             String.format("http://artipie:%s/%s/", port, repo),
             "-u", "alice", "-p", "123",
-            "/var/artipie/data/artipie/pypi/example-pckg/dist/artipietestpkg-0.0.3.tar.gz"
+            "/w/example-pckg/dist/artipietestpkg-0.0.3.tar.gz"
         );
         this.containers.assertArtipieContent(
             "Bad content after upload",

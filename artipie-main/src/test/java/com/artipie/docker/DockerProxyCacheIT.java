@@ -21,7 +21,7 @@ import java.nio.file.Path;
  */
 public class DockerProxyCacheIT {
 
-    private static final String IMAGE = "alpine:3.19";
+    private static final String IMAGE = "alpine:3.19.1";
 
     @TempDir
     Path temp;

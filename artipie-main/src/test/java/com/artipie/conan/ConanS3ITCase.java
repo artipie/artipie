@@ -83,13 +83,16 @@ public final class ConanS3ITCase {
             .withRepoConfig("conan/conan-s3.yml", ConanS3ITCase.REPO)
             .withExposedPorts(9301),
         () -> {
-            this.client = prepareClientContainer();
+            this.client = ConanS3ITCase.prepareClientContainer();
             return this.client;
         }
     );
 
     @BeforeEach
-    void init() throws IOException {
+    void init() throws IOException, InterruptedException {
+        this.client.execInContainer(
+            "conan remote add conan-test http://artipie:9301 False --force".split(" ")
+        );
         this.containers.assertExec(
             "Failed to start Minio", new ContainerResultMatcher(),
             "bash", "-c", "nohup /root/bin/minio server /var/minio 2>&1|tee /tmp/minio.log &"
@@ -124,11 +127,15 @@ public final class ConanS3ITCase {
     public void incorrectPortFailTest() throws IOException {
         new TestResource(ConanS3ITCase.SRV_RES_PREFIX).addFilesTo(this.repository, new Key.From(ConanS3ITCase.REPO));
         this.containers.assertExec(
+            "rm cache failed", new ContainerResultMatcher(),
+            "rm -rf /root/.conan/data".split(" ")
+        );
+        this.containers.assertExec(
             "Conan remote add failed", new ContainerResultMatcher(),
             "conan remote add -f conan-test http://artipie:9300 False".split(" ")
         );
         this.containers.assertExec(
-            "Conan remote add failed", new ContainerResultMatcher(
+            "Conan install must fail", new ContainerResultMatcher(
                 new IsNot<>(new IsEqual<>(ContainerResultMatcher.SUCCESS))
             ),
             "conan install zlib/1.2.13@ -r conan-test -b -pr:b=default".split(" ")
@@ -139,7 +146,7 @@ public final class ConanS3ITCase {
     public void incorrectPkgFailTest() throws IOException {
         new TestResource(ConanS3ITCase.SRV_RES_PREFIX).addFilesTo(this.repository, new Key.From(ConanS3ITCase.REPO));
         this.containers.assertExec(
-            "Conan remote add failed", new ContainerResultMatcher(
+            "Conan install must fail", new ContainerResultMatcher(
                 new IsNot<>(new IsEqual<>(ContainerResultMatcher.SUCCESS))
             ),
             "conan install zlib/1.2.11@ -r conan-test -b -pr:b=default".split(" ")
@@ -148,6 +155,10 @@ public final class ConanS3ITCase {
 
     @Test
     public void installFromArtipie() throws IOException, InterruptedException {
+        this.containers.assertExec(
+            "rm cache failed", new ContainerResultMatcher(),
+            "rm -rf /root/.conan/data".split(" ")
+        );
         MatcherAssert.assertThat(
             "Binary package must not exist in cache before test",
             this.client.execInContainer("ls", CLIENT_BIN_PKG).getExitCode() > 0
@@ -202,7 +213,11 @@ public final class ConanS3ITCase {
             !this.repository.exists(ConanS3ITCase.REPO_BIN_PKG).join()
         );
         this.containers.assertExec(
-            "Conan upload failed", new ContainerResultMatcher(
+            "rm cache failed", new ContainerResultMatcher(),
+            "rm -rf /root/.conan/data".split(" ")
+        );
+        this.containers.assertExec(
+            "Conan upload must fail", new ContainerResultMatcher(
                 new IsNot<>(new IsEqual<>(ContainerResultMatcher.SUCCESS))
             ),
             "conan upload zlib/1.2.13@ -r conan-test --all".split(" ")
@@ -252,41 +267,7 @@ public final class ConanS3ITCase {
      */
     @SuppressWarnings("PMD.LineLengthCheck")
     private static TestDeployment.ClientContainer prepareClientContainer() {
-        final ImageFromDockerfile image = new ImageFromDockerfile(
-            "local/artipie-main/conan_s3_itcase", false
-        ).withDockerfileFromBuilder(
-            builder -> builder
-                .from("ubuntu:22.04")
-                .env("CONAN_TRACE_FILE", "/tmp/conan_trace.log")
-                .env("DEBIAN_FRONTEND", "noninteractive")
-                .env("CONAN_VERBOSE_TRACEBACK", "1")
-                .env("CONAN_NON_INTERACTIVE", "1")
-                .env("no_proxy", "host.docker.internal,host.testcontainers.internal,localhost,127.0.0.1")
-                .workDir("/home")
-                .run("apt clean -y && apt update -y -o APT::Update::Error-Mode=any")
-                .run("apt install --no-install-recommends -y python3-pip curl g++ git make cmake xz-utils netcat")
-                .run("pip3 install -U pip setuptools")
-                .run("pip3 install -U conan==1.60.2")
-                .run("conan profile new --detect default")
-                .run("conan profile update settings.compiler.libcxx=libstdc++11 default")
-                .run("conan remote add conancenter https://center.conan.io False --force")
-                .run("conan remote add conan-center https://conan.bintray.com False --force")
-                .run("conan remote add conan-test http://artipie:9301 False --force")
-                .copy("minio-bin-20231120.txz", "/w/minio-bin-20231120.txz")
-                .run("tar xf /w/minio-bin-20231120.txz -C /root")
-                .run(
-                    String.join(
-                        ";",
-                        "sh -c '/root/bin/minio server /var/minio > /tmp/minio.log 2>&1 &'",
-                        "timeout 30 sh -c 'until nc -z localhost 9000; do sleep 0.1; done'",
-                        "/root/bin/mc alias set srv1 http://localhost:9000 minioadmin minioadmin 2>&1 |tee /tmp/mc.log",
-                        "/root/bin/mc mb srv1/buck1 --region s3test 2>&1|tee -a /tmp/mc.log",
-                        "/root/bin/mc anonymous set public srv1/buck1 2>&1|tee -a /tmp/mc.log"
-                    )
-                )
-                .run("rm -fv /w/minio-bin-20231120.txz /tmp/*.log")
-        ).withFileFromClasspath("minio-bin-20231120.txz", "minio-bin-20231120.txz");
-        return new TestDeployment.ClientContainer(image)
+        return new TestDeployment.ClientContainer("artipie/conan-tests:1.0")
             .withCommand("tail", "-f", "/dev/null")
             .withAccessToHost(true)
             .withWorkingDirectory("/w")

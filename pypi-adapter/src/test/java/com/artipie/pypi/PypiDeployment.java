@@ -85,7 +85,6 @@ public final class PypiDeployment implements BeforeEachCallback, AfterEachCallba
             .withCommand("tail", "-f", "/dev/null")
             .setWorkingDirectory("/home/");
         this.container.start();
-        this.bash("python3 -m pip install --user --upgrade twine");
     }
 
     @Override
@@ -111,7 +110,7 @@ public final class PypiDeployment implements BeforeEachCallback, AfterEachCallba
          * New client container with name.
          */
         public PypiContainer() {
-            super(DockerImageName.parse("python:3.7"));
+            super(DockerImageName.parse("artipie/pypi-tests:1.0"));
         }
     }
 }
