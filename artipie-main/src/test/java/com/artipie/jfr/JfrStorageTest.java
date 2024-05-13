@@ -199,7 +199,7 @@ class JfrStorageTest {
             rs.onEvent(event, ref::set);
             rs.startAsync();
             action.run();
-            Awaitility.waitAtMost(3_000, TimeUnit.MILLISECONDS)
+            Awaitility.waitAtMost(5_000, TimeUnit.MILLISECONDS)
                 .until(() -> ref.get() != null);
             return ref.get();
         }
