@@ -17,6 +17,8 @@ import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Tests for ChunksAndSizeMetricsContent.
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.Test;
         "PMD.AvoidDuplicateLiterals"
     }
 )
+@Execution(ExecutionMode.CONCURRENT)
 class ChunksAndSizeMetricsContentTest {
 
     /**

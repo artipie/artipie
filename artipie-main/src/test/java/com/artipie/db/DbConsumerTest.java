@@ -20,6 +20,8 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Record consumer.
@@ -31,6 +33,7 @@ import org.junit.jupiter.api.io.TempDir;
         "PMD.CloseResource", "PMD.UseUnderscoresInNumericLiterals"
     }
 )
+@Execution(ExecutionMode.CONCURRENT)
 class DbConsumerTest {
 
     /**

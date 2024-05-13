@@ -10,12 +10,15 @@ import javax.script.ScriptException;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Tests Script.StandardScript and Script.PrecompiledScript.
  * @since 0.1
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Execution(ExecutionMode.CONCURRENT)
 public class ScriptingTest {
 
     /**

@@ -21,6 +21,8 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.sqlite.SQLiteDataSource;
 
 /**
@@ -29,6 +31,7 @@ import org.sqlite.SQLiteDataSource;
  * @since 0.31
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Execution(ExecutionMode.CONCURRENT)
 public final class MetadataMavenITCase {
 
     /**
@@ -89,7 +92,7 @@ public final class MetadataMavenITCase {
     static void awaitDbRecords(
         final TestDeployment containers, final Path temp, final Predicate<ResultSet> condition
     ) {
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(
             () -> {
                 final Path data = temp.resolve(String.format("%s-artifacts.db", UUID.randomUUID()));
                 Files.write(data, containers.getArtipieContent("/var/artipie/artifacts.db"));

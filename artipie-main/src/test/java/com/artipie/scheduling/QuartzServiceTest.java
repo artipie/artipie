@@ -13,6 +13,8 @@ import org.cactoos.list.ListOf;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
@@ -66,7 +68,7 @@ public final class QuartzServiceTest {
         data.put("cnt", count);
         this.service.schedulePeriodicJob(2, 3, TestJob.class, data);
         this.service.start();
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(() -> count.get() > 12);
+        Awaitility.await().atMost(20, TimeUnit.SECONDS).until(() -> count.get() > 12);
     }
 
     /**

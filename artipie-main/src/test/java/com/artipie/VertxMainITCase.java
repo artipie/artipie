@@ -13,10 +13,13 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Test for {@link VertxMain}.
  */
+@Execution(ExecutionMode.CONCURRENT)
 final class VertxMainITCase {
 
     /**

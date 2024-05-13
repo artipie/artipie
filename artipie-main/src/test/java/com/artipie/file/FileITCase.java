@@ -14,6 +14,8 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -22,6 +24,7 @@ import org.junit.jupiter.params.provider.CsvSource;
  * @since 0.18
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Execution(ExecutionMode.CONCURRENT)
 final class FileITCase {
 
     /**

@@ -43,6 +43,8 @@ import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Base class for Rest API tests. When creating test for rest API verticle, extend this class.
@@ -50,6 +52,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  */
 @ExtendWith(VertxExtension.class)
 @SuppressWarnings("PMD.TooManyMethods")
+@Execution(ExecutionMode.CONCURRENT)
 public class RestApiServerBase {
 
     /**

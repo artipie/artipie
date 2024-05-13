@@ -38,6 +38,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -51,6 +53,7 @@ import org.testcontainers.utility.DockerImageName;
 @SuppressWarnings("PMD.AvoidCatchingThrowable")
 @Testcontainers
 @DisabledOnOs(OS.WINDOWS)
+@Execution(ExecutionMode.CONCURRENT)
 public class AuthFromKeycloakTest {
     /**
      * Keycloak port.

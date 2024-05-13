@@ -16,6 +16,8 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -24,6 +26,7 @@ import org.junit.jupiter.params.provider.CsvSource;
  * @since 0.23
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
+@Execution(ExecutionMode.CONCURRENT)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class CondaITCase {
 
@@ -78,7 +81,7 @@ public final class CondaITCase {
         "8081,conda/condarc-port,my-conda-port"
     })
     void canUploadToArtipie(final String port, final String condarc, final String repo)
-        throws IOException {
+        throws IOException, InterruptedException {
         this.containers.putClasspathResourceToClient(condarc, "/w/.condarc");
         this.moveCondarc();
         this.containers.assertExec(
@@ -96,6 +99,11 @@ public final class CondaITCase {
             "Login was not successful",
             new ContainerResultMatcher(),
             "anaconda", "login", "--username", "alice", "--password", "123"
+        );
+        this.containers.assertExec(
+            "Waiting for login",
+            new ContainerResultMatcher(),
+            "sleep 3".split(" ")
         );
         this.containers.assertExec(
             "Package was not installed successfully",

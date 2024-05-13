@@ -12,12 +12,15 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Test for {@link SettingsRest}.
  * @since 0.27
  */
 @ExtendWith(VertxExtension.class)
+@Execution(ExecutionMode.CONCURRENT)
 public final class SettingsRestTest extends RestApiServerBase {
 
     @Test

@@ -22,6 +22,8 @@ import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Tests JFR storage events.
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.Test;
         "PMD.TooManyMethods"
     }
 )
+@Execution(ExecutionMode.SAME_THREAD)
 class JfrStorageTest {
     /**
      * Random one for all tests.

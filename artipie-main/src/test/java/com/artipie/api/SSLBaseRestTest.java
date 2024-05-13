@@ -18,12 +18,15 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Base test for SSL.
  * @since 0.26
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Execution(ExecutionMode.CONCURRENT)
 abstract class SSLBaseRestTest extends RestApiServerBase {
     @Test
     void generatesToken(final Vertx vertx, final VertxTestContext ctx) throws Exception {

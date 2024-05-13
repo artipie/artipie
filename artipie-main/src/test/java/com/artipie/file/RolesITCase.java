@@ -11,12 +11,15 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 /**
  * Integration test with user's roles permissions.
  * @since 0.26
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@Execution(ExecutionMode.CONCURRENT)
 public final class RolesITCase {
 
     /**

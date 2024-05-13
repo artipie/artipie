@@ -21,6 +21,8 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.Is;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -32,6 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @since 0.28
  */
+@Execution(ExecutionMode.CONCURRENT)
 public class JfrSliceTest {
 
     @Test

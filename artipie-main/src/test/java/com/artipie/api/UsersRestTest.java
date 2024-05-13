@@ -20,12 +20,15 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 /**
  * Test for {@link UsersRest}.
  */
 @DisabledOnOs(OS.WINDOWS)
+@Execution(ExecutionMode.CONCURRENT)
 final class UsersRestTest extends RestApiServerBase {
 
     @Test

@@ -9,6 +9,9 @@ import com.artipie.api.ssl.KeyStore;
 import com.artipie.asto.Key;
 import com.artipie.asto.test.TestResource;
 import com.artipie.test.TestSettings;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -17,6 +20,7 @@ import java.util.Optional;
  * @since 0.26
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TestClassWithoutTestCases"})
+@Execution(ExecutionMode.CONCURRENT)
 final class SSLPfxRestTest extends SSLBaseRestTest {
     /**
      * PFX-file with certificate.

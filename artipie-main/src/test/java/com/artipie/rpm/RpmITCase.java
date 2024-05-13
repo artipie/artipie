@@ -12,6 +12,8 @@ import org.hamcrest.text.StringContainsInOrder;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.testcontainers.containers.BindMode;
@@ -22,6 +24,7 @@ import org.testcontainers.containers.BindMode;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
+@Execution(ExecutionMode.CONCURRENT)
 public final class RpmITCase {
 
     /**

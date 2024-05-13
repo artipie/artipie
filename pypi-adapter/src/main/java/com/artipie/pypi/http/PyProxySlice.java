@@ -30,7 +30,7 @@ import java.util.Queue;
 public final class PyProxySlice extends Slice.Wrap {
 
     /**
-     * New maven proxy without cache.
+     * New python proxy without cache.
      * @param clients HTTP clients
      * @param remote Remote URI
      * @param storage Cache storage

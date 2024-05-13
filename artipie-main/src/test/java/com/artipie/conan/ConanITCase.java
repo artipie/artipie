@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
@@ -22,6 +24,7 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
  * @since 0.23
  */
 @EnabledOnOs({OS.LINUX, OS.MAC})
+@Execution(ExecutionMode.CONCURRENT)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public final class ConanITCase {
     /**

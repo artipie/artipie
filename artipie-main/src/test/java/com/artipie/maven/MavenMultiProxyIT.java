@@ -13,6 +13,8 @@ import org.hamcrest.core.StringContains;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -23,6 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 @DisabledOnOs(OS.WINDOWS)
+@Execution(ExecutionMode.CONCURRENT)
 final class MavenMultiProxyIT {
 
     /**

@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.testcontainers.containers.BindMode;
 
 /**
@@ -22,6 +24,7 @@ import org.testcontainers.containers.BindMode;
  * @since 0.26
  */
 @DisabledOnOs(OS.WINDOWS)
+@Execution(ExecutionMode.CONCURRENT)
 @SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class HexpmITCase {
     /**
