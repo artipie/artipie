@@ -60,11 +60,9 @@ public final class DeleteDistTagsSlice implements Slice {
                                 ).build()
                             ).thenApply(
                                 json -> json.toString().getBytes(StandardCharsets.UTF_8)
-                            ).thenApply(
-                                bytes -> {
-                                    this.storage.save(meta, new Content.From(bytes));
-                                    return ResponseBuilder.ok().build();
-                                }
+                            ).thenCompose(
+                                bytes -> this.storage.save(meta, new Content.From(bytes))
+                                    .thenApply(unused -> ResponseBuilder.ok().build())
                             );
                     }
                     return ResponseBuilder.notFound().completedFuture();
