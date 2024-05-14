@@ -68,11 +68,11 @@ final class AddDistTagsSlice implements Slice {
                                             )
                                         ).add(tag, val.replaceAll("\"", ""))
                                 ).build()
-                            ).thenApply(
+                            ).thenCompose(
                                 json -> {
                                     byte[] bytes = json.toString().getBytes(StandardCharsets.UTF_8);
-                                    this.storage.save(meta, new Content.From(bytes));
-                                    return ResponseBuilder.ok().build();
+                                    return this.storage.save(meta, new Content.From(bytes))
+                                        .thenApply(unused -> ResponseBuilder.ok().build());
                                 }
                             );
                     }
