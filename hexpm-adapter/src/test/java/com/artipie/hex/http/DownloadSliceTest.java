@@ -56,7 +56,7 @@ class DownloadSliceTest {
     @ValueSource(strings = {"packages/decimal", "tarballs/decimal-2.0.0.tar"})
     void downloadOk(final String path) throws Exception {
         final byte[] bytes = Files.readAllBytes(new ResourceUtil(path).asPath());
-        this.storage.save(new Key.From(path), new Content.From(bytes));
+        this.storage.save(new Key.From(path), new Content.From(bytes)).join();
         MatcherAssert.assertThat(
             this.slice,
             new SliceHasResponse(

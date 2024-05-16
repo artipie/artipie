@@ -61,7 +61,7 @@ class JfrStorageTest {
         final Key key = new Key.From("test-key");
         final RecordedEvent event = process(
             "artipie.StorageSave",
-            () -> this.storage.save(key, content(size, chunks))
+            () -> this.storage.save(key, content(size, chunks)).join()
         );
         assertEvent(event, key.string());
         MatcherAssert.assertThat(event.getInt("chunks"), Is.is(chunks));
@@ -72,7 +72,7 @@ class JfrStorageTest {
     void shouldPublishStorageValueEventWhenValue() {
         final int size = 4 * 1024;
         final Key key = new Key.From("test-key");
-        this.storage.save(key, content(size, 1));
+        this.storage.save(key, content(size, 1)).join();
         final RecordedEvent event = process(
             "artipie.StorageValue",
             () -> Flowable.fromPublisher(this.storage.value(key).join())
@@ -86,7 +86,7 @@ class JfrStorageTest {
     @Test
     void shouldPublishStorageDeleteEventWhenDelete() {
         final Key key = new Key.From("test-key");
-        this.storage.save(key, content(1024, 1));
+        this.storage.save(key, content(1024, 1)).join();
         final RecordedEvent event = process(
             "artipie.StorageDelete",
             () -> this.storage.delete(key)
@@ -97,12 +97,12 @@ class JfrStorageTest {
     @Test
     void shouldPublishStorageDeleteAllEventWhenDeleteAll() {
         final Key base = new Key.From("test");
-        this.storage.save(new Key.From(base, "1"), content(1024, 1));
-        this.storage.save(new Key.From(base, "2"), content(1024, 1));
-        this.storage.save(new Key.From(base, "3"), content(1024, 1));
+        this.storage.save(new Key.From(base, "1"), content(1024, 1)).join();
+        this.storage.save(new Key.From(base, "2"), content(1024, 1)).join();
+        this.storage.save(new Key.From(base, "3"), content(1024, 1)).join();
         final RecordedEvent event = process(
             "artipie.StorageDeleteAll",
-            () -> this.storage.deleteAll(base)
+            () -> this.storage.deleteAll(base).join()
         );
         assertEvent(event, base.string());
     }
@@ -110,13 +110,13 @@ class JfrStorageTest {
     @Test
     void shouldPublishStorageExclusivelyEventWhenExclusively() {
         final Key key = new Key.From("test-Exclusively");
-        this.storage.save(key, content(1024, 2));
+        this.storage.save(key, content(1024, 2)).join();
         final RecordedEvent event = process(
             "artipie.StorageExclusively",
             () -> this.storage.exclusively(
                 key,
                 stor -> CompletableFuture.allOf()
-            )
+            ).toCompletableFuture().join()
         );
         assertEvent(event, key.string());
     }
@@ -125,10 +125,10 @@ class JfrStorageTest {
     void shouldPublishStorageMoveEventWhenMove() {
         final Key key = new Key.From("test-key");
         final Key target = new Key.From("new-test-key");
-        this.storage.save(key, content(1024, 2));
+        this.storage.save(key, content(1024, 2)).join();
         final RecordedEvent event = process(
             "artipie.StorageMove",
-            () -> this.storage.move(key, target)
+            () -> this.storage.move(key, target).join()
         );
         assertEvent(event, key.string());
         MatcherAssert.assertThat(event.getString("target"), Is.is(target.string()));
@@ -137,12 +137,12 @@ class JfrStorageTest {
     @Test
     void shouldPublishStorageListEventWhenList() {
         final Key base = new Key.From("test");
-        this.storage.save(new Key.From(base, "1"), content(1024, 1));
-        this.storage.save(new Key.From(base, "2"), content(1024, 1));
-        this.storage.save(new Key.From(base, "3"), content(1024, 1));
+        this.storage.save(new Key.From(base, "1"), content(1024, 1)).join();
+        this.storage.save(new Key.From(base, "2"), content(1024, 1)).join();
+        this.storage.save(new Key.From(base, "3"), content(1024, 1)).join();
         final RecordedEvent event = process(
             "artipie.StorageList",
-            () -> this.storage.list(base)
+            () -> this.storage.list(base).join()
         );
         assertEvent(event, base.string());
         MatcherAssert.assertThat(event.getInt("keysCount"), Is.is(3));
@@ -151,10 +151,10 @@ class JfrStorageTest {
     @Test
     void shouldPublishStorageExistsEventWhenExists() {
         final Key key = new Key.From("test-key");
-        this.storage.save(key, content(1024, 1));
+        this.storage.save(key, content(1024, 1)).join();
         final RecordedEvent event = process(
             "artipie.StorageExists",
-            () -> this.storage.exists(key)
+            () -> this.storage.exists(key).join()
         );
         assertEvent(event, key.string());
     }
@@ -162,10 +162,10 @@ class JfrStorageTest {
     @Test
     void shouldPublishStorageMetadataEventWhenMetadata() {
         final Key key = new Key.From("test-key");
-        this.storage.save(key, content(1024, 1));
+        this.storage.save(key, content(1024, 1)).join();
         final RecordedEvent event = process(
             "artipie.StorageMetadata",
-            () -> this.storage.metadata(key)
+            () -> this.storage.metadata(key).join()
         );
         assertEvent(event, key.string());
     }
