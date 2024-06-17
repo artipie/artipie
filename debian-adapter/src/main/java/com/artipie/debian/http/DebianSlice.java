@@ -48,20 +48,6 @@ public final class DebianSlice extends Slice.Wrap {
         super(
             new SliceRoute(
                 new RtRulePath(
-                    new RtRule.All(
-                            MethodRule.GET,
-                            new RtRule.ByPath(Pattern.compile("^/list-all$"))
-                    ),
-                    new BasicAuthzSlice(
-                        new ListSlice(storage),
-                        users,
-                        new OperationControl(
-                            policy,
-                            new AdapterBasicPermission(config.codename(), Action.Standard.READ)
-                        )
-                    )
-                ),
-                new RtRulePath(
                     MethodRule.GET,
                     new BasicAuthzSlice(
                         new ReleaseSlice(new SliceDownload(storage), storage, config),
