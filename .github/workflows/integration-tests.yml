@@ -5,6 +5,9 @@ name: Integration tests
     branches:
       - master
   pull_request:
+    types:
+      - opened
+      - synchronize
     branches:
       - master
 jobs:
