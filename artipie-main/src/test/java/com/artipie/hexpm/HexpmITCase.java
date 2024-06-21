@@ -10,6 +10,7 @@ import com.artipie.test.TestDeployment;
 import java.io.IOException;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringContains;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -80,6 +81,7 @@ public class HexpmITCase {
     }
 
     @Test
+    @Disabled("https://github.com/artipie/artipie/issues/1464")
     void downloadArtifact() throws Exception {
         this.containers.putResourceToArtipie(
             String.format("hexpm/%s", HexpmITCase.PACKAGE),

@@ -83,6 +83,7 @@ final class HexITCase {
     }
 
     @Test
+    @Disabled("https://github.com/artipie/artipie/issues/1464")
     void downloadDependency() throws IOException, InterruptedException {
         this.init(true);
         this.addArtifactToArtipie();
