@@ -162,7 +162,8 @@ start_artipie
 sleep 3 #sometimes artipie container needs extra time to load
 
 if [[ -z "$1" ]]; then
-  declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda pypi hexpm conan)
+#TODO: hexpm is removed from the list due to the issue: https://github.com/artipie/artipie/issues/1464
+  declare -a tests=(binary debian docker go helm maven npm nuget php rpm conda pypi conan)
 else
   declare -a tests=("$@")
 fi
