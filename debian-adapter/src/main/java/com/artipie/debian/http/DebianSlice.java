@@ -15,8 +15,7 @@ import com.artipie.http.rt.MethodRule;
 import com.artipie.http.rt.RtRule;
 import com.artipie.http.rt.RtRulePath;
 import com.artipie.http.rt.SliceRoute;
-import com.artipie.http.slice.SliceDownload;
-import com.artipie.http.slice.SliceSimple;
+import com.artipie.http.slice.*;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.security.perms.Action;
 import com.artipie.security.perms.AdapterBasicPermission;
@@ -24,6 +23,7 @@ import com.artipie.security.policy.Policy;
 
 import java.util.Optional;
 import java.util.Queue;
+import java.util.regex.Pattern;
 
 /**
  * Debian slice.
@@ -39,11 +39,11 @@ public final class DebianSlice extends Slice.Wrap {
      * @param events Artifact events queue
      */
     public DebianSlice(
-        final Storage storage,
-        final Policy<?> policy,
-        final Authentication users,
-        final Config config,
-        final Optional<Queue<ArtifactEvent>> events
+            final Storage storage,
+            final Policy<?> policy,
+            final Authentication users,
+            final Config config,
+            final Optional<Queue<ArtifactEvent>> events
     ) {
         super(
             new SliceRoute(
@@ -64,6 +64,17 @@ public final class DebianSlice extends Slice.Wrap {
                     ),
                     new BasicAuthzSlice(
                         new ReleaseSlice(new UpdateSlice(storage, config, events), storage, config),
+                        users,
+                        new OperationControl(
+                            policy,
+                            new AdapterBasicPermission(config.codename(), Action.Standard.WRITE)
+                        )
+                    )
+                ),
+                new RtRulePath(
+                    MethodRule.DELETE,
+                    new BasicAuthzSlice(
+                        new DeleteSlice(storage, config),
                         users,
                         new OperationControl(
                             policy,

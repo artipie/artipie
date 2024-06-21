@@ -7,29 +7,19 @@ package com.artipie.debian.metadata;
 import com.artipie.asto.Key;
 import com.artipie.asto.Storage;
 import com.artipie.asto.streams.StorageValuePipeline;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Implementation of {@link Package} that checks uniqueness of the packages index records.
@@ -68,6 +58,24 @@ public final class UniquePackage implements Package {
                 return duplicates;
             }
         ).thenCompose(this::remove);
+    }
+
+    public CompletionStage<Void> delete(final Iterable<String> items, final Key index) {
+        return new StorageValuePipeline<List<String>>(this.asto, index, new Key.From(index.string() + "_new")).processWithResult(
+                (opt, out) -> {
+                    List<String> duplicates = Collections.emptyList();
+                    if (opt.isPresent()) {
+                        duplicates = UniquePackage.decompressRemoveCompress(opt.get(), out, items);
+                    } else {
+                        UniquePackage.compress(items, out);
+                    }
+                    return duplicates;
+                }
+        ).thenCompose(
+                nothing -> this.asto.delete(index).thenCompose(
+                        nothing1 -> this.asto.move(new Key.From(index.string() + "_new"), index)
+                )
+        );
     }
 
     /**
@@ -144,6 +152,46 @@ public final class UniquePackage implements Package {
             throw new UncheckedIOException(ioe);
         }
         return duplicates;
+    }
+
+    @SuppressWarnings({"PMD.AssignmentInOperand", "PMD.CyclomaticComplexity"})
+    private static List<String> decompressRemoveCompress(
+            final InputStream decompress, final OutputStream res, final Iterable<String> items
+    ) {
+        final Set<Pair<String, String>> toDelete = StreamSupport.stream(items.spliterator(), false)
+                .<Pair<String, String>>map(
+                        item -> new ImmutablePair<>(
+                                new ControlField.Package().value(item).get(0),
+                                new ControlField.Version().value(item).get(0)
+                        )
+                ).collect(Collectors.toSet());
+        final List<String> deleted = new ArrayList<>(5);
+        try (
+                GZIPInputStream gis = new GZIPInputStream(decompress);
+                BufferedReader rdr =
+                        new BufferedReader(new InputStreamReader(gis, StandardCharsets.UTF_8));
+                GZIPOutputStream gop = new GZIPOutputStream(new BufferedOutputStream(res))
+        ) {
+            String line;
+            StringBuilder item = new StringBuilder();
+            do {
+                line = rdr.readLine();
+                if ((line == null || line.isEmpty()) && item.length() > 0) {
+                    final Optional<String> dupl = UniquePackage.duplicate(item.toString(), toDelete);
+                    if (dupl.isEmpty()) {
+                        gop.write(item.append('\n').toString().getBytes(StandardCharsets.UTF_8));
+                    }
+                    item = new StringBuilder();
+                } else if (line != null && !line.isEmpty()) {
+                    item.append(line).append('\n');
+                }
+            } while (line != null);
+        } catch (final UnsupportedEncodingException err) {
+            throw new IllegalStateException(err);
+        } catch (final IOException ioe) {
+            throw new UncheckedIOException(ioe);
+        }
+        return deleted;
     }
 
     /**
