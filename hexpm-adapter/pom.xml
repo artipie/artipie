@@ -35,7 +35,7 @@ SOFTWARE.
   <description>An Artipie adapter for Erlang/Elixir packages</description>
   <url>https://github.com/artipie/hexpm-adapter</url>
   <properties>
-    <protobuf.version>3.21.10</protobuf.version>
+    <protobuf.version>3.25.5</protobuf.version>
     <header.license>${project.basedir}/../LICENSE.header</header.license>
   </properties>
   <dependencies>
