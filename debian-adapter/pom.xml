@@ -122,6 +122,12 @@ SOFTWARE.
       <artifactId>javax.json</artifactId>
       <version>${javax.json.version}</version>
     </dependency>
+      <dependency>
+          <groupId>com.github.akarnokd</groupId>
+          <artifactId>rxjava2-jdk8-interop</artifactId>
+          <version>0.3.7</version>
+          <scope>compile</scope>
+      </dependency>
   </dependencies>
   <build>
     <testResources>
