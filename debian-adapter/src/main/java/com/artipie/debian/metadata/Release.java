@@ -95,7 +95,7 @@ public interface Release {
                         String.format("Components: %s", String.join(" ", this.config.components())),
                         String.format(
                             "Date: %s",
-                            DateTimeFormatter.ofPattern("E, MMM dd yyyy HH:mm:ss Z")
+                            DateTimeFormatter.ofPattern("E, dd MMM yyyy HH:mm:ss Z")
                                 .format(ZonedDateTime.now())
                         ),
                         "SHA256:",
