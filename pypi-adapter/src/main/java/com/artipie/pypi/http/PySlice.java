@@ -123,6 +123,17 @@ public final class PySlice extends Slice.Wrap {
                     )
                 ),
                 new RtRulePath(
+                    MethodRule.DELETE,
+                    new BasicAuthzSlice(
+                        new DeleteSlice(storage),
+                        auth,
+                        new OperationControl(
+                                policy,
+                                new AdapterBasicPermission(name, Action.Standard.WRITE)
+                        )
+                    )
+                ),
+                new RtRulePath(
                     RtRule.FALLBACK,
                     new SliceSimple(ResponseBuilder.notFound().build())
                 )
