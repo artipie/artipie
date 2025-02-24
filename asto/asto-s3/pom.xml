@@ -46,6 +46,11 @@ SOFTWARE.
       <artifactId>s3</artifactId>
       <version>2.23.21</version>
     </dependency>
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>sts</artifactId>
+      <version>2.23.21</version>
+    </dependency>
     <!-- tests -->
     <!-- s3 mocks deps -->
     <dependency>
