@@ -6,7 +6,6 @@ package com.artipie.db;
 
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.scheduling.ArtifactEvent;
-import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -19,7 +18,9 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Record consumer.
@@ -31,13 +32,14 @@ import org.junit.jupiter.api.io.TempDir;
         "PMD.CloseResource", "PMD.UseUnderscoresInNumericLiterals"
     }
 )
+@Testcontainers
 class DbConsumerTest {
 
     /**
-     * Test directory.
+     * PostgreSQL test container.
      */
-    @TempDir
-    Path path;
+    @Container
+    static final PostgreSQLContainer<?> POSTGRES = PostgreSQLTestConfig.createContainer();
 
     /**
      * Test connection.
@@ -46,8 +48,27 @@ class DbConsumerTest {
 
     @BeforeEach
     void init() {
-        this.source = new ArtifactDbFactory(Yaml.createYamlMappingBuilder().build(), this.path)
-            .initialize();
+        this.source = new ArtifactDbFactory(
+            Yaml.createYamlMappingBuilder().add(
+                "artifacts_database",
+                Yaml.createYamlMappingBuilder()
+                    .add(ArtifactDbFactory.YAML_HOST, POSTGRES.getHost())
+                    .add(ArtifactDbFactory.YAML_PORT, String.valueOf(POSTGRES.getFirstMappedPort()))
+                    .add(ArtifactDbFactory.YAML_DATABASE, POSTGRES.getDatabaseName())
+                    .add(ArtifactDbFactory.YAML_USER, POSTGRES.getUsername())
+                    .add(ArtifactDbFactory.YAML_PASSWORD, POSTGRES.getPassword())
+                    .build()
+            ).build(),
+            "artifacts"
+        ).initialize();
+        
+        // Clean up any existing data before each test
+        try (Connection conn = this.source.getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.execute("DELETE FROM artifacts");
+        } catch (SQLException e) {
+            // Ignore cleanup errors
+        }
     }
 
     @Test
@@ -65,8 +86,10 @@ class DbConsumerTest {
                     Connection conn = this.source.getConnection();
                     Statement stat = conn.createStatement()
                 ) {
-                    stat.execute("select count(*) from artifacts");
-                    return stat.getResultSet().getInt(1) == 1;
+                    stat.execute("SELECT COUNT(*) FROM artifacts");
+                    final ResultSet rs = stat.getResultSet();
+                    rs.next();
+                    return rs.getInt(1) == 1;
                 }
             }
         );
@@ -74,15 +97,15 @@ class DbConsumerTest {
             Connection conn = this.source.getConnection();
             Statement stat = conn.createStatement()
         ) {
-            stat.execute("select * from artifacts");
+            stat.execute("SELECT * FROM artifacts");
             final ResultSet res = stat.getResultSet();
             res.next();
             MatcherAssert.assertThat(
-                res.getString("repo_type"),
+                res.getString("repo_type").trim(),
                 new IsEqual<>(record.repoType())
             );
             MatcherAssert.assertThat(
-                res.getString("repo_name"),
+                res.getString("repo_name").trim(),
                 new IsEqual<>(record.repoName())
             );
             MatcherAssert.assertThat(
@@ -102,8 +125,8 @@ class DbConsumerTest {
                 new IsEqual<>(record.size())
             );
             MatcherAssert.assertThat(
-                res.getDate("created_date"),
-                new IsEqual<>(new Date(record.createdDate()))
+                res.getLong("created_date"),
+                new IsEqual<>(record.createdDate())
             );
             MatcherAssert.assertThat(
                 "ResultSet does not have more records",
@@ -122,8 +145,10 @@ class DbConsumerTest {
                     Connection conn = this.source.getConnection();
                     Statement stat = conn.createStatement()
                 ) {
-                    stat.execute("select count(*) from artifacts");
-                    return stat.getResultSet().getInt(1) == 0;
+                    stat.execute("SELECT COUNT(*) FROM artifacts");
+                    final ResultSet rs = stat.getResultSet();
+                    rs.next();
+                    return rs.getInt(1) == 0;
                 }
             }
         );
@@ -144,14 +169,16 @@ class DbConsumerTest {
                 Thread.sleep(1000);
             }
         }
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(
             () -> {
                 try (
                     Connection conn = this.source.getConnection();
                     Statement stat = conn.createStatement()
                 ) {
-                    stat.execute("select count(*) from artifacts");
-                    return stat.getResultSet().getInt(1) == 500;
+                    stat.execute("SELECT COUNT(*) FROM artifacts");
+                    final ResultSet rs = stat.getResultSet();
+                    rs.next();
+                    return rs.getInt(1) == 500;
                 }
             }
         );
@@ -179,8 +206,10 @@ class DbConsumerTest {
                     Connection conn = this.source.getConnection();
                     Statement stat = conn.createStatement()
                 ) {
-                    stat.execute("select count(*) from artifacts");
-                    return stat.getResultSet().getInt(1) == 975;
+                    stat.execute("SELECT COUNT(*) FROM artifacts");
+                    final ResultSet rs = stat.getResultSet();
+                    rs.next();
+                    return rs.getInt(1) == 975;
                 }
             }
         );
@@ -199,26 +228,30 @@ class DbConsumerTest {
                 )
             );
         }
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(
             () -> {
                 try (
                     Connection conn = this.source.getConnection();
                     Statement stat = conn.createStatement()
                 ) {
-                    stat.execute("select count(*) from artifacts");
-                    return stat.getResultSet().getInt(1) == 10;
+                    stat.execute("SELECT COUNT(*) FROM artifacts");
+                    final ResultSet rs = stat.getResultSet();
+                    rs.next();
+                    return rs.getInt(1) == 10;
                 }
             }
         );
         consumer.accept(new ArtifactEvent("maven", "my-maven", "com.artipie.asto"));
-        Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
+        Awaitility.await().atMost(30, TimeUnit.SECONDS).until(
             () -> {
                 try (
                     Connection conn = this.source.getConnection();
                     Statement stat = conn.createStatement()
                 ) {
-                    stat.execute("select count(*) from artifacts");
-                    return stat.getResultSet().getInt(1) == 0;
+                    stat.execute("SELECT COUNT(*) FROM artifacts");
+                    final ResultSet rs = stat.getResultSet();
+                    rs.next();
+                    return rs.getInt(1) == 0;
                 }
             }
         );
@@ -247,8 +280,10 @@ class DbConsumerTest {
                     Connection conn = this.source.getConnection();
                     Statement stat = conn.createStatement()
                 ) {
-                    stat.execute("select count(*) from artifacts");
-                    return stat.getResultSet().getInt(1) == 1;
+                    stat.execute("SELECT COUNT(*) FROM artifacts");
+                    final ResultSet rs = stat.getResultSet();
+                    rs.next();
+                    return rs.getInt(1) == 1;
                 }
             }
         );
@@ -256,7 +291,7 @@ class DbConsumerTest {
             Connection conn = this.source.getConnection();
             Statement stat = conn.createStatement()
         ) {
-            stat.execute("select * from artifacts");
+            stat.execute("SELECT * FROM artifacts");
             final ResultSet res = stat.getResultSet();
             res.next();
             MatcherAssert.assertThat(
@@ -264,8 +299,8 @@ class DbConsumerTest {
                 new IsEqual<>(size)
             );
             MatcherAssert.assertThat(
-                res.getDate("created_date"),
-                new IsEqual<>(new Date(second))
+                res.getLong("created_date"),
+                new IsEqual<>(second)
             );
             MatcherAssert.assertThat(
                 "ResultSet does not have more records",

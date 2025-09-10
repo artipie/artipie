@@ -1,12 +1,18 @@
 version: "3.3"
 services:
   artipie:
-    image: artipie/artipie:latest
+    image: ayd88/artipie
     container_name: artipie
     restart: unless-stopped
     environment:
       - ARTIPIE_USER_NAME=artipie
       - ARTIPIE_USER_PASS=artipie
+      - ARTIPIE_CONFIG=/etc/artipie/artipie.yml
+    volumes:
+      - ~/Desktop/Support/artipie/artipie.yml:/etc/artipie/artipie.yml
+      - ~/Desktop/Support/artipie/repo:/var/artipie/repo
+      - ~/Desktop/Support/artipie/security:/var/artipie/security
+      - ~/Desktop/Support/artipie/data:/var/artipie/data
     networks:
       - artipie-net
     ports:
@@ -22,6 +28,18 @@ services:
       - ARTIPIE_REST=http://artipie:8086
     ports:
       - "8080:8080"
+  artipie-db:
+    image: postgres:15-alpine
+    container_name: artipie-db
+    restart: unless-stopped
+    networks:
+      - artipie-net
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=artipie
+      - POSTGRES_PASSWORD=artipie
+      - POSTGRES_DB=artifacts
 
 networks:
   artipie-net:

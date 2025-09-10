@@ -327,6 +327,7 @@ SOFTWARE.
                 <exclude>pom.xml</exclude>
                 <exclude>LICENSE.header</exclude>
                 <exclude>.Dockerignore</exclude>
+                <exclude>.testcontainers.properties</exclude>
                 <exclude>**/com/artipie/hex/proto/generated/*</exclude>
                 <exclude>**/src/test/resources/**</exclude>
                 <exclude>**/src/test/resources-binary/**</exclude>

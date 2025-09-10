@@ -1,5 +1,5 @@
 FROM openjdk:21-oracle
-ARG JAR_FILE
+ARG JAR_FILE=artipie-main-1.0-SNAPSHOT.jar
 
 LABEL description="Artipie binary repository management tool"
 LABEL maintainer="g4s8.public@gmail.com"
@@ -18,4 +18,4 @@ VOLUME /var/artipie /etc/artipie
 WORKDIR /var/artipie
 
 EXPOSE 8080 8086
-CMD [ "sh", "-c", "java $JVM_ARGS --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -cp /usr/lib/artipie/artipie.jar:/usr/lib/artipie/lib/* com.artipie.VertxMain --config-file=/etc/artipie/artipie.yml --port=8080 --api-port=8086" ]
+CMD [ "sh", "-c", "CLASSPATH=\"/usr/lib/artipie/artipie.jar:$(ls /usr/lib/artipie/lib/*.jar | tr '\\n' ':' | sed 's/:$//')\" && java $JVM_ARGS --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.security=ALL-UNNAMED -cp \"$CLASSPATH\" com.artipie.VertxMain --config-file=/etc/artipie/artipie.yml --port=8080 --api-port=8086" ]

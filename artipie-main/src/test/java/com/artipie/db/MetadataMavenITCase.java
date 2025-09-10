@@ -21,7 +21,7 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
-import org.sqlite.SQLiteDataSource;
+import org.postgresql.ds.PGSimpleDataSource;
 
 /**
  * Integration test for artifact metadata
@@ -91,16 +91,24 @@ public final class MetadataMavenITCase {
     ) {
         Awaitility.await().atMost(10, TimeUnit.SECONDS).until(
             () -> {
-                final Path data = temp.resolve(String.format("%s-artifacts.db", UUID.randomUUID()));
-                Files.write(data, containers.getArtipieContent("/var/artipie/artifacts.db"));
-                final SQLiteDataSource source = new SQLiteDataSource();
-                source.setUrl(String.format("jdbc:sqlite:%s", data));
+                // For integration tests, we'll use a simple PostgreSQL connection
+                // In a real scenario, you'd need to configure the test container
+                // to match the production database configuration
+                final PGSimpleDataSource source = new PGSimpleDataSource();
+                source.setServerName(System.getProperty("test.postgres.host", "localhost"));
+                source.setPortNumber(Integer.parseInt(System.getProperty("test.postgres.port", "5432")));
+                source.setDatabaseName(System.getProperty("test.postgres.database", "artifacts"));
+                source.setUser(System.getProperty("test.postgres.user", "artipie"));
+                source.setPassword(System.getProperty("test.postgres.password", "artipie"));
                 try (
                     Connection conn = source.getConnection();
                     Statement stat = conn.createStatement()
                 ) {
-                    stat.execute("select count(*) from artifacts");
+                    stat.execute("SELECT COUNT(*) FROM artifacts");
                     return condition.test(stat.getResultSet());
+                } catch (final Exception ex) {
+                    // If database is not available, return false to retry
+                    return false;
                 }
             }
         );

@@ -77,27 +77,43 @@ public final class DbConsumer implements Consumer<ArtifactEvent> {
             try (
                 Connection conn = DbConsumer.this.source.getConnection();
                 PreparedStatement insert = conn.prepareStatement(
-                    "insert or replace into artifacts (repo_type, repo_name, name, version, size, created_date, owner) VALUES (?,?,?,?,?,?,?);"
+                    "INSERT INTO artifacts (repo_type, repo_name, name, version, size, created_date, owner) VALUES (?,?,?,?,?,?,?)"
+                );
+                PreparedStatement update = conn.prepareStatement(
+                    "UPDATE artifacts SET repo_type = ?, size = ?, created_date = ?, owner = ? WHERE TRIM(repo_name) = ? AND name = ? AND version = ?"
                 );
                 PreparedStatement deletev = conn.prepareStatement(
-                    "delete from artifacts where repo_name = ? and name = ? and version = ?;"
+                    "DELETE FROM artifacts WHERE TRIM(repo_name) = ? AND name = ? AND version = ?;"
                 );
                 PreparedStatement delete = conn.prepareStatement(
-                    "delete from artifacts where repo_name = ? and name = ?;"
+                    "DELETE FROM artifacts WHERE TRIM(repo_name) = ? AND name = ?;"
                 )
             ) {
                 conn.setAutoCommit(false);
                 for (final ArtifactEvent record : events) {
                     try {
                         if (record.eventType() == ArtifactEvent.Type.INSERT) {
-                            insert.setString(1, record.repoType());
-                            insert.setString(2, record.repoName());
-                            insert.setString(3, record.artifactName());
-                            insert.setString(4, record.artifactVersion());
-                            insert.setDouble(5, record.size());
-                            insert.setDate(6, new Date(record.createdDate()));
-                            insert.setString(7, record.owner());
-                            insert.execute();
+                            // Try to update first
+                            update.setString(1, record.repoType());
+                            update.setDouble(2, record.size());
+                            update.setLong(3, record.createdDate());
+                            update.setString(4, record.owner());
+                            update.setString(5, record.repoName());
+                            update.setString(6, record.artifactName());
+                            update.setString(7, record.artifactVersion());
+                            final int updated = update.executeUpdate();
+                            
+                            // If no rows were updated, insert new record
+                            if (updated == 0) {
+                                insert.setString(1, record.repoType());
+                                insert.setString(2, record.repoName());
+                                insert.setString(3, record.artifactName());
+                                insert.setString(4, record.artifactVersion());
+                                insert.setDouble(5, record.size());
+                                insert.setLong(6, record.createdDate());
+                                insert.setString(7, record.owner());
+                                insert.execute();
+                            }
                         } else if (record.eventType() == ArtifactEvent.Type.DELETE_VERSION) {
                             deletev.setString(1, record.repoName());
                             deletev.setString(2, record.artifactName());

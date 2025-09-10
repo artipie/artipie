@@ -7,10 +7,11 @@ package com.artipie;
 import com.amihaiemil.eoyaml.Yaml;
 import com.artipie.db.ArtifactDbFactory;
 import com.artipie.db.DbConsumer;
+import com.artipie.db.PostgreSQLTestConfig;
 import com.artipie.scheduling.ArtifactEvent;
 import com.artipie.scheduling.QuartzService;
-import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Queue;
@@ -20,8 +21,10 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.quartz.SchedulerException;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Test for {@link QuartzService} and
@@ -29,13 +32,14 @@ import org.quartz.SchedulerException;
  * @since 0.31
  */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods"})
+@Testcontainers
 public final class SchedulerDbTest {
 
     /**
-     * Test directory.
+     * PostgreSQL test container.
      */
-    @TempDir
-    Path path;
+    @Container
+    static final PostgreSQLContainer<?> POSTGRES = PostgreSQLTestConfig.createContainer();
 
     /**
      * Test connection.
@@ -49,8 +53,19 @@ public final class SchedulerDbTest {
 
     @BeforeEach
     void init() {
-        this.source = new ArtifactDbFactory(Yaml.createYamlMappingBuilder().build(), this.path)
-            .initialize();
+        this.source = new ArtifactDbFactory(
+            Yaml.createYamlMappingBuilder().add(
+                "artifacts_database",
+                Yaml.createYamlMappingBuilder()
+                    .add(ArtifactDbFactory.YAML_HOST, POSTGRES.getHost())
+                    .add(ArtifactDbFactory.YAML_PORT, String.valueOf(POSTGRES.getFirstMappedPort()))
+                    .add(ArtifactDbFactory.YAML_DATABASE, POSTGRES.getDatabaseName())
+                    .add(ArtifactDbFactory.YAML_USER, POSTGRES.getUsername())
+                    .add(ArtifactDbFactory.YAML_PASSWORD, POSTGRES.getPassword())
+                    .build()
+            ).build(),
+            "artifacts"
+        ).initialize();
         this.service = new QuartzService();
     }
 
@@ -83,8 +98,10 @@ public final class SchedulerDbTest {
                     Connection conn = this.source.getConnection();
                     Statement stat = conn.createStatement()
                 ) {
-                    stat.execute("select count(*) from artifacts");
-                    return stat.getResultSet().getInt(1) == 1000;
+                    stat.execute("SELECT COUNT(*) FROM artifacts");
+                    final ResultSet rs = stat.getResultSet();
+                    rs.next();
+                    return rs.getInt(1) == 1000;
                 }
             }
         );

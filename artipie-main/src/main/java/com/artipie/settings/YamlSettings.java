@@ -238,7 +238,7 @@ public final class YamlSettings implements Settings {
             return Optional.empty();
         }
         try {
-            final DataSource database = new ArtifactDbFactory(settings, path).initialize();
+            final DataSource database = new ArtifactDbFactory(settings, "artifacts").initialize();
             final int threads = Math.max(1, prop.integer("threads_count"));
             final int interval = Math.max(1, prop.integer("interval_seconds"));
             final List<Consumer<ArtifactEvent>> list = new ArrayList<>(threads);
