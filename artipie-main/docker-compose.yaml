@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   artipie:
-    image: ayd88/artipie
+    image: artipie/artipie
     container_name: artipie
     restart: unless-stopped
     environment:
