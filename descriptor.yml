@@ -1,0 +1,19 @@
+# Descriptor: https://wkdauto.atlassian.net/wiki/spaces/DEV/pages/1278115841/Descriptor
+name: artipie
+description: artipie service
+journeys: #Please fill
+team: devops
+email: ''
+jira: OPS
+type: Service
+data_base: None
+slack:
+  channel: '#deployments'
+  group: '@devops'
+  groupOnCall: '@devopsoftheday'
+handbook: #Please fill
+runbook: #Please fill
+tags:
+  - java
+cluster_groups: #Please fill
+extra: #Please fill
