@@ -10,6 +10,7 @@ import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
 import com.artipie.http.Slice;
 import com.artipie.http.rq.RequestLine;
+import com.jcabi.log.Logger;
 import io.reactivex.Flowable;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerOptions;
@@ -244,6 +245,8 @@ public final class VertxSliceServer implements Closeable {
         final StringWriter body = new StringWriter();
         body.append(throwable.toString()).append("\n");
         throwable.printStackTrace(new PrintWriter(body));
-        response.end(body.toString());
+        final String bodyString = body.toString();
+        response.end(bodyString);
+        Logger.error(VertxSliceServer.class, "sendError sent:\n%s", bodyString);
     }
 }
