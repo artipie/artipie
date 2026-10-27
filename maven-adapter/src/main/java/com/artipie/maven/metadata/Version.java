@@ -4,7 +4,7 @@
  */
 package com.artipie.maven.metadata;
 
-import com.vdurmont.semver4j.Semver;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 /**
  * Artifact version.
@@ -15,20 +15,19 @@ public final class Version implements Comparable<Version> {
     /**
      * Version value as string.
      */
-    private final String value;
+    private final ComparableVersion value;
 
     /**
      * Ctor.
      * @param value Version as string
      */
     public Version(final String value) {
-        this.value = value;
+        this.value = new ComparableVersion(value);
     }
 
     @Override
     public int compareTo(final Version another) {
-        return new Semver(this.value, Semver.SemverType.LOOSE)
-            .compareTo(new Semver(another.value, Semver.SemverType.LOOSE));
+        return this.value.compareTo(another.value);
     }
 
 }
