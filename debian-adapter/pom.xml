@@ -115,7 +115,7 @@ SOFTWARE.
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20240303</version>
+      <version>20260719</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish</groupId>
