@@ -7,6 +7,7 @@ package com.artipie;
 
 import com.artipie.api.RestApi;
 import com.artipie.asto.Key;
+import com.artipie.auth.JwtSecret;
 import com.artipie.auth.JwtTokens;
 import com.artipie.http.BaseSlice;
 import com.artipie.http.MainSlice;
@@ -81,6 +82,11 @@ public final class VertxMain {
     private final int port;
 
     /**
+     * JWT secret source.
+     */
+    private final JwtSecret secret;
+
+    /**
      * Servers.
      */
     private final List<VertxSliceServer> servers;
@@ -99,8 +105,20 @@ public final class VertxMain {
      * @param port HTTP port
      */
     public VertxMain(final Path config, final int port) {
+        this(config, port, new JwtSecret());
+    }
+
+    /**
+     * Ctor.
+     *
+     * @param config Config file path.
+     * @param port HTTP port
+     * @param secret JWT secret source
+     */
+    public VertxMain(final Path config, final int port, final JwtSecret secret) {
         this.config = config;
         this.port = port;
+        this.secret = secret;
         this.servers = new ArrayList<>(0);
         this.http3 = new ConcurrentHashMap<>(0);
     }
@@ -108,7 +126,7 @@ public final class VertxMain {
     /**
      * Starts the server.
      *
-     * @param apiPort Port to run Rest API service on
+     * @param apiPort Port to run Rest API service on, zero or negative disables Rest API
      * @return Port the servers listening on.
      * @throws IOException In case of error reading settings.
      */
@@ -118,7 +136,7 @@ public final class VertxMain {
         final Vertx vertx = VertxMain.vertx(settings.metrics());
         final JWTAuth jwt = JWTAuth.create(
             vertx.getDelegate(), new JWTAuthOptions().addPubSecKey(
-                new PubSecKeyOptions().setAlgorithm("HS256").setBuffer("some secret")
+                new PubSecKeyOptions().setAlgorithm("HS256").setBuffer(this.secret.value())
             )
         );
         final Repositories repos = new MapRepositories(settings);
@@ -131,10 +149,23 @@ public final class VertxMain {
         );
         LOGGER.info("Artipie was started on port {}", main);
         this.startRepos(vertx, settings, repos, this.port, slices);
-        vertx.deployVerticle(new RestApi(settings, apiPort, jwt));
+        if (VertxMain.restApiEnabled(apiPort)) {
+            vertx.deployVerticle(new RestApi(settings, apiPort, jwt));
+        } else {
+            LOGGER.info("Artipie Rest API is disabled (api port {})", apiPort);
+        }
         quartz.start();
         new ScriptScheduler(quartz).loadCrontab(settings, repos);
         return main;
+    }
+
+    /**
+     * Whether Rest API should be started on the given port.
+     * @param apiPort Rest API port
+     * @return True if Rest API is enabled
+     */
+    static boolean restApiEnabled(final int apiPort) {
+        return apiPort > 0;
     }
 
     public void stop() {
@@ -162,7 +193,7 @@ public final class VertxMain {
         final String apiport = "ap";
         options.addOption(popt, "port", true, "The port to start Artipie on");
         options.addOption(fopt, "config-file", true, "The path to Artipie configuration file");
-        options.addOption(apiport, "api-port", true, "The port to start Artipie Rest API on");
+        options.addOption(apiport, "api-port", true, "The port to start Artipie Rest API on, 0 disables Rest API");
         final CommandLineParser parser = new DefaultParser();
         final CommandLine cmd = parser.parse(options, args);
         if (cmd.hasOption(popt)) {
