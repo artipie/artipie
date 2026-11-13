@@ -27,7 +27,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-jdk-21-maven-
       - name: Build it with Maven
-        run: mvn -B install -Dsurefire.rerunFailingTestsCount=2
+        run: mvn -B install "-Dsurefire.rerunFailingTestsCount=2"
   xcop-lint:
     runs-on: ubuntu-latest
     steps:
