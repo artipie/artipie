@@ -14,31 +14,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v2
-      - name: Download Linux JDK
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        run: |
-          curl --silent -o ${{ runner.temp }}/jdk-21_linux-x64_bin.tar.gz \
-            https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.tar.gz
-      - name: Set up Linux JDK
-        uses: actions/setup-java@v2
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v5
         with:
-          distribution: jdkfile
-          jdkFile: ${{ runner.temp }}/jdk-21_linux-x64_bin.tar.gz
+          distribution: temurin
           java-version: 21
-      - name: Download Windows JDK
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: |
-          curl --silent -o ${{ runner.temp }}/jdk-21_windows-x64_bin.zip https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.zip
-      - name: Set up Windows JDK
-        uses: actions/setup-java@v2
-        if: ${{ matrix.os == 'windows-latest' }}
-        with:
-          distribution: jdkfile
-          jdkFile: ${{ runner.temp }}/jdk-21_windows-x64_bin.zip
-          java-version: 21
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-jdk-21-maven-${{ hashFiles('**/pom.xml') }}
@@ -49,5 +31,8 @@ jobs:
   xcop-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: g4s8/xcop-action@master
+      - uses: actions/checkout@v4
+      - name: Lint XML with xcop
+        run: |
+          docker run --rm -v "$PWD":/w -w /w ruby:3.3 sh -c \
+            "gem install xcop -v 0.11.2 -q && xcop \$(find . \( -name '*.xml' -o -name '*.xsl' -o -name '*.xsd' -o -name '*.xhtml' \) -not -path '*/src/test/resources*/*' -not -path '*/target/*' -not -path './.git/*')"
