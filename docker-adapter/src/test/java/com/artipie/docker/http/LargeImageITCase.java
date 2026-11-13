@@ -85,7 +85,12 @@ public final class LargeImageITCase {
     }
 
     private void buildImage() throws Exception {
-        this.client.run("build", this.dockerFile().getParent().toString(), "-t", this.remote());
+        // Docker with containerd image store adds provenance attestation by default, which makes
+        // the image an OCI image index, while the registry under test serves plain manifests.
+        this.client.run(
+            "build", "--provenance=false", this.dockerFile().getParent().toString(),
+            "-t", this.remote()
+        );
     }
 
     private Path dockerFile() {
