@@ -1,4 +1,4 @@
-FROM openjdk:21-oracle
+FROM eclipse-temurin:21-jdk
 ARG JAR_FILE
 
 LABEL description="Artipie binary repository management tool"
@@ -6,7 +6,7 @@ LABEL maintainer="g4s8.public@gmail.com"
 LABEL maintainer="oleg.mozzhechkov@gmail.com"
 
 RUN groupadd -r -g 2020 artipie && \
-    adduser -M -r -g artipie -u 2021 -s /sbin/nologin artipie && \
+    useradd -M -r -g artipie -u 2021 -s /sbin/nologin artipie && \
     mkdir -p /etc/artipie /usr/lib/artipie /var/artipie && \
     chown artipie:artipie -R /etc/artipie /usr/lib/artipie /var/artipie
 USER 2021:2020
