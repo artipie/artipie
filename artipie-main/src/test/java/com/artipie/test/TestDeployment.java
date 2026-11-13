@@ -350,8 +350,11 @@ public final class TestDeployment implements BeforeEachCallback, AfterEachCallba
             "/etc/conf.d/docker"
         );
         this.clientExec("rc-service", "docker", "start");
-        // docker daemon needs some time to start after previous command
-        this.clientExec("sleep", "3");
+        // docker daemon needs some time to start after previous command, wait until it is ready
+        this.clientExec(
+            "sh", "-c",
+            "for i in $(seq 1 120); do docker info >/dev/null 2>&1 && exit 0; sleep 1; done; tail -n 50 /var/log/docker.log; exit 1"
+        );
     }
 
     /**

@@ -14,6 +14,7 @@ import com.artipie.docker.asto.Upload;
 import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.RsStatus;
+import com.artipie.http.headers.ContentLength;
 import com.artipie.http.headers.Header;
 import com.artipie.http.hm.ResponseMatcher;
 import com.artipie.http.hm.SliceHasResponse;
@@ -77,6 +78,63 @@ class UploadEntityPutTest {
                 .thenApply(Optional::isPresent)
                 .toCompletableFuture().join(),
             new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    void shouldFinishUploadWithBlobInRequestBody() {
+        final String name = "monolithic";
+        final byte[] data = "data".getBytes();
+        final Upload upload = this.docker.repo(name).uploads()
+            .start()
+            .toCompletableFuture().join();
+        final String digest = new Digest.Sha256(data).string();
+        final Response response = this.slice.response(
+            UploadEntityPutTest.requestLine(name, upload.uuid(), digest),
+            Headers.from(new ContentLength(data.length)),
+            new Content.From(data)
+        ).join();
+        MatcherAssert.assertThat(
+            "Returns 201 status and corresponding headers",
+            response,
+            new ResponseMatcher(
+                RsStatus.CREATED,
+                new Header("Location", String.format("/v2/%s/blobs/%s", name, digest)),
+                new Header("Content-Length", "0"),
+                new Header("Docker-Content-Digest", digest)
+            )
+        );
+        MatcherAssert.assertThat(
+            "Puts blob into storage",
+            this.docker.repo(name).layers().get(new Digest.FromString(digest))
+                .thenApply(Optional::isPresent)
+                .toCompletableFuture().join(),
+            new IsEqual<>(true)
+        );
+    }
+
+    @Test
+    void returnsBadRequestWhenDigestDoesNotMatchBlobInRequestBody() {
+        final String name = "monolithic-bad";
+        final byte[] data = "something".getBytes();
+        final Upload upload = this.docker.repo(name).uploads().start()
+            .toCompletableFuture().join();
+        final Response response = this.slice.response(
+            UploadEntityPutTest.requestLine(name, upload.uuid(), "sha256:0000"),
+            Headers.from(new ContentLength(data.length)),
+            new Content.From(data)
+        ).join();
+        MatcherAssert.assertThat(
+            "Returns 400 status",
+            response,
+            new IsErrorsResponse(RsStatus.BAD_REQUEST, "DIGEST_INVALID")
+        );
+        MatcherAssert.assertThat(
+            "Does not put blob into storage",
+            this.docker.repo(name).layers().get(new Digest.Sha256(data))
+                .thenApply(Optional::isPresent)
+                .toCompletableFuture().join(),
+            new IsEqual<>(false)
         );
     }
 
