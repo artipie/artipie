@@ -6,6 +6,7 @@ package com.artipie.docker.http.upload;
 
 import com.artipie.asto.Content;
 import com.artipie.docker.Docker;
+import com.artipie.docker.asto.Upload;
 import com.artipie.docker.Repo;
 import com.artipie.docker.error.UploadUnknownError;
 import com.artipie.docker.perms.DockerActions;
@@ -14,6 +15,7 @@ import com.artipie.http.Headers;
 import com.artipie.http.Response;
 import com.artipie.http.ResponseBuilder;
 import com.artipie.http.rq.RequestLine;
+import com.artipie.http.slice.ContentWithSize;
 
 import java.security.Permission;
 import java.util.concurrent.CompletableFuture;
@@ -38,14 +40,31 @@ public class PutUploadSlice extends UploadSlice {
         return repo.uploads()
             .get(request.uuid())
             .thenCompose(
-                found -> found.map(upload -> upload
-                    .putTo(repo.layers(), request.digest())
-                    .thenCompose(any -> createdResponse(request.name(), request.digest()))
+                found -> found.map(
+                    upload -> PutUploadSlice.appendBody(upload, new ContentWithSize(body, headers))
+                        .thenCompose(any -> upload.putTo(repo.layers(), request.digest()))
+                        .thenCompose(any -> createdResponse(request.name(), request.digest()))
                 ).orElseGet(
                     () -> ResponseBuilder.notFound()
                         .jsonBody(new UploadUnknownError(request.uuid()).json())
                         .completedFuture()
                 )
             );
+    }
+
+    /**
+     * Appends the request body to the upload, if there is one. The registry API allows the final
+     * (or the only) chunk of a blob to be sent in the body of the PUT request which completes the
+     * upload, and current Docker clients do so.
+     *
+     * @param upload Upload.
+     * @param content Request body.
+     * @return Completion stage.
+     */
+    private static CompletableFuture<Void> appendBody(final Upload upload, final Content content) {
+        if (content.size().orElse(0L) <= 0L) {
+            return CompletableFuture.completedFuture(null);
+        }
+        return upload.append(content).thenAccept(offset -> { });
     }
 }

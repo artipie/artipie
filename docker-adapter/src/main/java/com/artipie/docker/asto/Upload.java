@@ -108,10 +108,12 @@ public final class Upload {
                 final Key tmp = new Key.From(this.root(), UUID.randomUUID().toString());
                 final DigestedFlowable data = new DigestedFlowable(chunk);
                 return this.storage.save(tmp, new Content.From(chunk.size(), data)).thenCompose(
-                    nothing -> {
-                        final Key key = this.chunk(data.digest());
-                        return this.storage.move(tmp, key).thenApply(ignored -> key);
-                    }
+                    nothing -> this.digestOf(tmp, data).thenCompose(
+                        digest -> {
+                            final Key key = this.chunk(digest);
+                            return this.storage.move(tmp, key).thenApply(ignored -> key);
+                        }
+                    )
                 ).thenCompose(
                     key -> this.storage.metadata(key)
                         .thenApply(meta -> new MetaCommon(meta).size())
@@ -234,5 +236,33 @@ public final class Upload {
                         .toArray(CompletableFuture[]::new)
                 )
             );
+    }
+
+    /**
+     * Digest of the data saved to the temporary key. Some storages (e.g. S3) may complete saving
+     * of content of a known size before the content stream signals completion, so that
+     * the digest calculated on the fly is not available yet. In this case the data is read back.
+     *
+     * @param tmp Temporary key the data was saved to.
+     * @param data Data stream the digest is calculated on.
+     * @return Digest.
+     */
+    private CompletableFuture<Digest> digestOf(final Key tmp, final DigestedFlowable data) {
+        try {
+            return CompletableFuture.completedFuture(data.digest());
+        } catch (final NullPointerException ignored) {
+            return this.storage.value(tmp).thenCompose(
+                saved -> {
+                    final DigestedFlowable reread = new DigestedFlowable(saved);
+                    final CompletableFuture<Digest> res = new CompletableFuture<>();
+                    reread.subscribe(
+                        buf -> { },
+                        res::completeExceptionally,
+                        () -> res.complete(reread.digest())
+                    );
+                    return res;
+                }
+            );
+        }
     }
 }
