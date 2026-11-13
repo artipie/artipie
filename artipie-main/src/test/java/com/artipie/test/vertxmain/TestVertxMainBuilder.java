@@ -9,6 +9,7 @@ import com.amihaiemil.eoyaml.YamlMapping;
 import com.amihaiemil.eoyaml.YamlSequence;
 import com.amihaiemil.eoyaml.YamlSequenceBuilder;
 import com.artipie.VertxMain;
+import com.artipie.auth.JwtSecret;
 import com.artipie.asto.test.TestResource;
 import com.artipie.http.client.RemoteConfig;
 import org.junit.jupiter.api.Assertions;
@@ -248,14 +249,27 @@ public class TestVertxMainBuilder {
      * @throws IOException If failed
      */
     public TestVertxMain build(int port) throws IOException {
+        return build(port, freePort(), new JwtSecret());
+    }
+
+    /**
+     * Builds and starts Artipie server.
+     *
+     * @param port Artipie http server port
+     * @param apiPort Artipie Rest API port, zero or negative disables Rest API
+     * @param secret JWT secret source
+     * @return TestVertxMain
+     * @throws IOException If failed
+     */
+    public TestVertxMain build(int port, int apiPort, JwtSecret secret) throws IOException {
         Path cfg = new MetaBuilder()
                 .withRepoDir(this.repos)
                 .withSecurityDir(this.security)
                 .build(this.base);
-        VertxMain server = new VertxMain(cfg, port);
-        Assertions.assertEquals(port, server.start(freePort()));
+        VertxMain server = new VertxMain(cfg, port, secret);
+        Assertions.assertEquals(port, server.start(apiPort));
 
-        return new TestVertxMain(port, server);
+        return new TestVertxMain(port, apiPort, server);
     }
 
     private void saveRepoConfig(String name, YamlMapping cfg) throws IOException {
