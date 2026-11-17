@@ -31,7 +31,7 @@ public final class MetadataDockerITCase {
             .withRepoConfig("docker/docker-proxy-port.yml", "my-docker-proxy")
             .withUser("security/users/alice.yaml", "alice")
             .withExposedPorts(8081),
-        () -> new TestDeployment.ClientContainer("alpine:3.11")
+        () -> new TestDeployment.ClientContainer("alpine:3.20")
             .withPrivilegedMode(true)
             .withWorkingDirectory("/w")
     );

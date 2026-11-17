@@ -85,7 +85,6 @@ SOFTWARE.
       <version>1.0-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>
-
     <!-- s3 mocks deps -->
     <dependency>
       <groupId>com.adobe.testing</groupId>

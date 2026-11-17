@@ -1,0 +1,5 @@
+type: plain
+pass: jwt-admin-pass
+permissions:
+  api_repository_permissions:
+    - "*"
